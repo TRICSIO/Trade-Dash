@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock, Percent } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from './ui/button';
 import {
@@ -82,7 +82,8 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 <TableHead>Style</TableHead>
                 <TableHead>Cost</TableHead>
                 <TableHead>Proceeds</TableHead>
-                <TableHead>P/L</TableHead>
+                <TableHead>P/L ($)</TableHead>
+                <TableHead>P/L (%)</TableHead>
                 <TableHead>Entry Date</TableHead>
                 <TableHead>Exit Date</TableHead>
                 <TableHead>Qty</TableHead>
@@ -98,6 +99,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                     const cost = trade.entryPrice * trade.quantity * multiplier;
                     const proceeds = isClosed ? (trade.exitPrice ?? 0) * trade.quantity * multiplier : null;
                     const pl = isClosed && proceeds ? proceeds - cost : null;
+                    const plPercent = pl !== null && cost !== 0 ? (pl / cost) * 100 : null;
                     const isProfit = pl !== null && pl >= 0;
                     
                     return (
@@ -109,9 +111,15 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                         <TableCell>${cost.toFixed(2)}</TableCell>
                         <TableCell>{proceeds !== null ? `$${proceeds.toFixed(2)}` : '-'}</TableCell>
                         <TableCell className={pl === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
                                 {pl === null ? <Clock className="h-4 w-4" /> : isProfit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
                                 {pl !== null ? `$${pl.toFixed(2)}` : 'Open'}
+                            </div>
+                        </TableCell>
+                        <TableCell className={plPercent === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}>
+                            <div className="flex items-center gap-1">
+                                {plPercent === null ? <Clock className="h-4 w-4" /> : <Percent className="h-3 w-3" />}
+                                {plPercent !== null ? `${plPercent.toFixed(2)}%` : 'Open'}
                             </div>
                         </TableCell>
                         <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
@@ -136,7 +144,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 })
                 ) : (
                 <TableRow>
-                    <TableCell colSpan={10} className="h-24 text-center">
+                    <TableCell colSpan={11} className="h-24 text-center">
                     No trades found.
                     </TableCell>
                 </TableRow>
