@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo, ChangeEvent } from 'react';
+import { useState, useMemo, ChangeEvent, useEffect } from 'react';
 import type { Trade } from '@/lib/types';
-import useLocalStorage from '@/hooks/use-local-storage';
+import useFirestoreTrades from '@/hooks/use-firestore-trades';
 import AppHeader from '@/components/header';
 import AddTradeDialog from '@/components/add-trade-dialog';
 import ImportTradesDialog from '@/components/import-trades-dialog';
@@ -15,50 +15,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 
-
-const initialTrades: Trade[] = [
-    {
-        id: '1',
-        instrument: 'AAPL',
-        account: 'Fidelity',
-        entryDate: new Date('2023-10-01'),
-        exitDate: new Date('2023-10-15'),
-        entryPrice: 150.00,
-        exitPrice: 165.50,
-        quantity: 10,
-        tradeStyle: 'Swing Trade',
-        notes: 'Caught a good run-up before earnings.'
-    },
-    {
-        id: '2',
-        instrument: 'GOOGL',
-        account: 'Fidelity',
-        entryDate: new Date('2023-11-05'),
-        exitDate: new Date('2023-11-06'),
-        entryPrice: 135.20,
-        exitPrice: 132.80,
-        quantity: 50,
-        tradeStyle: 'Day Trade',
-        notes: 'News catalyst didn\'t play out as expected.'
-    },
-    {
-        id: '3',
-        instrument: 'TSLA',
-        account: 'IBKR',
-        entryDate: new Date('2023-11-10'),
-        exitDate: new Date('2023-12-20'),
-        entryPrice: 220.50,
-        exitPrice: 255.00,
-        quantity: 5,
-        tradeStyle: 'Position Trade',
-        notes: 'Long term hold based on delivery numbers.'
-    }
-];
 
 export default function Dashboard() {
-  const [trades, setTrades] = useLocalStorage<Trade[]>('trades', initialTrades);
-  const [startingBalances, setStartingBalances] = useLocalStorage<Record<string, number>>('startingBalances', { 'Fidelity': 10000, 'IBKR': 25000 });
+  const { user } = useAuth();
+  const { trades, startingBalances, setTrades, setStartingBalances, loading } = useFirestoreTrades(user?.uid);
+  
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
@@ -69,6 +32,13 @@ export default function Dashboard() {
     const allAccounts = trades.map(t => t.account);
     return ['all', ...Array.from(new Set(allAccounts))];
   }, [trades]);
+
+  // Reset selected account if it no longer exists
+  useEffect(() => {
+    if (!accounts.includes(selectedAccount)) {
+      setSelectedAccount('all');
+    }
+  }, [accounts, selectedAccount]);
 
   const filteredTrades = useMemo(() => {
     if (selectedAccount === 'all') {
@@ -106,7 +76,7 @@ export default function Dashboard() {
     let updatedTrades;
     if (id) {
         // Editing existing trade
-        updatedTrades = trades.map(t => t.id === id ? { ...t, ...tradeData } : t);
+        updatedTrades = trades.map(t => t.id === id ? { ...t, ...tradeData, id } : t);
     } else {
         // Adding new trade
         const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
