@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
-  title: 'Trade Insights',
+  title: 'Trade Insights by TRICSIO',
   description: 'A dedicated trade journaling and analysis app to log and review your financial trades.',
 };
 
