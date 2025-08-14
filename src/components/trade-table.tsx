@@ -79,8 +79,10 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <TableHeader>
                 <TableRow>
                 <TableHead>Instrument</TableHead>
-                <TableHead>P/L</TableHead>
                 <TableHead>Style</TableHead>
+                <TableHead>Cost</TableHead>
+                <TableHead>Proceeds</TableHead>
+                <TableHead>P/L</TableHead>
                 <TableHead>Entry Date</TableHead>
                 <TableHead>Exit Date</TableHead>
                 <TableHead>Qty</TableHead>
@@ -91,22 +93,24 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <TableBody>
                 {filteredTrades.length > 0 ? (
                 filteredTrades.map(trade => {
-                    let pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
-                    if (trade.tradeStyle === 'Option') {
-                        pl *= 100;
-                    }
+                    const multiplier = trade.tradeStyle === 'Option' ? 100 : 1;
+                    const cost = trade.entryPrice * trade.quantity * multiplier;
+                    const proceeds = trade.exitPrice * trade.quantity * multiplier;
+                    const pl = proceeds - cost;
                     const isProfit = pl >= 0;
                     return (
                     <TableRow key={trade.id}>
                         <TableCell className="font-medium">{trade.instrument}</TableCell>
+                        <TableCell>
+                            <Badge variant="secondary">{trade.tradeStyle}</Badge>
+                        </TableCell>
+                        <TableCell>{cost.toFixed(2)}</TableCell>
+                        <TableCell>{proceeds.toFixed(2)}</TableCell>
                         <TableCell className={isProfit ? 'text-green-400' : 'text-red-400'}>
                             <div className="flex items-center gap-2">
                                 {isProfit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
                                 {pl.toFixed(2)}
                             </div>
-                        </TableCell>
-                        <TableCell>
-                            <Badge variant="secondary">{trade.tradeStyle}</Badge>
                         </TableCell>
                         <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
                         <TableCell>{format(trade.exitDate, 'PP')}</TableCell>
@@ -118,6 +122,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                                     <Pencil className="h-4 w-4" />
                                     <span className="sr-only">Edit</span>
                                 </Button>
+
                                 <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteCandidate(trade)}>
                                     <Trash2 className="h-4 w-4" />
                                     <span className="sr-only">Delete</span>
@@ -129,7 +134,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 })
                 ) : (
                 <TableRow>
-                    <TableCell colSpan={8} className="h-24 text-center">
+                    <TableCell colSpan={10} className="h-24 text-center">
                     No trades found.
                     </TableCell>
                 </TableRow>

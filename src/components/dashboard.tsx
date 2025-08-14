@@ -91,9 +91,9 @@ export default function Dashboard() {
     setTrades(updatedTrades);
   }
 
-  const { totalPL, winRate, riskRewardRatio } = useMemo(() => {
+  const { totalPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount } = useMemo(() => {
     if (trades.length === 0) {
-      return { totalPL: 0, winRate: 0, riskRewardRatio: 0 };
+      return { totalPL: 0, winRate: 0, riskRewardRatio: 0, winningTradesCount: 0, losingTradesCount: 0 };
     }
 
     const tradeResults = trades.map(t => {
@@ -104,6 +104,9 @@ export default function Dashboard() {
 
     const winningTrades = tradeResults.filter(pl => pl > 0);
     const losingTrades = tradeResults.filter(pl => pl < 0);
+    
+    const winningTradesCount = winningTrades.length;
+    const losingTradesCount = losingTrades.length;
 
     const winRate = trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
 
@@ -112,7 +115,7 @@ export default function Dashboard() {
     
     const riskRewardRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
 
-    return { totalPL, winRate, riskRewardRatio };
+    return { totalPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount };
   }, [trades]);
 
   return (
@@ -123,9 +126,11 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>Performance Overview</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
+          <CardContent className="grid gap-4 md:grid-cols-5">
             <KpiCard title="Total P/L" value={totalPL.toFixed(2)} isCurrency />
             <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
+            <KpiCard title="Winning Trades" value={winningTradesCount.toString()} />
+            <KpiCard title="Losing Trades" value={losingTradesCount.toString()} />
             <KpiCard title="Avg. Risk/Reward" value={riskRewardRatio.toFixed(2)} />
           </CardContent>
         </Card>
