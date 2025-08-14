@@ -13,15 +13,29 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { Button } from './ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type TradeTableProps = {
   trades: Trade[];
+  onEditTrade: (trade: Trade) => void;
+  onDeleteTrade: (tradeId: string) => void;
 };
 
-export default function TradeTable({ trades }: TradeTableProps) {
+export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: TradeTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteCandidate, setDeleteCandidate] = useState<Trade | null>(null);
 
   const filteredTrades = useMemo(() => {
     return trades
@@ -35,7 +49,15 @@ export default function TradeTable({ trades }: TradeTableProps) {
         );
   }, [trades, searchTerm]);
   
+  const handleDeleteConfirm = () => {
+    if(deleteCandidate) {
+        onDeleteTrade(deleteCandidate.id);
+        setDeleteCandidate(null);
+    }
+  }
+
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -61,7 +83,8 @@ export default function TradeTable({ trades }: TradeTableProps) {
                 <TableHead>Style</TableHead>
                 <TableHead>Entry Date</TableHead>
                 <TableHead>Exit Date</TableHead>
-                <TableHead>Notes</TableHead>
+                <TableHead className="max-w-[250px]">Notes</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -84,12 +107,24 @@ export default function TradeTable({ trades }: TradeTableProps) {
                         <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
                         <TableCell>{format(trade.exitDate, 'PP')}</TableCell>
                         <TableCell className="max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
+                        <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                                <Button variant="ghost" size="icon" onClick={() => onEditTrade(trade)}>
+                                    <Pencil className="h-4 w-4" />
+                                    <span className="sr-only">Edit</span>
+                                </Button>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setDeleteCandidate(trade)}>
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Delete</span>
+                                </Button>
+                            </div>
+                        </TableCell>
                     </TableRow>
                     );
                 })
                 ) : (
                 <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={7} className="h-24 text-center">
                     No trades found.
                     </TableCell>
                 </TableRow>
@@ -99,5 +134,21 @@ export default function TradeTable({ trades }: TradeTableProps) {
         </div>
       </CardContent>
     </Card>
+     <AlertDialog open={!!deleteCandidate} onOpenChange={(isOpen) => !isOpen && setDeleteCandidate(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the trade for{' '}
+              <span className="font-semibold">{deleteCandidate?.instrument}</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

@@ -10,7 +10,6 @@ import PerformanceChart from '@/components/performance-chart';
 import AiSuggestions from '@/components/ai-suggestions';
 import TradeTable from '@/components/trade-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 
 const initialTrades: Trade[] = [
     {
@@ -48,16 +47,46 @@ const initialTrades: Trade[] = [
 export default function Dashboard() {
   const [trades, setTrades] = useLocalStorage<Trade[]>('trades', initialTrades);
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
+  const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
 
-  const handleAddTrade = (newTrade: Omit<Trade, 'id'>) => {
-    const tradeWithId = { ...newTrade, id: crypto.randomUUID() };
-    const updatedTrades = [tradeWithId, ...trades];
+  const handleOpenAddDialog = () => {
+    setEditingTrade(undefined);
+    setAddTradeOpen(true);
+  }
+
+  const handleOpenEditDialog = (trade: Trade) => {
+    setEditingTrade(trade);
+    setAddTradeOpen(true);
+  }
+
+  const handleDialogClose = (isOpen: boolean) => {
+    if (!isOpen) {
+        setEditingTrade(undefined);
+    }
+    setAddTradeOpen(isOpen);
+  }
+
+  const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, id?: string) => {
+    let updatedTrades;
+    if (id) {
+        // Editing existing trade
+        updatedTrades = trades.map(t => t.id === id ? { ...t, ...tradeData } : t);
+    } else {
+        // Adding new trade
+        const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
+        updatedTrades = [tradeWithId, ...trades];
+    }
     setTrades(updatedTrades.map(trade => ({
         ...trade,
         entryDate: new Date(trade.entryDate),
         exitDate: new Date(trade.exitDate),
     })));
   };
+
+  const handleDeleteTrade = (tradeId: string) => {
+    const updatedTrades = trades.filter(t => t.id !== tradeId);
+    setTrades(updatedTrades);
+  }
 
   const { totalPL, winRate, riskRewardRatio } = useMemo(() => {
     if (trades.length === 0) {
@@ -82,7 +111,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <AppHeader onAddTradeClick={() => setAddTradeOpen(true)} />
+      <AppHeader onAddTradeClick={handleOpenAddDialog} />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
           <CardHeader>
@@ -104,13 +133,14 @@ export default function Dashboard() {
             </div>
         </div>
         
-        <TradeTable trades={trades} />
+        <TradeTable trades={trades} onEditTrade={handleOpenEditDialog} onDeleteTrade={handleDeleteTrade} />
 
       </main>
       <AddTradeDialog
         isOpen={isAddTradeOpen}
-        onOpenChange={setAddTradeOpen}
-        onAddTrade={handleAddTrade}
+        onOpenChange={handleDialogClose}
+        onSaveTrade={handleAddOrUpdateTrade}
+        trade={editingTrade}
       />
     </div>
   );

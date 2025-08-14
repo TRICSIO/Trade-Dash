@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, PlusCircle } from 'lucide-react';
+import { CalendarIcon, PlusCircle, Save } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +30,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Trade } from '@/lib/types';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   instrument: z.string().min(1, 'Instrument is required.'),
@@ -47,22 +48,47 @@ const formSchema = z.object({
 type AddTradeDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddTrade: (trade: Omit<Trade, 'id'>) => void;
+  onSaveTrade: (trade: Omit<Trade, 'id'>, id?: string) => void;
+  trade?: Trade;
 };
 
 const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp"];
 
-export default function AddTradeDialog({ isOpen, onOpenChange, onAddTrade }: AddTradeDialogProps) {
+export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trade }: AddTradeDialogProps) {
+  const isEditing = !!trade;
+    
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: isEditing ? {
+        ...trade,
+        entryDate: new Date(trade.entryDate),
+        exitDate: new Date(trade.exitDate),
+    } : {
       instrument: '',
       notes: '',
     },
   });
 
+  useEffect(() => {
+    if(isOpen) {
+        form.reset(isEditing ? {
+            ...trade,
+            entryDate: new Date(trade.entryDate),
+            exitDate: new Date(trade.exitDate),
+        } : {
+          instrument: '',
+          entryPrice: undefined,
+          exitPrice: undefined,
+          tradeStyle: undefined,
+          entryDate: undefined,
+          exitDate: undefined,
+          notes: '',
+        });
+    }
+  }, [isOpen, isEditing, trade, form]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onAddTrade(values);
+    onSaveTrade(values, trade?.id);
     form.reset();
     onOpenChange(false);
   }
@@ -71,9 +97,9 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onAddTrade }: Add
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Log a New Trade</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Trade' : 'Log a New Trade'}</DialogTitle>
           <DialogDescription>
-            Enter the details of your trade. Click save when you&apos;re done.
+            {isEditing ? 'Update the details of your trade.' : 'Enter the details of your trade. Click save when you\'re done.'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -216,8 +242,8 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onAddTrade }: Add
             />
             <DialogFooter>
               <Button type="submit">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Save Trade
+                {isEditing ? <Save className="mr-2 h-4 w-4" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                {isEditing ? 'Save Changes' : 'Save Trade'}
               </Button>
             </DialogFooter>
           </form>
