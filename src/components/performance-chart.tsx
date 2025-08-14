@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 
 type PerformanceChartProps = {
   trades: Trade[];
+  startingBalance: number;
 };
 
 const chartConfig = {
@@ -18,9 +19,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function PerformanceChart({ trades }: PerformanceChartProps) {
+export default function PerformanceChart({ trades, startingBalance }: PerformanceChartProps) {
   const chartData = useMemo(() => {
-    if (trades.length < 2) return [];
+    if (trades.length < 1) return [{ date: 'Start', equity: startingBalance }];
     
     const sortedTrades = [...trades]
         .map(trade => ({
@@ -30,7 +31,7 @@ export default function PerformanceChart({ trades }: PerformanceChartProps) {
         .sort((a, b) => a.exitDate.getTime() - b.exitDate.getTime());
     
     let cumulativePL = 0;
-    return sortedTrades.map(trade => {
+    const dataPoints = sortedTrades.map(trade => {
       let pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
       if (trade.tradeStyle === 'Option') {
         pl *= 100;
@@ -38,10 +39,13 @@ export default function PerformanceChart({ trades }: PerformanceChartProps) {
       cumulativePL += pl;
       return {
         date: format(trade.exitDate, 'MMM d'),
-        equity: cumulativePL,
+        equity: startingBalance + cumulativePL,
       };
     });
-  }, [trades]);
+
+    return [{ date: 'Start', equity: startingBalance }, ...dataPoints];
+
+  }, [trades, startingBalance]);
 
   return (
     <Card>
@@ -50,7 +54,7 @@ export default function PerformanceChart({ trades }: PerformanceChartProps) {
         <CardDescription>Your portfolio value over time.</CardDescription>
       </CardHeader>
       <CardContent>
-        {chartData.length > 0 ? (
+        {chartData.length > 1 ? (
           <ChartContainer config={chartConfig} className="h-[250px] w-full">
             <AreaChart data={chartData}>
               <defs>
@@ -61,10 +65,10 @@ export default function PerformanceChart({ trades }: PerformanceChartProps) {
               </defs>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
+              <YAxis domain={['dataMin - 100', 'dataMax + 100']} tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" labelKey="equity" />}
+                content={<ChartTooltipContent indicator="dot" labelKey="date" formatter={(value, name) => [value, 'Equity']} />}
               />
               <Area
                 dataKey="equity"
@@ -77,7 +81,7 @@ export default function PerformanceChart({ trades }: PerformanceChartProps) {
           </ChartContainer>
         ) : (
           <div className="flex h-[250px] items-center justify-center text-muted-foreground">
-            Log at least two trades to see your equity curve.
+            Your equity curve will appear here once you log a trade.
           </div>
         )}
       </CardContent>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, ChangeEvent } from 'react';
 import type { Trade } from '@/lib/types';
 import useLocalStorage from '@/hooks/use-local-storage';
 import AppHeader from '@/components/header';
@@ -9,7 +9,9 @@ import KpiCard from '@/components/kpi-card';
 import PerformanceChart from '@/components/performance-chart';
 import AiSuggestions from '@/components/ai-suggestions';
 import TradeTable from '@/components/trade-table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { isToday } from 'date-fns';
 
 const initialTrades: Trade[] = [
@@ -50,6 +52,7 @@ const initialTrades: Trade[] = [
 
 export default function Dashboard() {
   const [trades, setTrades] = useLocalStorage<Trade[]>('trades', initialTrades);
+  const [startingBalance, setStartingBalance] = useLocalStorage<number>('startingBalance', 10000);
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
 
@@ -92,9 +95,14 @@ export default function Dashboard() {
     setTrades(updatedTrades);
   }
 
-  const { totalPL, dayPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount, totalInvested, overallReturn } = useMemo(() => {
+  const handleBalanceChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setStartingBalance(Number(value));
+  }
+
+  const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance } = useMemo(() => {
     if (trades.length === 0) {
-      return { totalPL: 0, dayPL: 0, winRate: 0, riskRewardRatio: 0, winningTradesCount: 0, losingTradesCount: 0, totalInvested: 0, overallReturn: 0 };
+      return { totalPL: 0, dayPL: 0, winRate: 0, winningTradesCount: 0, losingTradesCount: 0, totalInvested: 0, overallReturn: 0, accountBalance: startingBalance };
     }
 
     let totalInvested = 0;
@@ -109,7 +117,7 @@ export default function Dashboard() {
     const totalPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
 
     const dayPL = tradeResults
-      .filter(result => isToday(result.exitDate))
+      .filter(result => isToday(new Date(result.exitDate)))
       .reduce((acc, result) => acc + result.pl, 0);
 
     const winningTrades = tradeResults.filter(result => result.pl > 0);
@@ -123,22 +131,37 @@ export default function Dashboard() {
     const avgWin = winningTrades.length > 0 ? winningTrades.reduce((acc, result) => acc + result.pl, 0) / winningTrades.length : 0;
     const avgLoss = losingTrades.length > 0 ? Math.abs(losingTrades.reduce((acc, result) => acc + result.pl, 0) / losingTrades.length) : 0;
     
-    const riskRewardRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
-    
     const overallReturn = totalInvested > 0 ? (totalPL / totalInvested) * 100 : 0;
+    
+    const accountBalance = startingBalance + totalPL;
 
-    return { totalPL, dayPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount, totalInvested, overallReturn };
-  }, [trades]);
+    return { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance };
+  }, [trades, startingBalance]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <AppHeader onAddTradeClick={handleOpenAddDialog} />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
-          <CardHeader>
-            <CardTitle>Performance Overview</CardTitle>
+          <CardHeader className="flex flex-row items-start justify-between">
+            <div>
+              <CardTitle>Performance Overview</CardTitle>
+              <CardDescription>Your key trading metrics at a glance.</CardDescription>
+            </div>
+            <div className="w-full max-w-xs">
+              <Label htmlFor="starting-balance">Starting Balance</Label>
+              <Input
+                id="starting-balance"
+                type="number"
+                value={startingBalance}
+                onChange={handleBalanceChange}
+                className="mt-1"
+                placeholder="e.g., 10000"
+              />
+            </div>
           </CardHeader>
-          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+            <KpiCard title="Account Balance" value={accountBalance.toFixed(2)} isCurrency />
             <KpiCard title="Total P/L" value={totalPL.toFixed(2)} isCurrency />
             <KpiCard title="Day P/L" value={dayPL.toFixed(2)} isCurrency />
             <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
@@ -149,7 +172,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-5">
             <div className="lg:col-span-3">
-                <PerformanceChart trades={trades} />
+                <PerformanceChart trades={trades} startingBalance={startingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={trades} />
