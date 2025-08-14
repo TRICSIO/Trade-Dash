@@ -50,22 +50,6 @@ const formSchema = z.object({
 }, {
     message: "Exit date cannot be before entry date.",
     path: ["exitDate"],
-}).refine(data => {
-    if (data.exitDate && !data.exitPrice) {
-        return false;
-    }
-    return true;
-}, {
-    message: "Exit price is required if exit date is set.",
-    path: ["exitPrice"],
-}).refine(data => {
-    if (data.exitPrice && !data.exitDate) {
-        return false;
-    }
-    return true;
-}, {
-    message: "Exit date is required if exit price is set.",
-    path: ["exitDate"],
 });
 
 
