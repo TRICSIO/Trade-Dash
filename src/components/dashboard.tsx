@@ -103,11 +103,8 @@ export default function Dashboard() {
   const closedTrades = useMemo(() => trades.filter(t => t.exitDate && t.exitPrice), [trades]);
 
   const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance } = useMemo(() => {
-    if (closedTrades.length === 0) {
-      return { totalPL: 0, dayPL: 0, winRate: 0, winningTradesCount: 0, losingTradesCount: 0, totalInvested: 0, overallReturn: 0, accountBalance: startingBalance };
-    }
-
     let totalInvested = 0;
+    
     const tradeResults = closedTrades.map(t => {
         const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
         const cost = t.entryPrice * t.quantity * multiplier;
@@ -129,9 +126,6 @@ export default function Dashboard() {
     const losingTradesCount = losingTrades.length;
 
     const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
-
-    const avgWin = winningTrades.length > 0 ? winningTrades.reduce((acc, result) => acc + result.pl, 0) / winningTrades.length : 0;
-    const avgLoss = losingTrades.length > 0 ? Math.abs(losingTrades.reduce((acc, result) => acc + result.pl, 0) / losingTrades.length) : 0;
     
     const overallReturn = totalInvested > 0 ? (totalPL / totalInvested) * 100 : 0;
     
