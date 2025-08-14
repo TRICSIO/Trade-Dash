@@ -58,7 +58,7 @@ const initialTrades: Trade[] = [
 
 export default function Dashboard() {
   const [trades, setTrades] = useLocalStorage<Trade[]>('trades', initialTrades);
-  const [startingBalance, setStartingBalance] = useLocalStorage<number>('startingBalance', 10000);
+  const [startingBalances, setStartingBalances] = useLocalStorage<Record<string, number>>('startingBalances', { 'Fidelity': 10000, 'IBKR': 25000 });
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
@@ -76,6 +76,13 @@ export default function Dashboard() {
     }
     return trades.filter(t => t.account === selectedAccount);
   }, [trades, selectedAccount]);
+
+  const currentStartingBalance = useMemo(() => {
+    if (selectedAccount === 'all') {
+      return Object.values(startingBalances).reduce((acc, balance) => acc + balance, 0);
+    }
+    return startingBalances[selectedAccount] || 0;
+  }, [selectedAccount, startingBalances]);
 
 
   const handleOpenAddDialog = () => {
@@ -110,6 +117,11 @@ export default function Dashboard() {
         entryDate: new Date(trade.entryDate),
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
+
+    // Initialize starting balance for a new account if it doesn't exist
+    if (!accounts.includes(tradeData.account)) {
+      setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
+    }
   };
 
   const handleDeleteTrade = (tradeId: string) => {
@@ -119,7 +131,12 @@ export default function Dashboard() {
 
   const handleBalanceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setStartingBalance(Number(value));
+    if (selectedAccount !== 'all') {
+        setStartingBalances(prev => ({
+            ...prev,
+            [selectedAccount]: Number(value)
+        }));
+    }
   }
 
   const handleImportTrades = (broker: string, file: File, account: string) => {
@@ -187,11 +204,10 @@ export default function Dashboard() {
         return acc + (t.entryPrice * t.quantity * multiplier);
     }, 0);
     
-    // Account balance should only be calculated when looking at all accounts, otherwise it's misleading
-    const accountBalance = selectedAccount === 'all' ? startingBalance + totalNetPL - openTradesCost : 0;
+    const accountBalance = currentStartingBalance + totalNetPL - openTradesCost;
 
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
-  }, [filteredTrades, startingBalance, selectedAccount]);
+  }, [filteredTrades, currentStartingBalance]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -217,13 +233,13 @@ export default function Dashboard() {
                     </SelectContent>
                   </Select>
               </div>
-              {selectedAccount === 'all' && (
+              {selectedAccount !== 'all' && (
                 <div className="w-full sm:max-w-xs space-y-2">
                   <Label htmlFor="starting-balance">Starting Balance</Label>
                   <Input
                     id="starting-balance"
                     type="number"
-                    value={startingBalance}
+                    value={currentStartingBalance}
                     onChange={handleBalanceChange}
                     className="mt-1"
                     placeholder="e.g., 10000"
@@ -233,16 +249,14 @@ export default function Dashboard() {
             </div>
           </CardHeader>
           <CardContent>
-            {selectedAccount === 'all' && (
               <div className="mb-6">
                 <Card className="bg-primary/10 border-primary/40 inline-block">
                     <CardHeader className="pb-2">
-                        <CardDescription>Current Account Balance</CardDescription>
+                        <CardDescription>Current Account Balance ({selectedAccount === 'all' ? 'All' : selectedAccount})</CardDescription>
                         <CardTitle className="text-3xl">${accountBalance.toFixed(2)}</CardTitle>
                     </CardHeader>
                 </Card>
               </div>
-            )}
             <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
                 <KpiCard title="Total Trades" value={totalTrades.toString()} />
                 <KpiCard title="Winning Trades" value={winningTradesCount.toString()} />
@@ -262,7 +276,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-5">
             <div className="lg:col-span-3">
-                <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={startingBalance} />
+                <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />

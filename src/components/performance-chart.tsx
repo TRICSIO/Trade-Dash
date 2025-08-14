@@ -25,6 +25,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
     if (trades.length < 1) return [{ date: 'Start', equity: startingBalance }];
     
     const sortedTrades = [...trades]
+        .filter(trade => trade.exitDate && trade.exitPrice) // Ensure we only process closed trades
         .map(trade => ({
             ...trade,
             exitDate: new Date(trade.exitDate!),
@@ -69,7 +70,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
               <YAxis domain={['dataMin - 100', 'dataMax + 100']} tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" labelKey="date" formatter={(value, name) => [value, 'Equity']} />}
+                content={<ChartTooltipContent indicator="dot" labelKey="date" formatter={(value, name) => [`$${(value as number).toFixed(2)}`, 'Equity']} />}
               />
               <Area
                 dataKey="equity"
