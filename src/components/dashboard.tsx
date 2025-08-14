@@ -100,7 +100,7 @@ export default function Dashboard() {
     setStartingBalance(Number(value));
   }
 
-  const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance } = useMemo(() => {
+  const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance, totalTrades } = useMemo(() => {
     let totalInvested = 0;
     
     const closedTrades = trades.filter(t => t.exitDate && t.exitPrice);
@@ -125,6 +125,7 @@ export default function Dashboard() {
     
     const winningTradesCount = winningTrades.length;
     const losingTradesCount = losingTrades.length;
+    const totalTrades = trades.length;
 
     const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
     
@@ -137,7 +138,7 @@ export default function Dashboard() {
     
     const accountBalance = startingBalance + totalPL - openTradesCost;
 
-    return { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance };
+    return { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance, totalTrades };
   }, [trades, startingBalance]);
 
   return (
@@ -162,13 +163,14 @@ export default function Dashboard() {
               />
             </div>
           </CardHeader>
-          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
             <KpiCard title="Account Balance" value={accountBalance.toFixed(2)} isCurrency />
             <KpiCard title="Total P/L" value={totalPL.toFixed(2)} isCurrency />
             <KpiCard title="Day P/L" value={dayPL.toFixed(2)} isCurrency />
             <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
             <KpiCard title="Winning Trades" value={winningTradesCount.toString()} />
             <KpiCard title="Losing Trades" value={losingTradesCount.toString()} />
+            <KpiCard title="Total Trades" value={totalTrades.toString()} />
           </CardContent>
         </Card>
 
