@@ -3,35 +3,32 @@
 import { useState, useEffect } from 'react';
 
 function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-    try {
-      const item = window.localStorage.getItem(key);
-      if (item) {
-        // When retrieving from localStorage, dates are stored as strings.
-        // We need to parse them back into Date objects.
-        const parsed = JSON.parse(item, (key, value) => {
-            if (key === 'entryDate' || key === 'exitDate') {
-                return new Date(value);
-            }
-            return value;
-        });
-        return parsed;
-      }
-      return initialValue;
-    } catch (error) {
-      console.error(error);
-      return initialValue;
-    }
-  });
-
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      try {
+        const item = window.localStorage.getItem(key);
+        if (item) {
+          const parsed = JSON.parse(item, (key, value) => {
+              if (key === 'entryDate' || key === 'exitDate') {
+                  return new Date(value);
+              }
+              return value;
+          });
+          setStoredValue(parsed);
+        }
+      } catch (error) {
+        console.error(error);
+        setStoredValue(initialValue);
+      }
+    }
+  }, [isMounted, key, initialValue]);
 
   useEffect(() => {
     if (isMounted) {
@@ -46,6 +43,10 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => voi
         }
     }
   }, [key, storedValue, isMounted]);
+
+  if (!isMounted) {
+    return [initialValue, () => {}];
+  }
 
   return [storedValue, setStoredValue];
 }
