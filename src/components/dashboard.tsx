@@ -91,14 +91,18 @@ export default function Dashboard() {
     setTrades(updatedTrades);
   }
 
-  const { totalPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount } = useMemo(() => {
+  const { totalPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount, totalInvested, overallReturn } = useMemo(() => {
     if (trades.length === 0) {
-      return { totalPL: 0, winRate: 0, riskRewardRatio: 0, winningTradesCount: 0, losingTradesCount: 0 };
+      return { totalPL: 0, winRate: 0, riskRewardRatio: 0, winningTradesCount: 0, losingTradesCount: 0, totalInvested: 0, overallReturn: 0 };
     }
 
+    let totalInvested = 0;
     const tradeResults = trades.map(t => {
-        const pl = (t.exitPrice - t.entryPrice) * t.quantity;
-        return t.tradeStyle === 'Option' ? pl * 100 : pl;
+        const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
+        const cost = t.entryPrice * t.quantity * multiplier;
+        totalInvested += cost;
+        const proceeds = t.exitPrice * t.quantity * multiplier;
+        return proceeds - cost;
     });
     const totalPL = tradeResults.reduce((acc, pl) => acc + pl, 0);
 
@@ -114,8 +118,10 @@ export default function Dashboard() {
     const avgLoss = losingTrades.length > 0 ? Math.abs(losingTrades.reduce((acc, pl) => acc + pl, 0) / losingTrades.length) : 0;
     
     const riskRewardRatio = avgLoss > 0 ? avgWin / avgLoss : 0;
+    
+    const overallReturn = totalInvested > 0 ? (totalPL / totalInvested) * 100 : 0;
 
-    return { totalPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount };
+    return { totalPL, winRate, riskRewardRatio, winningTradesCount, losingTradesCount, totalInvested, overallReturn };
   }, [trades]);
 
   return (
@@ -126,8 +132,10 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle>Performance Overview</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-5">
+          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
             <KpiCard title="Total P/L" value={totalPL.toFixed(2)} isCurrency />
+            <KpiCard title="Overall Return" value={`${overallReturn.toFixed(2)}%`} />
+            <KpiCard title="Total Invested" value={totalInvested.toFixed(2)} isCurrency />
             <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
             <KpiCard title="Winning Trades" value={winningTradesCount.toString()} />
             <KpiCard title="Losing Trades" value={losingTradesCount.toString()} />

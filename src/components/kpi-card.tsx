@@ -9,8 +9,14 @@ type KpiCardProps = {
 };
 
 export default function KpiCard({ title, value, isCurrency = false }: KpiCardProps) {
-    const isPositive = !isCurrency || (isCurrency && parseFloat(value) >= 0);
-    const valueColor = isCurrency ? (isPositive ? 'text-green-400' : 'text-red-400') : 'text-foreground';
+    const isPercentage = value.includes('%');
+    const numericValue = parseFloat(value.replace(/[^0-9.-]+/g,""));
+    const isPositive = numericValue >= 0;
+    
+    let valueColor = 'text-foreground';
+    if (isCurrency || isPercentage) {
+        valueColor = isPositive ? 'text-green-400' : 'text-red-400';
+    }
 
   return (
     <Card className="bg-card/50 backdrop-blur-sm">
@@ -19,7 +25,7 @@ export default function KpiCard({ title, value, isCurrency = false }: KpiCardPro
       </CardHeader>
       <CardContent>
         <div className={`text-2xl font-bold ${valueColor}`}>
-          {isCurrency && isPositive && '+'}${isCurrency && !isPositive && ''}{value}
+          {(isCurrency || (isPercentage && isPositive)) && isPositive && '+'}{value}
         </div>
       </CardContent>
     </Card>
