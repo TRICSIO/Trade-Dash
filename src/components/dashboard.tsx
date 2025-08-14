@@ -122,13 +122,13 @@ export default function Dashboard() {
     setStartingBalance(Number(value));
   }
 
-  const handleImportTrades = (broker: string, file: File) => {
-    console.log(`Importing from ${broker}`, file);
+  const handleImportTrades = (broker: string, file: File, account: string) => {
+    console.log(`Importing from ${broker} into ${account}`, file);
     // As discussed, the parsing logic is complex and broker-specific.
     // This is a placeholder to show the UI is connected.
     toast({
         title: "Import Started",
-        description: `Parsing for ${broker} is not yet implemented.`,
+        description: `Parsing for ${broker} into ${account} is not yet implemented.`,
     });
     setImportTradeOpen(false);
   };
@@ -282,6 +282,7 @@ export default function Dashboard() {
         isOpen={isImportTradeOpen}
         onOpenChange={setImportTradeOpen}
         onImport={handleImportTrades}
+        accounts={accounts.filter(acc => acc !== 'all')}
       />
     </div>
   );
