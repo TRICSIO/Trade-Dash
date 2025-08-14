@@ -21,10 +21,10 @@ const chartConfig = {
 
 export default function PerformanceChart({ trades, startingBalance }: PerformanceChartProps) {
   const chartData = useMemo(() => {
-    const closedTrades = trades.filter(t => t.exitDate && t.exitPrice);
-    if (closedTrades.length < 1) return [{ date: 'Start', equity: startingBalance }];
+    // The chart should only display based on closed trades
+    if (trades.length < 1) return [{ date: 'Start', equity: startingBalance }];
     
-    const sortedTrades = [...closedTrades]
+    const sortedTrades = [...trades]
         .map(trade => ({
             ...trade,
             exitDate: new Date(trade.exitDate!),

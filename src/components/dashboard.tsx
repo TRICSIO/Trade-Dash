@@ -100,10 +100,11 @@ export default function Dashboard() {
     setStartingBalance(Number(value));
   }
 
-  const closedTrades = useMemo(() => trades.filter(t => t.exitDate && t.exitPrice), [trades]);
-
   const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance } = useMemo(() => {
     let totalInvested = 0;
+    
+    const closedTrades = trades.filter(t => t.exitDate && t.exitPrice);
+    const openTrades = trades.filter(t => !t.exitDate || !t.exitPrice);
     
     const tradeResults = closedTrades.map(t => {
         const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
@@ -128,11 +129,16 @@ export default function Dashboard() {
     const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
     
     const overallReturn = totalInvested > 0 ? (totalPL / totalInvested) * 100 : 0;
+
+    const openTradesCost = openTrades.reduce((acc, t) => {
+        const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
+        return acc + (t.entryPrice * t.quantity * multiplier);
+    }, 0);
     
-    const accountBalance = startingBalance + totalPL;
+    const accountBalance = startingBalance + totalPL - openTradesCost;
 
     return { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance };
-  }, [closedTrades, startingBalance]);
+  }, [trades, startingBalance]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -168,7 +174,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-5">
             <div className="lg:col-span-3">
-                <PerformanceChart trades={closedTrades} startingBalance={startingBalance} />
+                <PerformanceChart trades={trades.filter(t => t.exitDate && t.exitPrice)} startingBalance={startingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={trades} />
