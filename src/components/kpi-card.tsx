@@ -25,7 +25,7 @@ export default function KpiCard({ title, value, isCurrency = false }: KpiCardPro
       </CardHeader>
       <CardContent>
         <div className={`text-2xl font-bold ${valueColor}`}>
-          {(isCurrency || (isPercentage && isPositive)) && isPositive && '+'}{value}
+          {(isCurrency || (isPercentage && isPositive)) && isPositive && '+'}{isCurrency ? '$' : ''}{value}
         </div>
       </CardContent>
     </Card>
