@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2 } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from './ui/button';
 import {
@@ -42,7 +42,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
         .map(trade => ({
             ...trade,
             entryDate: new Date(trade.entryDate),
-            exitDate: new Date(trade.exitDate),
+            exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
         }))
         .filter(trade =>
             trade.instrument.toLowerCase().includes(searchTerm.toLowerCase())
@@ -63,7 +63,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <CardTitle>Trade History</CardTitle>
-                <CardDescription>A log of all your past trades.</CardDescription>
+                <CardDescription>A log of all your past and open trades.</CardDescription>
             </div>
             <Input
                 placeholder="Filter by instrument..."
@@ -93,27 +93,29 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <TableBody>
                 {filteredTrades.length > 0 ? (
                 filteredTrades.map(trade => {
+                    const isClosed = trade.exitDate && trade.exitPrice;
                     const multiplier = trade.tradeStyle === 'Option' ? 100 : 1;
                     const cost = trade.entryPrice * trade.quantity * multiplier;
-                    const proceeds = trade.exitPrice * trade.quantity * multiplier;
-                    const pl = proceeds - cost;
-                    const isProfit = pl >= 0;
+                    const proceeds = isClosed ? (trade.exitPrice ?? 0) * trade.quantity * multiplier : null;
+                    const pl = isClosed && proceeds ? proceeds - cost : null;
+                    const isProfit = pl !== null && pl >= 0;
+                    
                     return (
                     <TableRow key={trade.id}>
                         <TableCell className="font-medium">{trade.instrument}</TableCell>
                         <TableCell>
                             <Badge variant="secondary">{trade.tradeStyle}</Badge>
                         </TableCell>
-                        <TableCell>{cost.toFixed(2)}</TableCell>
-                        <TableCell>{proceeds.toFixed(2)}</TableCell>
-                        <TableCell className={isProfit ? 'text-green-400' : 'text-red-400'}>
+                        <TableCell>${cost.toFixed(2)}</TableCell>
+                        <TableCell>{proceeds !== null ? `$${proceeds.toFixed(2)}` : '-'}</TableCell>
+                        <TableCell className={pl === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}>
                             <div className="flex items-center gap-2">
-                                {isProfit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
-                                {pl.toFixed(2)}
+                                {pl === null ? <Clock className="h-4 w-4" /> : isProfit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
+                                {pl !== null ? `$${pl.toFixed(2)}` : 'Open'}
                             </div>
                         </TableCell>
                         <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
-                        <TableCell>{format(trade.exitDate, 'PP')}</TableCell>
+                        <TableCell>{trade.exitDate ? format(trade.exitDate, 'PP') : '-'}</TableCell>
                         <TableCell>{trade.quantity}</TableCell>
                         <TableCell className="max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
                         <TableCell className="text-right">

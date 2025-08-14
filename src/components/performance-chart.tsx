@@ -21,18 +21,19 @@ const chartConfig = {
 
 export default function PerformanceChart({ trades, startingBalance }: PerformanceChartProps) {
   const chartData = useMemo(() => {
-    if (trades.length < 1) return [{ date: 'Start', equity: startingBalance }];
+    const closedTrades = trades.filter(t => t.exitDate && t.exitPrice);
+    if (closedTrades.length < 1) return [{ date: 'Start', equity: startingBalance }];
     
-    const sortedTrades = [...trades]
+    const sortedTrades = [...closedTrades]
         .map(trade => ({
             ...trade,
-            exitDate: new Date(trade.exitDate),
+            exitDate: new Date(trade.exitDate!),
         }))
         .sort((a, b) => a.exitDate.getTime() - b.exitDate.getTime());
     
     let cumulativePL = 0;
     const dataPoints = sortedTrades.map(trade => {
-      let pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
+      let pl = ((trade.exitPrice ?? 0) - trade.entryPrice) * trade.quantity;
       if (trade.tradeStyle === 'Option') {
         pl *= 100;
       }
@@ -51,7 +52,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
     <Card>
       <CardHeader>
         <CardTitle>Equity Curve</CardTitle>
-        <CardDescription>Your portfolio value over time.</CardDescription>
+        <CardDescription>Your portfolio value over time (based on closed trades).</CardDescription>
       </CardHeader>
       <CardContent>
         {chartData.length > 1 ? (
@@ -81,7 +82,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
           </ChartContainer>
         ) : (
           <div className="flex h-[250px] items-center justify-center text-muted-foreground">
-            Your equity curve will appear here once you log a trade.
+            Your equity curve will appear here once you log a closed trade.
           </div>
         )}
       </CardContent>

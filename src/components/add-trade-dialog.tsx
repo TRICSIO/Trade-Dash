@@ -35,16 +35,38 @@ import { useEffect } from 'react';
 const formSchema = z.object({
   instrument: z.string().min(1, 'Instrument is required.'),
   entryDate: z.date({ required_error: 'Entry date is required.' }),
-  exitDate: z.date({ required_error: 'Exit date is required.' }),
+  exitDate: z.date().optional(),
   entryPrice: z.coerce.number().positive('Entry price must be positive.'),
-  exitPrice: z.coerce.number().positive('Exit price must be positive.'),
+  exitPrice: z.coerce.number().positive('Exit price must be positive.').optional(),
   quantity: z.coerce.number().positive('Quantity must be a positive number.'),
   tradeStyle: z.string().min(1, 'Trade style is required.'),
   notes: z.string().optional(),
-}).refine(data => data.exitDate >= data.entryDate, {
+}).refine(data => {
+    if (data.exitDate && data.entryDate) {
+        return data.exitDate >= data.entryDate;
+    }
+    return true;
+}, {
     message: "Exit date cannot be before entry date.",
     path: ["exitDate"],
+}).refine(data => {
+    if (data.exitDate && !data.exitPrice) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Exit price is required if exit date is set.",
+    path: ["exitPrice"],
+}).refine(data => {
+    if (data.exitPrice && !data.exitDate) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Exit date is required if exit price is set.",
+    path: ["exitDate"],
 });
+
 
 type AddTradeDialogProps = {
   isOpen: boolean;
@@ -63,7 +85,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
     defaultValues: isEditing ? {
         ...trade,
         entryDate: new Date(trade.entryDate),
-        exitDate: new Date(trade.exitDate),
+        exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     } : {
       instrument: '',
       notes: '',
@@ -75,7 +97,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         form.reset(isEditing ? {
             ...trade,
             entryDate: new Date(trade.entryDate),
-            exitDate: new Date(trade.exitDate),
+            exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
         } : {
           instrument: '',
           entryPrice: undefined,
@@ -90,7 +112,12 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
   }, [isOpen, isEditing, trade, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    onSaveTrade(values, trade?.id);
+    const tradeToSave = {
+        ...values,
+        exitPrice: values.exitPrice || undefined,
+        exitDate: values.exitDate || undefined,
+    };
+    onSaveTrade(tradeToSave, trade?.id);
     form.reset();
     onOpenChange(false);
   }

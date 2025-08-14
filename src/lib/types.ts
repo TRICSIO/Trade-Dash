@@ -2,9 +2,9 @@ export type Trade = {
   id: string;
   instrument: string;
   entryDate: Date;
-  exitDate: Date;
+  exitDate?: Date;
   entryPrice: number;
-  exitPrice: number;
+  exitPrice?: number;
   quantity: number;
   tradeStyle: string;
   notes?: string;

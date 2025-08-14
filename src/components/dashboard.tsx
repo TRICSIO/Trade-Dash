@@ -86,7 +86,7 @@ export default function Dashboard() {
     setTrades(updatedTrades.map(trade => ({
         ...trade,
         entryDate: new Date(trade.entryDate),
-        exitDate: new Date(trade.exitDate),
+        exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
   };
 
@@ -100,18 +100,20 @@ export default function Dashboard() {
     setStartingBalance(Number(value));
   }
 
+  const closedTrades = useMemo(() => trades.filter(t => t.exitDate && t.exitPrice), [trades]);
+
   const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance } = useMemo(() => {
-    if (trades.length === 0) {
+    if (closedTrades.length === 0) {
       return { totalPL: 0, dayPL: 0, winRate: 0, winningTradesCount: 0, losingTradesCount: 0, totalInvested: 0, overallReturn: 0, accountBalance: startingBalance };
     }
 
     let totalInvested = 0;
-    const tradeResults = trades.map(t => {
+    const tradeResults = closedTrades.map(t => {
         const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
         const cost = t.entryPrice * t.quantity * multiplier;
         totalInvested += cost;
-        const proceeds = t.exitPrice * t.quantity * multiplier;
-        return {pl: proceeds - cost, exitDate: t.exitDate};
+        const proceeds = (t.exitPrice ?? 0) * t.quantity * multiplier;
+        return {pl: proceeds - cost, exitDate: t.exitDate!};
     });
     
     const totalPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
@@ -126,7 +128,7 @@ export default function Dashboard() {
     const winningTradesCount = winningTrades.length;
     const losingTradesCount = losingTrades.length;
 
-    const winRate = trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
+    const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
 
     const avgWin = winningTrades.length > 0 ? winningTrades.reduce((acc, result) => acc + result.pl, 0) / winningTrades.length : 0;
     const avgLoss = losingTrades.length > 0 ? Math.abs(losingTrades.reduce((acc, result) => acc + result.pl, 0) / losingTrades.length) : 0;
@@ -136,7 +138,7 @@ export default function Dashboard() {
     const accountBalance = startingBalance + totalPL;
 
     return { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance };
-  }, [trades, startingBalance]);
+  }, [closedTrades, startingBalance]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -146,7 +148,7 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-start justify-between">
             <div>
               <CardTitle>Performance Overview</CardTitle>
-              <CardDescription>Your key trading metrics at a glance.</CardDescription>
+              <CardDescription>Your key trading metrics at a glance (based on closed trades).</CardDescription>
             </div>
             <div className="w-full max-w-xs">
               <Label htmlFor="starting-balance">Starting Balance</Label>
@@ -172,7 +174,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-5">
             <div className="lg:col-span-3">
-                <PerformanceChart trades={trades} startingBalance={startingBalance} />
+                <PerformanceChart trades={closedTrades} startingBalance={startingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={trades} />

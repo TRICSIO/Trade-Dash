@@ -44,11 +44,17 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
       const tradeHistory = trades
         .map(
           (t, i) => {
-            let pl = (t.exitPrice - t.entryPrice) * t.quantity;
-            if (t.tradeStyle === 'Option') {
-              pl *= 100;
+            const isClosed = t.exitDate && t.exitPrice;
+            let plString = "N/A (Open)";
+            if (isClosed) {
+                let pl = (t.exitPrice! - t.entryPrice) * t.quantity;
+                if (t.tradeStyle === 'Option') {
+                  pl *= 100;
+                }
+                plString = `$${pl.toFixed(2)}`;
             }
-            return `Trade ${i + 1}: Instrument: ${t.instrument}, Style: ${t.tradeStyle}, Qty: ${t.quantity}, Entry: ${format(new Date(t.entryDate), 'yyyy-MM-dd')} at $${t.entryPrice.toFixed(2)}, Exit: ${format(new Date(t.exitDate), 'yyyy-MM-dd')} at $${t.exitPrice.toFixed(2)}, P/L: $${pl.toFixed(2)}, Notes: ${t.notes || 'N/A'}`
+            
+            return `Trade ${i + 1}: Instrument: ${t.instrument}, Style: ${t.tradeStyle}, Qty: ${t.quantity}, Entry: ${format(new Date(t.entryDate), 'yyyy-MM-dd')} at $${t.entryPrice.toFixed(2)}, Exit: ${isClosed ? format(new Date(t.exitDate!), 'yyyy-MM-dd') : 'Open'} at ${isClosed ? `$${t.exitPrice!.toFixed(2)}` : 'N/A'}, P/L: ${plString}, Notes: ${t.notes || 'N/A'}`
           }
         )
         .join('\n');
