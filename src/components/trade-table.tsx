@@ -91,7 +91,10 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <TableBody>
                 {filteredTrades.length > 0 ? (
                 filteredTrades.map(trade => {
-                    const pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
+                    let pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
+                    if (trade.tradeStyle === 'Option') {
+                        pl *= 100;
+                    }
                     const isProfit = pl >= 0;
                     return (
                     <TableRow key={trade.id}>

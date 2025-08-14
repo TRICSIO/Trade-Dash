@@ -96,13 +96,16 @@ export default function Dashboard() {
       return { totalPL: 0, winRate: 0, riskRewardRatio: 0 };
     }
 
-    const tradeResults = trades.map(t => (t.exitPrice - t.entryPrice) * t.quantity);
+    const tradeResults = trades.map(t => {
+        const pl = (t.exitPrice - t.entryPrice) * t.quantity;
+        return t.tradeStyle === 'Option' ? pl * 100 : pl;
+    });
     const totalPL = tradeResults.reduce((acc, pl) => acc + pl, 0);
 
     const winningTrades = tradeResults.filter(pl => pl > 0);
     const losingTrades = tradeResults.filter(pl => pl < 0);
 
-    const winRate = (winningTrades.length / trades.length) * 100;
+    const winRate = trades.length > 0 ? (winningTrades.length / trades.length) * 100 : 0;
 
     const avgWin = winningTrades.length > 0 ? winningTrades.reduce((acc, pl) => acc + pl, 0) / winningTrades.length : 0;
     const avgLoss = losingTrades.length > 0 ? Math.abs(losingTrades.reduce((acc, pl) => acc + pl, 0) / losingTrades.length) : 0;

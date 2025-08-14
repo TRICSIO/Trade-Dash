@@ -31,7 +31,10 @@ export default function PerformanceChart({ trades }: PerformanceChartProps) {
     
     let cumulativePL = 0;
     return sortedTrades.map(trade => {
-      const pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
+      let pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
+      if (trade.tradeStyle === 'Option') {
+        pl *= 100;
+      }
       cumulativePL += pl;
       return {
         date: format(trade.exitDate, 'MMM d'),
