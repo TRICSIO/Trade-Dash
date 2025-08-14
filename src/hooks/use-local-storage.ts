@@ -9,24 +9,44 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => voi
     }
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        // When retrieving from localStorage, dates are stored as strings.
+        // We need to parse them back into Date objects.
+        const parsed = JSON.parse(item);
+        if (Array.isArray(parsed)) {
+            parsed.forEach(trade => {
+                if (trade.entryDate) trade.entryDate = new Date(trade.entryDate);
+                if (trade.exitDate) trade.exitDate = new Date(trade.exitDate);
+            });
+        }
+        return parsed;
+      }
+      return initialValue;
     } catch (error) {
       console.error(error);
       return initialValue;
     }
   });
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
-    try {
-      const valueToStore =
-        typeof storedValue === 'function'
-          ? storedValue(storedValue)
-          : storedValue;
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(error);
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+        try {
+          const valueToStore =
+            typeof storedValue === 'function'
+              ? storedValue(storedValue)
+              : storedValue;
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        } catch (error) {
+          console.error(error);
+        }
     }
-  }, [key, storedValue]);
+  }, [key, storedValue, isMounted]);
 
   return [storedValue, setStoredValue];
 }
