@@ -12,7 +12,6 @@ import TradeTable from '@/components/trade-table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { isToday } from 'date-fns';
 
 const initialTrades: Trade[] = [
     {
@@ -100,11 +99,24 @@ export default function Dashboard() {
     setStartingBalance(Number(value));
   }
 
-  const { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance, totalTrades } = useMemo(() => {
+  const {
+    totalTrades,
+    winningTradesCount,
+    losingTradesCount,
+    winRate,
+    totalGain,
+    totalLoss,
+    totalNetPL,
+    totalInvested,
+    totalReturn,
+    avgGain,
+    avgLoss,
+    profitFactor,
+    accountBalance,
+  } = useMemo(() => {
     let totalInvested = 0;
     
     const closedTrades = trades.filter(t => t.exitDate && t.exitPrice);
-    const openTrades = trades.filter(t => !t.exitDate || !t.exitPrice);
     
     const tradeResults = closedTrades.map(t => {
         const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
@@ -114,31 +126,36 @@ export default function Dashboard() {
         return {pl: proceeds - cost, exitDate: t.exitDate!};
     });
     
-    const totalPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
-
-    const dayPL = tradeResults
-      .filter(result => isToday(new Date(result.exitDate)))
-      .reduce((acc, result) => acc + result.pl, 0);
+    const totalNetPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
 
     const winningTrades = tradeResults.filter(result => result.pl > 0);
     const losingTrades = tradeResults.filter(result => result.pl < 0);
     
     const winningTradesCount = winningTrades.length;
     const losingTradesCount = losingTrades.length;
+    
     const totalTrades = trades.length;
 
-    const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0;
+    const winRate = closedTrades.length > 0 ? (winningTradesCount / closedTrades.length) * 100 : 0;
     
-    const overallReturn = totalInvested > 0 ? (totalPL / totalInvested) * 100 : 0;
+    const totalGain = winningTrades.reduce((acc, trade) => acc + trade.pl, 0);
+    const totalLoss = losingTrades.reduce((acc, trade) => acc + trade.pl, 0);
+    
+    const avgGain = winningTradesCount > 0 ? totalGain / winningTradesCount : 0;
+    const avgLoss = losingTradesCount > 0 ? totalLoss / losingTradesCount : 0;
 
-    const openTradesCost = openTrades.reduce((acc, t) => {
+    const profitFactor = totalLoss !== 0 ? Math.abs(totalGain / totalLoss) : Infinity;
+
+    const totalReturn = totalInvested > 0 ? (totalNetPL / totalInvested) * 100 : 0;
+
+    const openTradesCost = trades.filter(t => !t.exitDate || !t.exitPrice).reduce((acc, t) => {
         const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
         return acc + (t.entryPrice * t.quantity * multiplier);
     }, 0);
     
-    const accountBalance = startingBalance + totalPL - openTradesCost;
+    const accountBalance = startingBalance + totalNetPL - openTradesCost;
 
-    return { totalPL, dayPL, winRate, winningTradesCount, losingTradesCount, totalInvested, overallReturn, accountBalance, totalTrades };
+    return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [trades, startingBalance]);
 
   return (
@@ -151,26 +168,39 @@ export default function Dashboard() {
               <CardTitle>Performance Overview</CardTitle>
               <CardDescription>Your key trading metrics at a glance (based on closed trades).</CardDescription>
             </div>
-            <div className="w-full max-w-xs">
-              <Label htmlFor="starting-balance">Starting Balance</Label>
-              <Input
-                id="starting-balance"
-                type="number"
-                value={startingBalance}
-                onChange={handleBalanceChange}
-                className="mt-1"
-                placeholder="e.g., 10000"
-              />
+            <div className="w-full max-w-xs space-y-2">
+              <div>
+                <Label htmlFor="starting-balance">Starting Balance</Label>
+                <Input
+                  id="starting-balance"
+                  type="number"
+                  value={startingBalance}
+                  onChange={handleBalanceChange}
+                  className="mt-1"
+                  placeholder="e.g., 10000"
+                />
+              </div>
+              <Card className="bg-primary/10 border-primary/40">
+                <CardContent className="p-3">
+                    <p className="text-sm text-muted-foreground">Account Balance</p>
+                    <p className="text-2xl font-bold">${accountBalance.toFixed(2)}</p>
+                </CardContent>
+              </Card>
             </div>
           </CardHeader>
-          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-7">
-            <KpiCard title="Account Balance" value={accountBalance.toFixed(2)} isCurrency />
-            <KpiCard title="Total P/L" value={totalPL.toFixed(2)} isCurrency />
-            <KpiCard title="Day P/L" value={dayPL.toFixed(2)} isCurrency />
-            <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
+          <CardContent className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+            <KpiCard title="Total Trades" value={totalTrades.toString()} />
             <KpiCard title="Winning Trades" value={winningTradesCount.toString()} />
             <KpiCard title="Losing Trades" value={losingTradesCount.toString()} />
-            <KpiCard title="Total Trades" value={totalTrades.toString()} />
+            <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
+            <KpiCard title="Total Gain" value={totalGain.toFixed(2)} isCurrency />
+            <KpiCard title="Total Loss" value={totalLoss.toFixed(2)} isCurrency />
+            <KpiCard title="Total Net P/L" value={totalNetPL.toFixed(2)} isCurrency />
+            <KpiCard title="Total Invested Capital" value={totalInvested.toFixed(2)} isCurrency />
+            <KpiCard title="Total Return" value={`${totalReturn.toFixed(1)}%`} />
+            <KpiCard title="Average Gain" value={avgGain.toFixed(2)} isCurrency />
+            <KpiCard title="Average Loss" value={avgLoss.toFixed(2)} isCurrency />
+            <KpiCard title="Profit Factor" value={isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞'} />
           </CardContent>
         </Card>
 
@@ -195,3 +225,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+    
