@@ -8,4 +8,5 @@ export type Trade = {
   quantity: number;
   tradeStyle: string;
   notes?: string;
+  account: string;
 };

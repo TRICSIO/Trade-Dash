@@ -34,6 +34,7 @@ import { useEffect } from 'react';
 
 const formSchema = z.object({
   instrument: z.string().min(1, 'Instrument is required.'),
+  account: z.string().min(1, 'Account name is required.'),
   entryDate: z.date({ required_error: 'Entry date is required.' }),
   exitDate: z.date().optional(),
   entryPrice: z.coerce.number().positive('Entry price must be positive.'),
@@ -88,6 +89,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     } : {
       instrument: '',
+      account: 'Primary',
       notes: '',
     },
   });
@@ -100,6 +102,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
             exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
         } : {
           instrument: '',
+          account: 'Primary',
           entryPrice: undefined,
           exitPrice: undefined,
           quantity: undefined,
@@ -133,19 +136,34 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="instrument"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instrument</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., AAPL, BTC/USD" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="instrument"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Instrument</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., AAPL, BTC/USD" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="account"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Account</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., Fidelity, IBKR" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}

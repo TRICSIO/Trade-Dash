@@ -79,6 +79,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <TableHeader>
                 <TableRow>
                 <TableHead>Instrument</TableHead>
+                <TableHead>Account</TableHead>
                 <TableHead>Style</TableHead>
                 <TableHead>Cost</TableHead>
                 <TableHead>Proceeds</TableHead>
@@ -105,6 +106,9 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                     return (
                     <TableRow key={trade.id}>
                         <TableCell className="font-medium">{trade.instrument}</TableCell>
+                        <TableCell>
+                            <Badge variant="outline">{trade.account}</Badge>
+                        </TableCell>
                         <TableCell>
                             <Badge variant="secondary">{trade.tradeStyle}</Badge>
                         </TableCell>
@@ -144,7 +148,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 })
                 ) : (
                 <TableRow>
-                    <TableCell colSpan={11} className="h-24 text-center">
+                    <TableCell colSpan={12} className="h-24 text-center">
                     No trades found.
                     </TableCell>
                 </TableRow>
@@ -160,7 +164,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the trade for{' '}
-              <span className="font-semibold">{deleteCandidate?.instrument}</span>.
+              <span className="font-semibold">{deleteCandidate?.instrument}</span> from the <span className="font-semibold">{deleteCandidate?.account}</span> account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
