@@ -19,6 +19,7 @@ const initialTrades: Trade[] = [
         exitDate: new Date('2023-10-15'),
         entryPrice: 150.00,
         exitPrice: 165.50,
+        quantity: 10,
         tradeStyle: 'Swing Trade',
         notes: 'Caught a good run-up before earnings.'
     },
@@ -29,6 +30,7 @@ const initialTrades: Trade[] = [
         exitDate: new Date('2023-11-06'),
         entryPrice: 135.20,
         exitPrice: 132.80,
+        quantity: 50,
         tradeStyle: 'Day Trade',
         notes: 'News catalyst didn\'t play out as expected.'
     },
@@ -39,6 +41,7 @@ const initialTrades: Trade[] = [
         exitDate: new Date('2023-12-20'),
         entryPrice: 220.50,
         exitPrice: 255.00,
+        quantity: 5,
         tradeStyle: 'Position Trade',
         notes: 'Long term hold based on delivery numbers.'
     }
@@ -93,7 +96,7 @@ export default function Dashboard() {
       return { totalPL: 0, winRate: 0, riskRewardRatio: 0 };
     }
 
-    const tradeResults = trades.map(t => t.exitPrice - t.entryPrice);
+    const tradeResults = trades.map(t => (t.exitPrice - t.entryPrice) * t.quantity);
     const totalPL = tradeResults.reduce((acc, pl) => acc + pl, 0);
 
     const winningTrades = tradeResults.filter(pl => pl > 0);

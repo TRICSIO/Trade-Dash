@@ -44,7 +44,7 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
       const tradeHistory = trades
         .map(
           (t, i) =>
-            `Trade ${i + 1}: Instrument: ${t.instrument}, Style: ${t.tradeStyle}, Entry: ${format(new Date(t.entryDate), 'yyyy-MM-dd')} at $${t.entryPrice.toFixed(2)}, Exit: ${format(new Date(t.exitDate), 'yyyy-MM-dd')} at $${t.exitPrice.toFixed(2)}, P/L: $${(t.exitPrice - t.entryPrice).toFixed(2)}, Notes: ${t.notes || 'N/A'}`
+            `Trade ${i + 1}: Instrument: ${t.instrument}, Style: ${t.tradeStyle}, Qty: ${t.quantity}, Entry: ${format(new Date(t.entryDate), 'yyyy-MM-dd')} at $${t.entryPrice.toFixed(2)}, Exit: ${format(new Date(t.exitDate), 'yyyy-MM-dd')} at $${t.exitPrice.toFixed(2)}, P/L: $${((t.exitPrice - t.entryPrice) * t.quantity).toFixed(2)}, Notes: ${t.notes || 'N/A'}`
         )
         .join('\n');
 

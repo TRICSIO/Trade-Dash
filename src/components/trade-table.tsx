@@ -83,6 +83,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 <TableHead>Style</TableHead>
                 <TableHead>Entry Date</TableHead>
                 <TableHead>Exit Date</TableHead>
+                <TableHead>Qty</TableHead>
                 <TableHead className="max-w-[250px]">Notes</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -90,7 +91,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
             <TableBody>
                 {filteredTrades.length > 0 ? (
                 filteredTrades.map(trade => {
-                    const pl = trade.exitPrice - trade.entryPrice;
+                    const pl = (trade.exitPrice - trade.entryPrice) * trade.quantity;
                     const isProfit = pl >= 0;
                     return (
                     <TableRow key={trade.id}>
@@ -106,6 +107,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                         </TableCell>
                         <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
                         <TableCell>{format(trade.exitDate, 'PP')}</TableCell>
+                        <TableCell>{trade.quantity}</TableCell>
                         <TableCell className="max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
@@ -124,7 +126,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 })
                 ) : (
                 <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
+                    <TableCell colSpan={8} className="h-24 text-center">
                     No trades found.
                     </TableCell>
                 </TableRow>

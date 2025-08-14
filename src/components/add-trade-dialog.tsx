@@ -38,6 +38,7 @@ const formSchema = z.object({
   exitDate: z.date({ required_error: 'Exit date is required.' }),
   entryPrice: z.coerce.number().positive('Entry price must be positive.'),
   exitPrice: z.coerce.number().positive('Exit price must be positive.'),
+  quantity: z.coerce.number().positive('Quantity must be a positive number.'),
   tradeStyle: z.string().min(1, 'Trade style is required.'),
   notes: z.string().optional(),
 }).refine(data => data.exitDate >= data.entryDate, {
@@ -52,7 +53,7 @@ type AddTradeDialogProps = {
   trade?: Trade;
 };
 
-const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp"];
+const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
 export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trade }: AddTradeDialogProps) {
   const isEditing = !!trade;
@@ -79,6 +80,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
           instrument: '',
           entryPrice: undefined,
           exitPrice: undefined,
+          quantity: undefined,
           tradeStyle: undefined,
           entryDate: undefined,
           exitDate: undefined,
@@ -185,7 +187,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   <FormItem>
                     <FormLabel>Entry Price</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0.00" {...field} />
+                      <Input type="number" step="any" placeholder="0.00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,13 +200,26 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   <FormItem>
                     <FormLabel>Exit Price</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0.00" {...field} />
+                      <Input type="number" step="any" placeholder="0.00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Quantity</FormLabel>
+                  <FormControl>
+                    <Input type="number" step="any" placeholder="e.g., 100" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
              <FormField
                 control={form.control}
                 name="tradeStyle"

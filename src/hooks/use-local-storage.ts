@@ -12,13 +12,12 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => voi
       if (item) {
         // When retrieving from localStorage, dates are stored as strings.
         // We need to parse them back into Date objects.
-        const parsed = JSON.parse(item);
-        if (Array.isArray(parsed)) {
-            parsed.forEach(trade => {
-                if (trade.entryDate) trade.entryDate = new Date(trade.entryDate);
-                if (trade.exitDate) trade.exitDate = new Date(trade.exitDate);
-            });
-        }
+        const parsed = JSON.parse(item, (key, value) => {
+            if (key === 'entryDate' || key === 'exitDate') {
+                return new Date(value);
+            }
+            return value;
+        });
         return parsed;
       }
       return initialValue;

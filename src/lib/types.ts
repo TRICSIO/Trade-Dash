@@ -5,6 +5,7 @@ export type Trade = {
   exitDate: Date;
   entryPrice: number;
   exitPrice: number;
+  quantity: number;
   tradeStyle: string;
   notes?: string;
 };
