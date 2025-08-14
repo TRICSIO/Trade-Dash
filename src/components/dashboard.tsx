@@ -5,6 +5,7 @@ import type { Trade } from '@/lib/types';
 import useLocalStorage from '@/hooks/use-local-storage';
 import AppHeader from '@/components/header';
 import AddTradeDialog from '@/components/add-trade-dialog';
+import ImportTradesDialog from '@/components/import-trades-dialog';
 import KpiCard from '@/components/kpi-card';
 import PerformanceChart from '@/components/performance-chart';
 import AiSuggestions from '@/components/ai-suggestions';
@@ -13,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+
 
 const initialTrades: Trade[] = [
     {
@@ -57,8 +60,10 @@ export default function Dashboard() {
   const [trades, setTrades] = useLocalStorage<Trade[]>('trades', initialTrades);
   const [startingBalance, setStartingBalance] = useLocalStorage<number>('startingBalance', 10000);
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
+  const [isImportTradeOpen, setImportTradeOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
   const [selectedAccount, setSelectedAccount] = useState('all');
+  const { toast } = useToast();
 
   const accounts = useMemo(() => {
     const allAccounts = trades.map(t => t.account);
@@ -116,6 +121,17 @@ export default function Dashboard() {
     const value = event.target.value;
     setStartingBalance(Number(value));
   }
+
+  const handleImportTrades = (broker: string, file: File) => {
+    console.log(`Importing from ${broker}`, file);
+    // As discussed, the parsing logic is complex and broker-specific.
+    // This is a placeholder to show the UI is connected.
+    toast({
+        title: "Import Started",
+        description: `Parsing for ${broker} is not yet implemented.`,
+    });
+    setImportTradeOpen(false);
+  };
 
   const {
     totalTrades,
@@ -179,7 +195,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <AppHeader onAddTradeClick={handleOpenAddDialog} />
+      <AppHeader onAddTradeClick={handleOpenAddDialog} onImportClick={() => setImportTradeOpen(true)} />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
@@ -261,6 +277,11 @@ export default function Dashboard() {
         onOpenChange={handleDialogClose}
         onSaveTrade={handleAddOrUpdateTrade}
         trade={editingTrade}
+      />
+      <ImportTradesDialog
+        isOpen={isImportTradeOpen}
+        onOpenChange={setImportTradeOpen}
+        onImport={handleImportTrades}
       />
     </div>
   );
