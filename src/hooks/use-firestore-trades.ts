@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import type { Trade } from '@/lib/types';
 import { useToast } from './use-toast';
 
@@ -17,7 +15,6 @@ function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
       timeout = setTimeout(() => func(...args), waitFor);
     };
 }
-
 
 const initialTrades: Trade[] = [
     {
@@ -60,34 +57,34 @@ const initialTrades: Trade[] = [
 
 const initialStartingBalances = { 'Fidelity': 10000, 'IBKR': 25000 };
 
+function getLocalStorageKey(userId: string) {
+    return `trade-insights-data-${userId}`;
+}
+
 function useFirestoreTrades(userId?: string) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [startingBalances, setStartingBalances] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const saveDataToFirestore = useCallback(
-    async (newTrades: Trade[], newBalances: Record<string, number>) => {
+  const saveDataToLocalStorage = useCallback(
+    (newTrades: Trade[], newBalances: Record<string, number>) => {
       if (!userId) return;
       try {
-        const tradesToStore = newTrades.map(t => ({
-          ...t,
-          entryDate: t.entryDate.toISOString(),
-          exitDate: t.exitDate ? t.exitDate.toISOString() : undefined,
-        }));
-        await setDoc(doc(db, 'users', userId), {
-          trades: tradesToStore,
+        const dataToStore = {
+          trades: newTrades,
           startingBalances: newBalances
-        });
+        };
+        localStorage.setItem(getLocalStorageKey(userId), JSON.stringify(dataToStore));
       } catch (error) {
-        console.error("Error saving data to Firestore:", error);
-        toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
+        console.error("Error saving data to Local Storage:", error);
+        toast({ title: "Error", description: "Could not save changes locally.", variant: 'destructive'});
       }
     },
     [userId, toast]
   );
   
-  const debouncedSave = useCallback(debounce(saveDataToFirestore, 1500), [saveDataToFirestore]);
+  const debouncedSave = useCallback(debounce(saveDataToLocalStorage, 1500), [saveDataToLocalStorage]);
 
   useEffect(() => {
     if (!userId) {
@@ -95,14 +92,13 @@ function useFirestoreTrades(userId?: string) {
       return;
     }
 
-    const fetchData = async () => {
+    const fetchData = () => {
       setLoading(true);
       try {
-        const docRef = doc(db, 'users', userId);
-        const docSnap = await getDoc(docRef);
+        const storedData = localStorage.getItem(getLocalStorageKey(userId));
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+        if (storedData) {
+          const data = JSON.parse(storedData);
           const tradesFromDb = (data.trades || []).map((t: any) => ({
             ...t,
             entryDate: new Date(t.entryDate),
@@ -111,26 +107,21 @@ function useFirestoreTrades(userId?: string) {
           setTrades(tradesFromDb);
           setStartingBalances(data.startingBalances || {});
         } else {
-          // If the user document doesn't exist, create it with initial data
-          const tradesToStore = initialTrades.map(t => ({
-              ...t,
-              entryDate: t.entryDate.toISOString(),
-              exitDate: t.exitDate ? t.exitDate.toISOString() : undefined,
-          }));
-          await setDoc(docRef, { trades: tradesToStore, startingBalances: initialStartingBalances });
+          // If no data in local storage, use initial data
           setTrades(initialTrades);
           setStartingBalances(initialStartingBalances);
+          saveDataToLocalStorage(initialTrades, initialStartingBalances);
         }
       } catch (error) {
-        console.error("Error fetching data from Firestore:", error);
-        toast({ title: "Error", description: "Could not load data from the cloud.", variant: 'destructive'});
+        console.error("Error fetching data from Local Storage:", error);
+        toast({ title: "Error", description: "Could not load data from local storage.", variant: 'destructive'});
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [userId, toast]);
+  }, [userId, toast, saveDataToLocalStorage]);
 
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
     const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
