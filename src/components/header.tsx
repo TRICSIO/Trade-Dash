@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { PlusCircle, BarChartBig, Upload, LogOut } from 'lucide-react';
+import { PlusCircle, BarChartBig, Upload, LogOut, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -18,10 +18,11 @@ import { Menu } from 'lucide-react';
 type AppHeaderProps = {
   onAddTradeClick: () => void;
   onImportClick: () => void;
+  onBackupClick: () => void;
 };
 
 
-export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderProps) {
+export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick }: AppHeaderProps) {
   const { user } = useAuth();
   const router = useRouter();
 
@@ -42,6 +43,10 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
         <div className="hidden sm:flex flex-1 items-center justify-end space-x-2">
           {user && (
             <>
+              <Button variant="outline" onClick={onBackupClick}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Backup
+              </Button>
               <Button variant="outline" onClick={onImportClick}>
                   <Upload className="mr-2 h-4 w-4" />
                   Import
@@ -68,6 +73,12 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                     </SheetTrigger>
                     <SheetContent>
                         <div className="grid gap-4 py-4">
+                             <SheetClose asChild>
+                                <Button variant="outline" onClick={onBackupClick} className="w-full justify-start">
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Backup Data
+                                </Button>
+                             </SheetClose>
                              <SheetClose asChild>
                                 <Button variant="outline" onClick={onImportClick} className="w-full justify-start">
                                     <Upload className="mr-2 h-4 w-4" />

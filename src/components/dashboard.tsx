@@ -119,6 +119,36 @@ export default function Dashboard() {
     });
     setImportTradeOpen(false);
   };
+  
+  const handleBackup = () => {
+    try {
+        const backupData = {
+            trades,
+            startingBalances,
+        };
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const date = new Date().toISOString().slice(0, 10);
+        link.download = `trade-insights-backup-${date}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast({
+            title: "Backup Successful",
+            description: "Your data has been downloaded.",
+        });
+    } catch (error) {
+        toast({
+            title: "Backup Failed",
+            description: "Could not create backup file.",
+            variant: "destructive",
+        });
+    }
+  };
 
   const {
     totalTrades,
@@ -181,7 +211,11 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <AppHeader onAddTradeClick={handleOpenAddDialog} onImportClick={() => setImportTradeOpen(true)} />
+      <AppHeader 
+        onAddTradeClick={handleOpenAddDialog} 
+        onImportClick={() => setImportTradeOpen(true)}
+        onBackupClick={handleBackup} 
+      />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
