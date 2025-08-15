@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-provider';
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: 'Trade Insights by TRICSIO',
@@ -24,8 +25,10 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
             <AuthProvider>
+              <LanguageProvider>
                 {children}
                 <Toaster />
+              </LanguageProvider>
             </AuthProvider>
         </ThemeProvider>
       </body>

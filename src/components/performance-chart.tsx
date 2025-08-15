@@ -6,11 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import type { Trade } from '@/lib/types';
 import { format } from 'date-fns';
-
-type PerformanceChartProps = {
-  trades: Trade[];
-  startingBalance: number;
-};
+import { useTranslation } from '@/hooks/use-translation';
+import { useLanguage } from '@/context/language-context';
+import { enUS, es } from 'date-fns/locale';
 
 const chartConfig = {
   equity: {
@@ -20,12 +18,15 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function PerformanceChart({ trades, startingBalance }: PerformanceChartProps) {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const dateLocale = language === 'es' ? es : enUS;
+
   const chartData = useMemo(() => {
-    // The chart should only display based on closed trades
-    if (trades.length < 1) return [{ date: 'Start', equity: startingBalance }];
+    if (trades.length < 1) return [{ date: t('start'), equity: startingBalance }];
     
     const sortedTrades = [...trades]
-        .filter(trade => trade.exitDate && trade.exitPrice) // Ensure we only process closed trades
+        .filter(trade => trade.exitDate && trade.exitPrice) 
         .map(trade => ({
             ...trade,
             exitDate: new Date(trade.exitDate!),
@@ -40,24 +41,24 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
       }
       cumulativePL += pl;
       return {
-        date: format(trade.exitDate, 'MMM d'),
+        date: format(trade.exitDate, 'MMM d', { locale: dateLocale }),
         equity: startingBalance + cumulativePL,
       };
     });
 
-    return [{ date: 'Start', equity: startingBalance }, ...dataPoints];
+    return [{ date: t('start'), equity: startingBalance }, ...dataPoints];
 
-  }, [trades, startingBalance]);
+  }, [trades, startingBalance, t, dateLocale]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Equity Curve</CardTitle>
-        <CardDescription>Your portfolio value over time (based on closed trades).</CardDescription>
+        <CardTitle>{t('equityCurve')}</CardTitle>
+        <CardDescription>{t('equityCurveDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
         {chartData.length > 1 ? (
-          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+          <ChartContainer config={{...chartConfig, equity: { ...chartConfig.equity, label: t('equity')}}} className="h-[250px] w-full">
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="fillEquity" x1="0" y1="0" x2="0" y2="1">
@@ -70,7 +71,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
               <YAxis domain={['dataMin - 100', 'dataMax + 100']} tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" labelKey="date" formatter={(value, name) => [`$${(value as number).toFixed(2)}`, 'Equity']} />}
+                content={<ChartTooltipContent indicator="dot" labelKey="date" formatter={(value, name) => [`$${(value as number).toFixed(2)}`, t('equity')]} />}
               />
               <Area
                 dataKey="equity"
@@ -83,7 +84,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
           </ChartContainer>
         ) : (
           <div className="flex h-[250px] items-center justify-center text-muted-foreground">
-            Your equity curve will appear here once you log a closed trade.
+            {t('equityCurvePlaceholder')}
           </div>
         )}
       </CardContent>

@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { BarChartBig } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -20,12 +21,13 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast({
-        title: 'Passwords do not match',
+        title: t('passwordsDoNotMatch'),
         variant: 'destructive',
       });
       return;
@@ -35,7 +37,6 @@ export default function RegisterPage() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // Create a document for the user to store their trades and settings
       await setDoc(doc(db, "users", user.uid), {
         trades: [],
         startingBalances: {}
@@ -44,7 +45,7 @@ export default function RegisterPage() {
       router.push('/');
     } catch (error: any) {
       toast({
-        title: 'Registration Failed',
+        title: t('registrationFailed'),
         description: error.message,
         variant: 'destructive',
       });
@@ -62,13 +63,13 @@ export default function RegisterPage() {
                     Trade Insights <span className="text-2xl sm:text-3xl font-normal text-muted-foreground">by TRICSIO</span>
                 </h1>
             </div>
-          <CardTitle>Create an Account</CardTitle>
-          <CardDescription>Join to start tracking your trades and improving your strategy.</CardDescription>
+          <CardTitle>{t('createAnAccount')}</CardTitle>
+          <CardDescription>{t('joinToStart')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -80,7 +81,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('password')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -92,7 +93,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Label htmlFor="confirm-password">{t('confirmPassword')}</Label>
               <Input
                 id="confirm-password"
                 type="password"
@@ -103,13 +104,13 @@ export default function RegisterPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Registering...' : 'Register'}
+              {loading ? t('registering') : t('register')}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {t('alreadyHaveAccount')}{' '}
             <Link href="/login" className="font-semibold text-primary hover:underline">
-              Login
+              {t('login')}
             </Link>
           </p>
         </CardContent>

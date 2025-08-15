@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
+import { useTranslation } from '@/hooks/use-translation';
 
 
 export default function Dashboard() {
@@ -27,13 +28,13 @@ export default function Dashboard() {
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
   const [selectedAccount, setSelectedAccount] = useState('all');
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const accounts = useMemo(() => {
     const allAccounts = trades.map(t => t.account);
     return ['all', ...Array.from(new Set(allAccounts))];
   }, [trades]);
 
-  // Reset selected account if it no longer exists
   useEffect(() => {
     if (!accounts.includes(selectedAccount)) {
       setSelectedAccount('all');
@@ -75,10 +76,8 @@ export default function Dashboard() {
   const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, id?: string) => {
     let updatedTrades;
     if (id) {
-        // Editing existing trade
         updatedTrades = trades.map(t => t.id === id ? { ...t, ...tradeData, id } : t);
     } else {
-        // Adding new trade
         const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
         updatedTrades = [tradeWithId, ...trades];
     }
@@ -88,7 +87,6 @@ export default function Dashboard() {
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
 
-    // Initialize starting balance for a new account if it doesn't exist
     if (!accounts.includes(tradeData.account)) {
       setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
     }
@@ -111,10 +109,8 @@ export default function Dashboard() {
 
   const handleImportTrades = (broker: string, file: File, account: string) => {
     console.log(`Importing from ${broker} into ${account}`, file);
-    // As discussed, the parsing logic is complex and broker-specific.
-    // This is a placeholder to show the UI is connected.
     toast({
-        title: "Import Started",
+        title: t('importStarted'),
         description: `Parsing for ${broker} into ${account} is not yet implemented.`,
     });
     setImportTradeOpen(false);
@@ -138,13 +134,13 @@ export default function Dashboard() {
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         toast({
-            title: "Backup Successful",
-            description: "Your data has been downloaded.",
+            title: t('backupSuccessful'),
+            description: t('yourDataHasBeenDownloaded'),
         });
     } catch (error) {
         toast({
-            title: "Backup Failed",
-            description: "Could not create backup file.",
+            title: t('backupFailed'),
+            description: t('couldNotCreateBackup'),
             variant: "destructive",
         });
     }
@@ -220,26 +216,26 @@ export default function Dashboard() {
         <Card>
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1">
-              <CardTitle>Performance Overview</CardTitle>
-              <CardDescription>Your key trading metrics. Use the dropdown to filter by account.</CardDescription>
+              <CardTitle>{t('performanceOverview')}</CardTitle>
+              <CardDescription>{t('kpiDescription')}</CardDescription>
             </div>
             <div className="w-full sm:w-auto flex flex-col sm:flex-row items-start sm:items-end gap-4">
               <div className="w-full sm:max-w-xs space-y-2">
-                  <Label htmlFor="account-select">Account</Label>
+                  <Label htmlFor="account-select">{t('account')}</Label>
                   <Select value={selectedAccount} onValueChange={setSelectedAccount}>
                     <SelectTrigger id="account-select">
-                      <SelectValue placeholder="Select account" />
+                      <SelectValue placeholder={t('selectAccount')} />
                     </SelectTrigger>
                     <SelectContent>
                       {accounts.map(acc => (
-                        <SelectItem key={acc} value={acc}>{acc === 'all' ? 'All Accounts' : acc}</SelectItem>
+                        <SelectItem key={acc} value={acc}>{acc === 'all' ? t('allAccounts') : acc}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
               </div>
               {selectedAccount !== 'all' && (
                 <div className="w-full sm:max-w-xs space-y-2">
-                  <Label htmlFor="starting-balance">Starting Balance</Label>
+                  <Label htmlFor="starting-balance">{t('startingBalance')}</Label>
                   <Input
                     id="starting-balance"
                     type="number"
@@ -256,24 +252,24 @@ export default function Dashboard() {
               <div className="mb-6">
                 <Card className="bg-primary/10 border-primary/40 inline-block">
                     <CardHeader className="pb-2">
-                        <CardDescription>Current Account Balance ({selectedAccount === 'all' ? 'All' : selectedAccount})</CardDescription>
+                        <CardDescription>{t('currentAccountBalance')} ({selectedAccount === 'all' ? t('all') : selectedAccount})</CardDescription>
                         <CardTitle className="text-3xl">${accountBalance.toFixed(2)}</CardTitle>
                     </CardHeader>
                 </Card>
               </div>
             <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-                <KpiCard title="Total Trades" value={totalTrades.toString()} />
-                <KpiCard title="Winning Trades" value={winningTradesCount.toString()} />
-                <KpiCard title="Losing Trades" value={losingTradesCount.toString()} />
-                <KpiCard title="Win Rate" value={`${winRate.toFixed(1)}%`} />
-                <KpiCard title="Total Gain" value={totalGain.toFixed(2)} isCurrency />
-                <KpiCard title="Total Loss" value={totalLoss.toFixed(2)} isCurrency />
-                <KpiCard title="Total Net P/L" value={totalNetPL.toFixed(2)} isCurrency />
-                <KpiCard title="Total Invested Capital" value={totalInvested.toFixed(2)} isCurrency />
-                <KpiCard title="Total Return" value={`${totalReturn.toFixed(1)}%`} />
-                <KpiCard title="Average Gain" value={avgGain.toFixed(2)} isCurrency />
-                <KpiCard title="Average Loss" value={avgLoss.toFixed(2)} isCurrency />
-                <KpiCard title="Profit Factor" value={isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞'} />
+                <KpiCard title={t('totalTrades')} value={totalTrades.toString()} />
+                <KpiCard title={t('winningTrades')} value={winningTradesCount.toString()} />
+                <KpiCard title={t('losingTrades')} value={losingTradesCount.toString()} />
+                <KpiCard title={t('winRate')} value={`${winRate.toFixed(1)}%`} />
+                <KpiCard title={t('totalGain')} value={totalGain.toFixed(2)} isCurrency />
+                <KpiCard title={t('totalLoss')} value={totalLoss.toFixed(2)} isCurrency />
+                <KpiCard title={t('totalNetPL')} value={totalNetPL.toFixed(2)} isCurrency />
+                <KpiCard title={t('totalInvestedCapital')} value={totalInvested.toFixed(2)} isCurrency />
+                <KpiCard title={t('totalReturn')} value={`${totalReturn.toFixed(1)}%`} />
+                <KpiCard title={t('averageGain')} value={avgGain.toFixed(2)} isCurrency />
+                <KpiCard title={t('averageLoss')} value={avgLoss.toFixed(2)} isCurrency />
+                <KpiCard title={t('profitFactor')} value={isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞'} />
             </div>
           </CardContent>
         </Card>

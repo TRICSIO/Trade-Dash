@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Upload } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 type ImportTradesDialogProps = {
   isOpen: boolean;
@@ -39,6 +40,7 @@ export default function ImportTradesDialog({
   const [selectedBroker, setSelectedBroker] = useState('');
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { t } = useTranslation();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -56,19 +58,19 @@ export default function ImportTradesDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Import Trades</DialogTitle>
+          <DialogTitle>{t('importTrades')}</DialogTitle>
           <DialogDescription>
-            Select your broker, account, and upload the trade history file (usually a CSV).
+            {t('importDescription')}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="broker-select" className="text-right">
-              Broker
+              {t('broker')}
             </Label>
             <Select onValueChange={setSelectedBroker} value={selectedBroker}>
               <SelectTrigger id="broker-select" className="col-span-3">
-                <SelectValue placeholder="Select a broker" />
+                <SelectValue placeholder={t('selectBroker')} />
               </SelectTrigger>
               <SelectContent>
                 {brokers.map((broker) => (
@@ -81,11 +83,11 @@ export default function ImportTradesDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="account-import-select" className="text-right">
-              Account
+              {t('account')}
             </Label>
             <Select onValueChange={setSelectedAccount} value={selectedAccount}>
               <SelectTrigger id="account-import-select" className="col-span-3">
-                <SelectValue placeholder="Select an account" />
+                <SelectValue placeholder={t('selectAnAccount')} />
               </SelectTrigger>
               <SelectContent>
                 {accounts.map((account) => (
@@ -98,7 +100,7 @@ export default function ImportTradesDialog({
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="file-upload" className="text-right">
-              File
+              {t('file')}
             </Label>
             <Input
               id="file-upload"
@@ -115,7 +117,7 @@ export default function ImportTradesDialog({
             disabled={!selectedBroker || !selectedFile || !selectedAccount}
           >
             <Upload className="mr-2 h-4 w-4" />
-            Import
+            {t('import')}
           </Button>
         </DialogFooter>
       </DialogContent>

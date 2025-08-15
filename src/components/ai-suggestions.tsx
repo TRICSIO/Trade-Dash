@@ -16,6 +16,7 @@ import { Sparkles, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import { format } from 'date-fns';
+import { useTranslation } from '@/hooks/use-translation';
 
 type AiSuggestionsProps = {
   trades: Trade[];
@@ -26,12 +27,13 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState('');
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleGenerate = async () => {
     if (trades.length === 0) {
         toast({
-            title: 'Not enough data',
-            description: 'Please log some trades before requesting suggestions.',
+            title: t('notEnoughData'),
+            description: t('logTradesForSuggestions'),
             variant: 'destructive',
         });
         return;
@@ -64,8 +66,8 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
     } catch (error) {
       console.error('Failed to generate suggestions:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to generate suggestions. Please try again.',
+        title: t('error'),
+        description: t('failedToGenerateSuggestions'),
         variant: 'destructive',
       });
       setIsOpen(false);
@@ -80,19 +82,19 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            <CardTitle>AI-Powered Insights</CardTitle>
+            <CardTitle>{t('aiPoweredInsights')}</CardTitle>
           </div>
-          <CardDescription>Get personalized suggestions to improve your trading strategy based on your history.</CardDescription>
+          <CardDescription>{t('getPersonalizedSuggestions')}</CardDescription>
         </CardHeader>
         <CardContent className="flex-grow">
             <div className="text-sm text-muted-foreground bg-accent/20 p-4 rounded-lg border border-dashed">
-                Based on your logged trades, our AI can analyze your patterns, identify potential strengths and weaknesses, and offer actionable advice to help you refine your approach and make more informed decisions.
+                {t('aiAnalysisDescription')}
             </div>
         </CardContent>
         <CardFooter>
           <Button onClick={handleGenerate} disabled={isLoading} className="w-full">
             <Wand2 className="mr-2 h-4 w-4" />
-            Generate Suggestions
+            {t('generateSuggestions')}
           </Button>
         </CardFooter>
       </Card>
@@ -100,9 +102,9 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Your Personalized Trade Suggestions</DialogTitle>
+            <DialogTitle>{t('yourPersonalizedTradeSuggestions')}</DialogTitle>
             <DialogDescription>
-              Here are some AI-generated suggestions based on your trading history.
+              {t('aiSuggestionsBasedOnHistory')}
             </DialogDescription>
           </DialogHeader>
           {isLoading ? (
@@ -117,7 +119,6 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
             <div className="prose prose-sm dark:prose-invert max-h-[60vh] overflow-y-auto p-1">
               {suggestions.split('\n').map((line, index) => {
                 if(line.trim() === '') return <br key={index}/>
-                // Simple markdown-like formatting for bold text
                 if (line.startsWith('*') && line.endsWith('*')) {
                     return <p key={index} className="font-bold my-2">{line.slice(1, -1)}</p>
                 }

@@ -31,27 +31,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { cn } from '@/lib/utils';
 import type { Trade } from '@/lib/types';
 import { useEffect } from 'react';
+import { useTranslation } from '@/hooks/use-translation';
+import { useLanguage } from '@/context/language-context';
+import { enUS, es } from 'date-fns/locale';
 
-const formSchema = z.object({
-  instrument: z.string().min(1, 'Instrument is required.'),
-  account: z.string().min(1, 'Account name is required.'),
-  entryDate: z.date({ required_error: 'Entry date is required.' }),
-  exitDate: z.date().optional(),
-  entryPrice: z.coerce.number().positive('Entry price must be positive.'),
-  exitPrice: z.coerce.number().positive('Exit price must be positive.').optional(),
-  quantity: z.coerce.number().positive('Quantity must be a positive number.'),
-  tradeStyle: z.string().min(1, 'Trade style is required.'),
-  notes: z.string().optional(),
-}).refine(data => {
-    if (data.exitDate && data.entryDate) {
-        return data.exitDate >= data.entryDate;
-    }
-    return true;
-}, {
-    message: "Exit date cannot be before entry date.",
-    path: ["exitDate"],
-});
+const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
+const useFormSchema = () => {
+  const { t } = useTranslation();
+  return z.object({
+    instrument: z.string().min(1, t('instrumentRequired')),
+    account: z.string().min(1, t('accountRequired')),
+    entryDate: z.date({ required_error: t('entryDateRequired') }),
+    exitDate: z.date().optional(),
+    entryPrice: z.coerce.number().positive(t('entryPricePositive')),
+    exitPrice: z.coerce.number().positive(t('exitPricePositive')).optional(),
+    quantity: z.coerce.number().positive(t('quantityPositive')),
+    tradeStyle: z.string().min(1, t('tradeStyleRequired')),
+    notes: z.string().optional(),
+  }).refine(data => {
+      if (data.exitDate && data.entryDate) {
+          return data.exitDate >= data.entryDate;
+      }
+      return true;
+  }, {
+      message: t('exitDateError'),
+      path: ["exitDate"],
+  });
+};
 
 type AddTradeDialogProps = {
   isOpen: boolean;
@@ -60,10 +67,13 @@ type AddTradeDialogProps = {
   trade?: Trade;
 };
 
-const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
-
 export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trade }: AddTradeDialogProps) {
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+  const formSchema = useFormSchema();
   const isEditing = !!trade;
+
+  const dateLocale = language === 'es' ? es : enUS;
     
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -113,9 +123,9 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Trade' : 'Log a New Trade'}</DialogTitle>
+          <DialogTitle>{isEditing ? t('editTrade') : t('logNewTrade')}</DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update the details of your trade.' : 'Enter the details of your trade. Click save when you\'re done.'}
+            {isEditing ? t('updateTradeDetails') : t('enterTradeDetails')}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -126,7 +136,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   name="instrument"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Instrument</FormLabel>
+                      <FormLabel>{t('instrument')}</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., AAPL, BTC/USD" {...field} />
                       </FormControl>
@@ -139,7 +149,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   name="account"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Account</FormLabel>
+                      <FormLabel>{t('account')}</FormLabel>
                       <FormControl>
                         <Input placeholder="e.g., Fidelity, IBKR" {...field} />
                       </FormControl>
@@ -154,7 +164,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 name="entryDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Entry Date</FormLabel>
+                    <FormLabel>{t('entryDate')}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -165,13 +175,13 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                               !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: dateLocale }) : <span>{t('pickADate')}</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar locale={dateLocale} mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -183,7 +193,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 name="exitDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Exit Date</FormLabel>
+                    <FormLabel>{t('exitDate')}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -194,13 +204,13 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                               !field.value && 'text-muted-foreground'
                             )}
                           >
-                            {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                            {field.value ? format(field.value, 'PPP', { locale: dateLocale }) : <span>{t('pickADate')}</span>}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                        <Calendar locale={dateLocale} mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                       </PopoverContent>
                     </Popover>
                     <FormMessage />
@@ -214,7 +224,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 name="entryPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Entry Price</FormLabel>
+                    <FormLabel>{t('entryPrice')}</FormLabel>
                     <FormControl>
                       <Input type="number" step="any" placeholder="0.00" {...field} />
                     </FormControl>
@@ -227,7 +237,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 name="exitPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Exit Price</FormLabel>
+                    <FormLabel>{t('exitPrice')}</FormLabel>
                     <FormControl>
                       <Input type="number" step="any" placeholder="0.00" {...field} />
                     </FormControl>
@@ -241,7 +251,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
               name="quantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Quantity</FormLabel>
+                  <FormLabel>{t('quantity')}</FormLabel>
                   <FormControl>
                     <Input type="number" step="any" placeholder="e.g., 100" {...field} />
                   </FormControl>
@@ -254,16 +264,16 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 name="tradeStyle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trade Style</FormLabel>
+                    <FormLabel>{t('tradeStyle')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a trade style" />
+                          <SelectValue placeholder={t('selectTradeStyle')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {tradeStyles.map(style => (
-                          <SelectItem key={style} value={style}>{style}</SelectItem>
+                          <SelectItem key={style} value={style}>{t(style.toLowerCase().replace(' ', ''))}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -276,9 +286,9 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
               name="notes"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes / Commentary</FormLabel>
+                  <FormLabel>{t('notes')}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Why did you take this trade?" {...field} />
+                    <Textarea placeholder={t('whyTrade')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -287,7 +297,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
             <DialogFooter>
               <Button type="submit">
                 {isEditing ? <Save className="mr-2 h-4 w-4" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-                {isEditing ? 'Save Changes' : 'Save Trade'}
+                {isEditing ? t('saveChanges') : t('saveTrade')}
               </Button>
             </DialogFooter>
           </form>
