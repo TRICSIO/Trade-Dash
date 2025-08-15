@@ -41,7 +41,7 @@ export default function LoginPage() {
         <CardHeader className="text-center">
             <div className="flex justify-center items-center gap-2 mb-4">
                 <BarChartBig className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Trade Insights by TRICSIO</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Trade Insights by TRICSIO</h1>
             </div>
           <CardTitle>Welcome Back</CardTitle>
           <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
