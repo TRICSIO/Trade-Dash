@@ -34,7 +34,9 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
       <div className="container flex h-16 items-center space-x-4 px-4 sm:justify-between sm:space-x-0">
         <div className="flex gap-2 items-center">
             <BarChartBig className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Trade Insights by TRICSIO</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                Trade Insights <span className="hidden sm:inline-block text-xl sm:text-2xl font-normal text-muted-foreground">by TRICSIO</span>
+            </h1>
         </div>
         <div className="hidden sm:flex flex-1 items-center justify-end space-x-2">
           {user && (
