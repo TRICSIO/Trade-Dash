@@ -81,14 +81,14 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                 <TableHead>Instrument</TableHead>
                 <TableHead>Account</TableHead>
                 <TableHead>Style</TableHead>
-                <TableHead>Cost</TableHead>
-                <TableHead>Proceeds</TableHead>
+                <TableHead className="hidden md:table-cell">Cost</TableHead>
+                <TableHead className="hidden md:table-cell">Proceeds</TableHead>
                 <TableHead>P/L ($)</TableHead>
-                <TableHead>P/L (%)</TableHead>
+                <TableHead className="hidden md:table-cell">P/L (%)</TableHead>
                 <TableHead>Entry Date</TableHead>
                 <TableHead>Exit Date</TableHead>
                 <TableHead>Qty</TableHead>
-                <TableHead className="max-w-[250px]">Notes</TableHead>
+                <TableHead className="hidden lg:table-cell max-w-[250px]">Notes</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
@@ -112,15 +112,15 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                         <TableCell>
                             <Badge variant="secondary">{trade.tradeStyle}</Badge>
                         </TableCell>
-                        <TableCell>${cost.toFixed(2)}</TableCell>
-                        <TableCell>{proceeds !== null ? `$${proceeds.toFixed(2)}` : '-'}</TableCell>
+                        <TableCell className="hidden md:table-cell">${cost.toFixed(2)}</TableCell>
+                        <TableCell className="hidden md:table-cell">{proceeds !== null ? `$${proceeds.toFixed(2)}` : '-'}</TableCell>
                         <TableCell className={pl === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}>
                             <div className="flex items-center gap-1">
                                 {pl === null ? <Clock className="h-4 w-4" /> : isProfit ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
                                 {pl !== null ? `$${pl.toFixed(2)}` : 'Open'}
                             </div>
                         </TableCell>
-                        <TableCell className={plPercent === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}>
+                        <TableCell className={`hidden md:table-cell ${plPercent === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}`}>
                             <div className="flex items-center gap-1">
                                 {plPercent === null ? <Clock className="h-4 w-4" /> : <Percent className="h-3 w-3" />}
                                 {plPercent !== null ? `${plPercent.toFixed(2)}%` : 'Open'}
@@ -129,7 +129,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                         <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
                         <TableCell>{trade.exitDate ? format(trade.exitDate, 'PP') : '-'}</TableCell>
                         <TableCell>{trade.quantity}</TableCell>
-                        <TableCell className="max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
+                        <TableCell className="hidden lg:table-cell max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => onEditTrade(trade)}>

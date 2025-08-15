@@ -6,6 +6,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Menu } from 'lucide-react';
+
 
 type AppHeaderProps = {
   onAddTradeClick: () => void;
@@ -27,9 +34,9 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
       <div className="container flex h-16 items-center space-x-4 px-4 sm:justify-between sm:space-x-0">
         <div className="flex gap-2 items-center">
             <BarChartBig className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight">Trade Insights by TRICSIO</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Trade Insights by TRICSIO</h1>
         </div>
-        <div className="flex flex-1 items-center justify-end space-x-2">
+        <div className="hidden sm:flex flex-1 items-center justify-end space-x-2">
           {user && (
             <>
               <Button variant="outline" onClick={onImportClick}>
@@ -46,6 +53,34 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
               </Button>
             </>
           )}
+        </div>
+        <div className="sm:hidden flex items-center">
+             {user && (
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Menu className="h-6 w-6" />
+                            <span className="sr-only">Open Menu</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent>
+                        <div className="grid gap-4 py-4">
+                             <Button variant="outline" onClick={onImportClick} className="w-full justify-start">
+                                <Upload className="mr-2 h-4 w-4" />
+                                Import
+                            </Button>
+                            <Button onClick={onAddTradeClick} className="w-full justify-start">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add Trade
+                            </Button>
+                            <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">
+                                <LogOut className="mr-2 h-4 w-4" />
+                                Logout
+                            </Button>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+             )}
         </div>
       </div>
     </header>

@@ -184,12 +184,12 @@ export default function Dashboard() {
       <AppHeader onAddTradeClick={handleOpenAddDialog} onImportClick={() => setImportTradeOpen(true)} />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
-          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
+          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex-1">
               <CardTitle>Performance Overview</CardTitle>
               <CardDescription>Your key trading metrics. Use the dropdown to filter by account.</CardDescription>
             </div>
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-start sm:items-end gap-4">
               <div className="w-full sm:max-w-xs space-y-2">
                   <Label htmlFor="account-select">Account</Label>
                   <Select value={selectedAccount} onValueChange={setSelectedAccount}>
