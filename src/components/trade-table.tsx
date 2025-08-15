@@ -39,11 +39,6 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
 
   const filteredTrades = useMemo(() => {
     return trades
-        .map(trade => ({
-            ...trade,
-            entryDate: new Date(trade.entryDate),
-            exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
-        }))
         .filter(trade =>
             trade.instrument.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -126,8 +121,8 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                                 {plPercent !== null ? `${plPercent.toFixed(2)}%` : 'Open'}
                             </div>
                         </TableCell>
-                        <TableCell>{format(trade.entryDate, 'PP')}</TableCell>
-                        <TableCell>{trade.exitDate ? format(trade.exitDate, 'PP') : '-'}</TableCell>
+                        <TableCell>{format(new Date(trade.entryDate), 'PP')}</TableCell>
+                        <TableCell>{trade.exitDate ? format(new Date(trade.exitDate), 'PP') : '-'}</TableCell>
                         <TableCell>{trade.quantity}</TableCell>
                         <TableCell className="hidden lg:table-cell max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
                         <TableCell className="text-right">

@@ -10,6 +10,7 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetClose
 } from "@/components/ui/sheet";
 import { Menu } from 'lucide-react';
 
@@ -67,18 +68,24 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                     </SheetTrigger>
                     <SheetContent>
                         <div className="grid gap-4 py-4">
-                             <Button variant="outline" onClick={onImportClick} className="w-full justify-start">
-                                <Upload className="mr-2 h-4 w-4" />
-                                Import
-                            </Button>
-                            <Button onClick={onAddTradeClick} className="w-full justify-start">
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Add Trade
-                            </Button>
-                            <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Logout
-                            </Button>
+                             <SheetClose asChild>
+                                <Button variant="outline" onClick={onImportClick} className="w-full justify-start">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    Import
+                                </Button>
+                             </SheetClose>
+                             <SheetClose asChild>
+                                <Button onClick={onAddTradeClick} className="w-full justify-start">
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Add Trade
+                                </Button>
+                             </SheetClose>
+                             <SheetClose asChild>
+                                <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Logout
+                                </Button>
+                             </SheetClose>
                         </div>
                     </SheetContent>
                 </Sheet>

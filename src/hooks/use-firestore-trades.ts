@@ -24,8 +24,8 @@ const initialTrades: Trade[] = [
         id: '1',
         instrument: 'AAPL',
         account: 'Fidelity',
-        entryDate: new Date('2023-10-01'),
-        exitDate: new Date('2023-10-15'),
+        entryDate: new Date('2023-10-01T00:00:00'),
+        exitDate: new Date('2023-10-15T00:00:00'),
         entryPrice: 150.00,
         exitPrice: 165.50,
         quantity: 10,
@@ -36,8 +36,8 @@ const initialTrades: Trade[] = [
         id: '2',
         instrument: 'GOOGL',
         account: 'Fidelity',
-        entryDate: new Date('2023-11-05'),
-        exitDate: new Date('2023-11-06'),
+        entryDate: new Date('2023-11-05T00:00:00'),
+        exitDate: new Date('2023-11-06T00:00:00'),
         entryPrice: 135.20,
         exitPrice: 132.80,
         quantity: 50,
@@ -48,8 +48,8 @@ const initialTrades: Trade[] = [
         id: '3',
         instrument: 'TSLA',
         account: 'IBKR',
-        entryDate: new Date('2023-11-10'),
-        exitDate: new Date('2023-12-20'),
+        entryDate: new Date('2023-11-10T00:00:00'),
+        exitDate: new Date('2023-12-20T00:00:00'),
         entryPrice: 220.50,
         exitPrice: 255.00,
         quantity: 5,
@@ -70,8 +70,13 @@ function useFirestoreTrades(userId?: string) {
     async (newTrades: Trade[], newBalances: Record<string, number>) => {
       if (!userId) return;
       try {
+        const tradesToStore = newTrades.map(t => ({
+          ...t,
+          entryDate: t.entryDate.toISOString(),
+          exitDate: t.exitDate ? t.exitDate.toISOString() : undefined,
+        }));
         await setDoc(doc(db, 'users', userId), {
-          trades: newTrades,
+          trades: tradesToStore,
           startingBalances: newBalances
         });
       } catch (error) {
@@ -98,16 +103,21 @@ function useFirestoreTrades(userId?: string) {
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          const tradesFromDb = data.trades.map((t: any) => ({
+          const tradesFromDb = (data.trades || []).map((t: any) => ({
             ...t,
-            entryDate: t.entryDate instanceof Timestamp ? t.entryDate.toDate() : new Date(t.entryDate),
-            exitDate: t.exitDate ? (t.exitDate instanceof Timestamp ? t.exitDate.toDate() : new Date(t.exitDate)) : undefined,
+            entryDate: new Date(t.entryDate),
+            exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
           }));
           setTrades(tradesFromDb);
           setStartingBalances(data.startingBalances || {});
         } else {
           // If the user document doesn't exist, create it with initial data
-          await setDoc(docRef, { trades: initialTrades, startingBalances: initialStartingBalances });
+          const tradesToStore = initialTrades.map(t => ({
+              ...t,
+              entryDate: t.entryDate.toISOString(),
+              exitDate: t.exitDate ? t.exitDate.toISOString() : undefined,
+          }));
+          await setDoc(docRef, { trades: tradesToStore, startingBalances: initialStartingBalances });
           setTrades(initialTrades);
           setStartingBalances(initialStartingBalances);
         }
