@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { PlusCircle, BarChartBig, Upload, LogOut, Download } from 'lucide-react';
+import { PlusCircle, BarChartBig, Upload, LogOut, Download, Moon, Sun } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -12,7 +12,14 @@ import {
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Menu } from 'lucide-react';
+import { useTheme } from '@/context/theme-provider';
 
 
 type AppHeaderProps = {
@@ -25,6 +32,7 @@ type AppHeaderProps = {
 export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick }: AppHeaderProps) {
   const { user } = useAuth();
   const router = useRouter();
+  const { setTheme } = useTheme();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -55,6 +63,26 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Add Trade
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    <span className="sr-only">Toggle theme</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setTheme("light")}>
+                    Light
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("dark")}>
+                    Dark
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setTheme("system")}>
+                    System
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
                 <span className="sr-only">Logout</span>
@@ -91,6 +119,21 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                                     Add Trade
                                 </Button>
                              </SheetClose>
+                             <div className="border-t -mx-6 my-2"></div>
+                             <h4 className="px-2 text-sm font-medium text-muted-foreground">Theme</h4>
+                              <SheetClose asChild>
+                                 <Button variant="ghost" onClick={() => setTheme("light")} className="w-full justify-start">
+                                    <Sun className="mr-2 h-4 w-4" />
+                                    Light
+                                </Button>
+                              </SheetClose>
+                              <SheetClose asChild>
+                                 <Button variant="ghost" onClick={() => setTheme("dark")} className="w-full justify-start">
+                                    <Moon className="mr-2 h-4 w-4" />
+                                    Dark
+                                </Button>
+                              </SheetClose>
+                             <div className="border-t -mx-6 my-2"></div>
                              <SheetClose asChild>
                                 <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">
                                     <LogOut className="mr-2 h-4 w-4" />
