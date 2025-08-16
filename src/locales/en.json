@@ -135,7 +135,7 @@
     "styleDistribution": "Style Distribution",
     "styleDistributionDescription": "Breakdown of your trades by style.",
     "styleDistributionPlaceholder": "Log some trades to see your style distribution.",
-    "accountSettings": "Account Settings",
+    "accountSettings": "Add/Edit Accounts",
     "accountSettingsDescription": "Manage your accounts, starting balances, and other optional details.",
     "addNewAccount": "Add New Account",
     "accountName": "Account Name",
