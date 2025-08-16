@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, PlusCircle, Save } from 'lucide-react';
+import { CalendarIcon, Plus, Save } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -296,7 +296,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
             />
             <DialogFooter>
               <Button type="submit">
-                {isEditing ? <Save className="mr-2 h-4 w-4" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                {isEditing ? <Save className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
                 {isEditing ? t('saveChanges') : t('saveTrade')}
               </Button>
             </DialogFooter>

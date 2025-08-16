@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Upload } from 'lucide-react';
+import { FileUp } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 
 type ImportTradesDialogProps = {
@@ -116,7 +116,7 @@ export default function ImportTradesDialog({
             onClick={handleImportClick}
             disabled={!selectedBroker || !selectedFile || !selectedAccount}
           >
-            <Upload className="mr-2 h-4 w-4" />
+            <FileUp className="mr-2 h-4 w-4" />
             {t('import')}
           </Button>
         </DialogFooter>

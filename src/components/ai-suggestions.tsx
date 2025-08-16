@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, Wand2 } from 'lucide-react';
+import { BrainCircuit, Wand2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import { format } from 'date-fns';
@@ -81,7 +81,7 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
       <Card className="h-full flex flex-col">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <BrainCircuit className="h-6 w-6 text-primary" />
             <CardTitle>{t('aiPoweredInsights')}</CardTitle>
           </div>
           <CardDescription>{t('getPersonalizedSuggestions')}</CardDescription>

@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
 import { useToast } from '@/hooks/use-toast';
-import { PlusCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 type AccountSettingsDialogProps = {
   isOpen: boolean;
@@ -150,7 +150,7 @@ export default function AccountSettingsDialog({
                         />
                     </div>
                     <Button type="submit" size="icon">
-                        <PlusCircle className="h-4 w-4" />
+                        <Plus className="h-4 w-4" />
                         <span className="sr-only">{t('add')}</span>
                     </Button>
                 </div>

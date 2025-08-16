@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { BarChartBig } from 'lucide-react';
+import { CandlestickChart } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 
 export default function RegisterPage() {
@@ -59,7 +59,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
              <div className="flex justify-center items-center gap-2 mb-4">
-                <BarChartBig className="h-10 w-10 text-primary" />
+                <CandlestickChart className="h-10 w-10 text-primary" />
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
                     Trade Insights <span className="text-2xl sm:text-3xl font-normal text-muted-foreground">by TRICSIO</span>
                 </h1>
