@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings } from '@/lib/types';
 import { useToast } from './use-toast';
@@ -30,13 +30,18 @@ function useFirestoreTrades(userId?: string) {
       if (!userId) return;
       try {
         const userDocRef = doc(db, 'users', userId);
-        // Firestore doesn't store `Date` objects directly, so we convert them to ISO strings
         const tradesToStore = newTrades.map(t => ({
           ...t,
-          entryDate: t.entryDate.toISOString(),
-          exitDate: t.exitDate?.toISOString(),
+          entryDate: new Date(t.entryDate).toISOString(),
+          exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
         }));
-        await setDoc(userDocRef, { trades: tradesToStore, startingBalances: newBalances, accountSettings: newSettings }, { merge: true });
+
+        await setDoc(userDocRef, { 
+            trades: tradesToStore, 
+            startingBalances: newBalances, 
+            accountSettings: newSettings 
+        }, { merge: true });
+
       } catch (error) {
         console.error("Error saving data to Firestore:", error);
         toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
@@ -53,38 +58,34 @@ function useFirestoreTrades(userId?: string) {
       return;
     }
 
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const userDocRef = doc(db, 'users', userId);
-        const docSnap = await getDoc(userDocRef);
-
+    setLoading(true);
+    const userDocRef = doc(db, 'users', userId);
+    
+    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
-          const data = docSnap.data();
-          const tradesFromDb = (data.trades || []).map((t: any) => ({
-            ...t,
-            entryDate: new Date(t.entryDate),
-            exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
-          }));
-          setTrades(tradesFromDb);
-          setStartingBalances(data.startingBalances || {});
-          setAccountSettings(data.accountSettings || {});
+            const data = docSnap.data();
+            const tradesFromDb = (data.trades || []).map((t: any) => ({
+              ...t,
+              entryDate: new Date(t.entryDate),
+              exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
+            }));
+            setTrades(tradesFromDb);
+            setStartingBalances(data.startingBalances || {});
+            setAccountSettings(data.accountSettings || {});
         } else {
-          // If no doc, it means it's a new user, register page will create it.
-          // Or the user has no data yet.
-          setTrades([]);
-          setStartingBalances({});
-          setAccountSettings({});
+            console.log("No such document! A new one will be created on first save.");
+            setTrades([]);
+            setStartingBalances({});
+            setAccountSettings({});
         }
-      } catch (error) {
+        setLoading(false);
+    }, (error) => {
         console.error("Error fetching data from Firestore:", error);
         toast({ title: "Error", description: "Could not load data from the cloud.", variant: 'destructive'});
-      } finally {
         setLoading(false);
-      }
-    };
+    });
 
-    fetchData();
+    return () => unsubscribe();
   }, [userId, toast]);
 
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {

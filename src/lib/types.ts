@@ -14,5 +14,8 @@ export type Trade = {
 export type AccountSettings = {
   [accountName: string]: {
     color: string;
+    accountNumber?: string;
+    accountNickname?: string;
+    accountProvider?: string;
   };
 };

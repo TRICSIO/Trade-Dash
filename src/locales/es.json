@@ -92,6 +92,7 @@
     "areYouSure": "¿Estás seguro?",
     "deleteTradeWarning": "Esta acción no se puede deshacer. Esto eliminará permanentemente la operación de {{instrument}} de la cuenta {{account}}.",
     "cancel": "Cancelar",
+    "close": "Cerrar",
 
     "editTrade": "Editar Operación",
     "logNewTrade": "Registrar Nueva Operación",
@@ -135,10 +136,13 @@
     "styleDistributionDescription": "Desglose de tus operaciones por estilo.",
     "styleDistributionPlaceholder": "Registra operaciones para ver tu distribución por estilo.",
     "accountSettings": "Ajustes de Cuenta",
-    "accountSettingsDescription": "Gestiona tus cuentas, saldos iniciales y colores de visualización.",
+    "accountSettingsDescription": "Gestiona tus cuentas, saldos iniciales y otros detalles opcionales.",
     "addNewAccount": "Añadir Nueva Cuenta",
     "accountName": "Nombre de la Cuenta",
     "accountNameRequired": "El nombre de la cuenta es obligatorio.",
     "accountExists": "Ya existe una cuenta con este nombre.",
-    "add": "Añadir"
+    "add": "Añadir",
+    "accountNickname": "Apodo de la Cuenta",
+    "accountProvider": "Proveedor/Bróker",
+    "accountNumber": "Número de Cuenta"
 }

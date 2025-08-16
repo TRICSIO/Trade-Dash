@@ -43,10 +43,10 @@ export default function AccountSettingsDialog({
     onStartingBalancesChange(newBalances);
   };
 
-  const handleColorChange = (accountName: string, color: string) => {
+  const handleSettingChange = (accountName: string, field: keyof AccountSettings[string], value: string) => {
     const newSettings = {
       ...accountSettings,
-      [accountName]: { ...accountSettings[accountName], color },
+      [accountName]: { ...accountSettings[accountName], [field]: value },
     };
     onAccountSettingsChange(newSettings);
   };
@@ -72,7 +72,7 @@ export default function AccountSettingsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t('accountSettings')}</DialogTitle>
           <DialogDescription>
@@ -83,7 +83,7 @@ export default function AccountSettingsDialog({
           {allAccounts.map((account) => (
             <div key={account} className="space-y-4 rounded-md border p-4">
               <h4 className="font-semibold">{account}</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
                 <div className="space-y-2">
                   <Label htmlFor={`balance-${account}`}>{t('startingBalance')}</Label>
                   <Input
@@ -95,12 +95,42 @@ export default function AccountSettingsDialog({
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor={`nickname-${account}`}>Account Nickname</Label>
+                  <Input
+                    id={`nickname-${account}`}
+                    type="text"
+                    value={accountSettings[account]?.accountNickname || ''}
+                    onChange={(e) => handleSettingChange(account, 'accountNickname', e.target.value)}
+                    placeholder="e.g., My Roth IRA"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor={`provider-${account}`}>Provider/Broker</Label>
+                  <Input
+                    id={`provider-${account}`}
+                    type="text"
+                    value={accountSettings[account]?.accountProvider || ''}
+                    onChange={(e) => handleSettingChange(account, 'accountProvider', e.target.value)}
+                    placeholder="e.g., Fidelity"
+                  />
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor={`number-${account}`}>Account Number</Label>
+                  <Input
+                    id={`number-${account}`}
+                    type="text"
+                    value={accountSettings[account]?.accountNumber || ''}
+                    onChange={(e) => handleSettingChange(account, 'accountNumber', e.target.value)}
+                    placeholder="e.g., X12345678"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor={`color-${account}`}>{t('accountColor')}</Label>
                   <Input
                     id={`color-${account}`}
                     type="color"
-                    value={accountSettings[account]?.color || '#000000'}
-                    onChange={(e) => handleColorChange(account, e.target.value)}
+                    value={accountSettings[account]?.color || '#ffffff'}
+                    onChange={(e) => handleSettingChange(account, 'color', e.target.value)}
                     className="p-1 h-10 w-full"
                   />
                 </div>
@@ -128,7 +158,7 @@ export default function AccountSettingsDialog({
         </div>
          <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t('close')}
+            Close
           </Button>
         </DialogFooter>
       </DialogContent>
