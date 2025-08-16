@@ -128,5 +128,8 @@
     "backupSuccessful": "Copia de Seguridad Exitosa",
     "yourDataHasBeenDownloaded": "Tus datos han sido descargados.",
     "backupFailed": "Fallo en la Copia de Seguridad",
-    "couldNotCreateBackup": "No se pudo crear el archivo de copia de seguridad."
+    "couldNotCreateBackup": "No se pudo crear el archivo de copia de seguridad.",
+    "styleDistribution": "Distribución por Estilo",
+    "styleDistributionDescription": "Desglose de tus operaciones por estilo.",
+    "styleDistributionPlaceholder": "Registra operaciones para ver tu distribución por estilo."
 }

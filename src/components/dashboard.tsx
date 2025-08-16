@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from '@/hooks/use-translation';
+import StyleDistributionChart from './style-distribution-chart';
 
 
 export default function Dashboard() {
@@ -274,12 +275,15 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-8 lg:grid-cols-5">
-            <div className="lg:col-span-3">
+        <div className="grid gap-8 lg:grid-cols-6">
+            <div className="lg:col-span-4">
                 <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
+            </div>
+             <div className="lg:col-span-2">
+                <StyleDistributionChart trades={filteredTrades} />
             </div>
         </div>
         

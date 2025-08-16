@@ -128,5 +128,8 @@
     "backupSuccessful": "Backup Successful",
     "yourDataHasBeenDownloaded": "Your data has been downloaded.",
     "backupFailed": "Backup Failed",
-    "couldNotCreateBackup": "Could not create backup file."
+    "couldNotCreateBackup": "Could not create backup file.",
+    "styleDistribution": "Style Distribution",
+    "styleDistributionDescription": "Breakdown of your trades by style.",
+    "styleDistributionPlaceholder": "Log some trades to see your style distribution."
 }
