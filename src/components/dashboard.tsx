@@ -11,13 +11,12 @@ import PerformanceChart from '@/components/performance-chart';
 import AiSuggestions from '@/components/ai-suggestions';
 import TradeTable from '@/components/trade-table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from '@/hooks/use-translation';
 import StyleDistributionChart from './style-distribution-chart';
+import AccountSettingsDialog from './account-settings-dialog';
 
 
 export default function Dashboard() {
@@ -26,15 +25,16 @@ export default function Dashboard() {
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
   const [selectedAccount, setSelectedAccount] = useState('all');
   const { toast } = useToast();
   const { t } = useTranslation();
 
   const accounts = useMemo(() => {
-    const allAccounts = trades.map(t => t.account);
-    return ['all', ...Array.from(new Set(allAccounts))];
-  }, [trades]);
+    const allAccounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
+    return ['all', ...allAccounts];
+  }, [trades, startingBalances]);
 
   useEffect(() => {
     if (!accounts.includes(selectedAccount)) {
@@ -55,14 +55,6 @@ export default function Dashboard() {
     }
     return startingBalances[selectedAccount] || 0;
   }, [selectedAccount, startingBalances]);
-
-  const currentAccountColor = useMemo(() => {
-    if (selectedAccount === 'all' || !accountSettings[selectedAccount]) {
-      return '#000000'; // Default color
-    }
-    return accountSettings[selectedAccount].color;
-  }, [selectedAccount, accountSettings]);
-
 
   const handleOpenAddDialog = () => {
     setEditingTrade(undefined);
@@ -95,8 +87,10 @@ export default function Dashboard() {
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
 
-    if (!accounts.includes(tradeData.account)) {
+    if (!(tradeData.account in startingBalances)) {
       setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
+    }
+     if (!(tradeData.account in accountSettings)) {
       setAccountSettings(prev => ({...prev, [tradeData.account]: { color: '#000000' }}));
     }
   };
@@ -105,26 +99,6 @@ export default function Dashboard() {
     const updatedTrades = trades.filter(t => t.id !== tradeId);
     setTrades(updatedTrades);
   }
-
-  const handleBalanceChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    if (selectedAccount !== 'all') {
-        setStartingBalances(prev => ({
-            ...prev,
-            [selectedAccount]: Number(value)
-        }));
-    }
-  }
-
-  const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const color = event.target.value;
-    if (selectedAccount !== 'all') {
-      setAccountSettings(prev => ({
-        ...prev,
-        [selectedAccount]: { ...prev[selectedAccount], color },
-      }));
-    }
-  };
 
   const handleImportTrades = (broker: string, file: File, account: string) => {
     console.log(`Importing from ${broker} into ${account}`, file);
@@ -231,6 +205,7 @@ export default function Dashboard() {
         onAddTradeClick={handleOpenAddDialog} 
         onImportClick={() => setImportTradeOpen(true)}
         onBackupClick={handleBackup} 
+        onSettingsClick={() => setSettingsOpen(true)}
       />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
@@ -253,31 +228,6 @@ export default function Dashboard() {
                     </SelectContent>
                   </Select>
               </div>
-              {selectedAccount !== 'all' && (
-                <>
-                    <div className="w-full sm:max-w-xs space-y-2">
-                      <Label htmlFor="starting-balance">{t('startingBalance')}</Label>
-                      <Input
-                        id="starting-balance"
-                        type="number"
-                        value={currentStartingBalance}
-                        onChange={handleBalanceChange}
-                        className="mt-1"
-                        placeholder="e.g., 10000"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="account-color">{t('accountColor')}</Label>
-                        <Input
-                            id="account-color"
-                            type="color"
-                            value={currentAccountColor}
-                            onChange={handleColorChange}
-                            className="p-1 h-10 w-14"
-                        />
-                    </div>
-                </>
-              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -332,6 +282,14 @@ export default function Dashboard() {
         onOpenChange={setImportTradeOpen}
         onImport={handleImportTrades}
         accounts={accounts.filter(acc => acc !== 'all')}
+      />
+      <AccountSettingsDialog
+        isOpen={isSettingsOpen}
+        onOpenChange={setSettingsOpen}
+        startingBalances={startingBalances}
+        accountSettings={accountSettings}
+        onStartingBalancesChange={setStartingBalances}
+        onAccountSettingsChange={setAccountSettings}
       />
     </div>
   );

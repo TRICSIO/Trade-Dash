@@ -20,6 +20,7 @@
     "backup": "Backup",
     "import": "Import",
     "addTrade": "Add Trade",
+    "settings": "Settings",
     "changeLanguage": "Change Language",
     "toggleTheme": "Toggle theme",
     "light": "Light",
@@ -132,5 +133,12 @@
     "couldNotCreateBackup": "Could not create backup file.",
     "styleDistribution": "Style Distribution",
     "styleDistributionDescription": "Breakdown of your trades by style.",
-    "styleDistributionPlaceholder": "Log some trades to see your style distribution."
+    "styleDistributionPlaceholder": "Log some trades to see your style distribution.",
+    "accountSettings": "Account Settings",
+    "accountSettingsDescription": "Manage your accounts, starting balances, and display colors.",
+    "addNewAccount": "Add New Account",
+    "accountName": "Account Name",
+    "accountNameRequired": "Account name is required.",
+    "accountExists": "An account with this name already exists.",
+    "add": "Add"
 }

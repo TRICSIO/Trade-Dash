@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { PlusCircle, BarChartBig, Upload, LogOut, Download, Moon, Sun, Languages } from 'lucide-react';
+import { PlusCircle, BarChartBig, Upload, LogOut, Download, Moon, Sun, Languages, Settings } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -28,10 +28,11 @@ type AppHeaderProps = {
   onAddTradeClick: () => void;
   onImportClick: () => void;
   onBackupClick: () => void;
+  onSettingsClick: () => void;
 };
 
 
-export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick }: AppHeaderProps) {
+export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick, onSettingsClick }: AppHeaderProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { setTheme } = useTheme();
@@ -66,6 +67,10 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
               <Button onClick={onAddTradeClick}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   {t('addTrade')}
+              </Button>
+               <Button variant="ghost" size="icon" onClick={onSettingsClick}>
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">{t('settings')}</span>
               </Button>
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -131,6 +136,12 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                                 <Button variant="outline" onClick={onImportClick} className="w-full justify-start">
                                     <Upload className="mr-2 h-4 w-4" />
                                     {t('import')}
+                                </Button>
+                             </SheetClose>
+                              <SheetClose asChild>
+                                <Button variant="outline" onClick={onSettingsClick} className="w-full justify-start">
+                                    <Settings className="mr-2 h-4 w-4" />
+                                    {t('settings')}
                                 </Button>
                              </SheetClose>
                              <SheetClose asChild>

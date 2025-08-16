@@ -20,6 +20,7 @@
     "backup": "Copia",
     "import": "Importar",
     "addTrade": "Añadir Operación",
+    "settings": "Ajustes",
     "changeLanguage": "Cambiar Idioma",
     "toggleTheme": "Cambiar tema",
     "light": "Claro",
@@ -132,5 +133,12 @@
     "couldNotCreateBackup": "No se pudo crear el archivo de copia de seguridad.",
     "styleDistribution": "Distribución por Estilo",
     "styleDistributionDescription": "Desglose de tus operaciones por estilo.",
-    "styleDistributionPlaceholder": "Registra operaciones para ver tu distribución por estilo."
+    "styleDistributionPlaceholder": "Registra operaciones para ver tu distribución por estilo.",
+    "accountSettings": "Ajustes de Cuenta",
+    "accountSettingsDescription": "Gestiona tus cuentas, saldos iniciales y colores de visualización.",
+    "addNewAccount": "Añadir Nueva Cuenta",
+    "accountName": "Nombre de la Cuenta",
+    "accountNameRequired": "El nombre de la cuenta es obligatorio.",
+    "accountExists": "Ya existe una cuenta con este nombre.",
+    "add": "Añadir"
 }
