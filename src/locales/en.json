@@ -38,6 +38,7 @@
     "allAccounts": "All Accounts",
     "startingBalance": "Starting Balance",
     "currentAccountBalance": "Current Account Balance",
+    "accountColor": "Color",
     "all": "All",
     "totalTrades": "Total Trades",
     "winningTrades": "Winning Trades",

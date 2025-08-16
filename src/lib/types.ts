@@ -10,3 +10,9 @@ export type Trade = {
   notes?: string;
   account: string;
 };
+
+export type AccountSettings = {
+  [accountName: string]: {
+    color: string;
+  };
+};

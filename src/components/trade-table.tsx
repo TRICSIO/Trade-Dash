@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { Trade } from '@/lib/types';
+import type { Trade, AccountSettings } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -32,11 +32,12 @@ import { enUS, es } from 'date-fns/locale';
 
 type TradeTableProps = {
   trades: Trade[];
+  accountSettings: AccountSettings;
   onEditTrade: (trade: Trade) => void;
   onDeleteTrade: (tradeId: string) => void;
 };
 
-export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: TradeTableProps) {
+export default function TradeTable({ trades, accountSettings, onEditTrade, onDeleteTrade }: TradeTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteCandidate, setDeleteCandidate] = useState<Trade | null>(null);
   const { t } = useTranslation();
@@ -103,12 +104,18 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                     const pl = isClosed && proceeds ? proceeds - cost : null;
                     const plPercent = pl !== null && cost !== 0 ? (pl / cost) * 100 : null;
                     const isProfit = pl !== null && pl >= 0;
+                    const accountColor = accountSettings[trade.account]?.color;
                     
                     return (
                     <TableRow key={trade.id}>
                         <TableCell className="font-medium">{trade.instrument}</TableCell>
                         <TableCell>
-                            <Badge variant="outline">{trade.account}</Badge>
+                             <Badge
+                                variant="outline"
+                                style={accountColor ? { borderColor: accountColor, color: accountColor } : {}}
+                            >
+                                {trade.account}
+                            </Badge>
                         </TableCell>
                         <TableCell>
                             <Badge variant="secondary">{t(trade.tradeStyle.toLowerCase().replace(' ',''))}</Badge>
@@ -123,7 +130,7 @@ export default function TradeTable({ trades, onEditTrade, onDeleteTrade }: Trade
                         </TableCell>
                         <TableCell className={`hidden md:table-cell ${plPercent === null ? 'text-muted-foreground' : isProfit ? 'text-green-400' : 'text-red-400'}`}>
                             <div className="flex items-center gap-1">
-                                {plPercent === null ? <Clock className="h-4 w-4" /> : <Percent className="h-3 w-3" />}
+                                {plPercent === null ? <Clock className="h-3 w-3" /> : <Percent className="h-3 w-3" />}
                                 {plPercent !== null ? `${plPercent.toFixed(2)}%` : t('open')}
                             </div>
                         </TableCell>

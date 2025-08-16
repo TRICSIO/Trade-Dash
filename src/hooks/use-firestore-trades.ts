@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Trade } from '@/lib/types';
+import type { Trade, AccountSettings } from '@/lib/types';
 import { useToast } from './use-toast';
 
 // Debounce function
@@ -21,11 +21,12 @@ function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
 function useFirestoreTrades(userId?: string) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [startingBalances, setStartingBalances] = useState<Record<string, number>>({});
+  const [accountSettings, setAccountSettings] = useState<AccountSettings>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const saveDataToFirestore = useCallback(
-    async (newTrades: Trade[], newBalances: Record<string, number>) => {
+    async (newTrades: Trade[], newBalances: Record<string, number>, newSettings: AccountSettings) => {
       if (!userId) return;
       try {
         const userDocRef = doc(db, 'users', userId);
@@ -35,7 +36,7 @@ function useFirestoreTrades(userId?: string) {
           entryDate: t.entryDate.toISOString(),
           exitDate: t.exitDate?.toISOString(),
         }));
-        await setDoc(userDocRef, { trades: tradesToStore, startingBalances: newBalances }, { merge: true });
+        await setDoc(userDocRef, { trades: tradesToStore, startingBalances: newBalances, accountSettings: newSettings }, { merge: true });
       } catch (error) {
         console.error("Error saving data to Firestore:", error);
         toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
@@ -67,11 +68,13 @@ function useFirestoreTrades(userId?: string) {
           }));
           setTrades(tradesFromDb);
           setStartingBalances(data.startingBalances || {});
+          setAccountSettings(data.accountSettings || {});
         } else {
           // If no doc, it means it's a new user, register page will create it.
           // Or the user has no data yet.
           setTrades([]);
           setStartingBalances({});
+          setAccountSettings({});
         }
       } catch (error) {
         console.error("Error fetching data from Firestore:", error);
@@ -87,17 +90,23 @@ function useFirestoreTrades(userId?: string) {
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
     const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
     setTrades(updatedTrades);
-    debouncedSave(updatedTrades, startingBalances);
+    debouncedSave(updatedTrades, startingBalances, accountSettings);
   }
   
   const handleSetStartingBalances = (newBalances: Record<string, number> | ((val: Record<string, number>) => Record<string, number>)) => {
     const updatedBalances = newBalances instanceof Function ? newBalances(startingBalances) : newBalances;
     setStartingBalances(updatedBalances);
-    debouncedSave(trades, updatedBalances);
+    debouncedSave(trades, updatedBalances, accountSettings);
+  }
+
+  const handleSetAccountSettings = (newSettings: AccountSettings | ((val: AccountSettings) => AccountSettings)) => {
+    const updatedSettings = newSettings instanceof Function ? newSettings(accountSettings) : newSettings;
+    setAccountSettings(updatedSettings);
+    debouncedSave(trades, startingBalances, updatedSettings);
   }
 
 
-  return { trades, startingBalances, setTrades: handleSetTrades, setStartingBalances: handleSetStartingBalances, loading };
+  return { trades, startingBalances, accountSettings, setTrades: handleSetTrades, setStartingBalances: handleSetStartingBalances, setAccountSettings: handleSetAccountSettings, loading };
 }
 
 export default useFirestoreTrades;

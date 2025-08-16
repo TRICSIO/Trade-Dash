@@ -38,6 +38,7 @@
     "allAccounts": "Todas las Cuentas",
     "startingBalance": "Saldo Inicial",
     "currentAccountBalance": "Saldo Actual de la Cuenta",
+    "accountColor": "Color",
     "all": "Todo",
     "totalTrades": "Operaciones Totales",
     "winningTrades": "Operaciones Ganadoras",

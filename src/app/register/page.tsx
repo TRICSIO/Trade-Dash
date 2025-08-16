@@ -39,7 +39,8 @@ export default function RegisterPage() {
       
       await setDoc(doc(db, "users", user.uid), {
         trades: [],
-        startingBalances: {}
+        startingBalances: {},
+        accountSettings: {}
       });
 
       router.push('/');

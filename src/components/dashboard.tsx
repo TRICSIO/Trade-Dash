@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, ChangeEvent, useEffect } from 'react';
-import type { Trade } from '@/lib/types';
+import type { Trade, AccountSettings } from '@/lib/types';
 import useFirestoreTrades from '@/hooks/use-firestore-trades';
 import AppHeader from '@/components/header';
 import AddTradeDialog from '@/components/add-trade-dialog';
@@ -22,7 +22,7 @@ import StyleDistributionChart from './style-distribution-chart';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { trades, startingBalances, setTrades, setStartingBalances, loading } = useFirestoreTrades(user?.uid);
+  const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, setAccountSettings, loading } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);
@@ -55,6 +55,13 @@ export default function Dashboard() {
     }
     return startingBalances[selectedAccount] || 0;
   }, [selectedAccount, startingBalances]);
+
+  const currentAccountColor = useMemo(() => {
+    if (selectedAccount === 'all' || !accountSettings[selectedAccount]) {
+      return '#000000'; // Default color
+    }
+    return accountSettings[selectedAccount].color;
+  }, [selectedAccount, accountSettings]);
 
 
   const handleOpenAddDialog = () => {
@@ -90,6 +97,7 @@ export default function Dashboard() {
 
     if (!accounts.includes(tradeData.account)) {
       setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
+      setAccountSettings(prev => ({...prev, [tradeData.account]: { color: '#000000' }}));
     }
   };
 
@@ -108,6 +116,16 @@ export default function Dashboard() {
     }
   }
 
+  const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const color = event.target.value;
+    if (selectedAccount !== 'all') {
+      setAccountSettings(prev => ({
+        ...prev,
+        [selectedAccount]: { ...prev[selectedAccount], color },
+      }));
+    }
+  };
+
   const handleImportTrades = (broker: string, file: File, account: string) => {
     console.log(`Importing from ${broker} into ${account}`, file);
     toast({
@@ -122,6 +140,7 @@ export default function Dashboard() {
         const backupData = {
             trades,
             startingBalances,
+            accountSettings
         };
         const jsonString = JSON.stringify(backupData, null, 2);
         const blob = new Blob([jsonString], {type: 'application/json'});
@@ -235,17 +254,29 @@ export default function Dashboard() {
                   </Select>
               </div>
               {selectedAccount !== 'all' && (
-                <div className="w-full sm:max-w-xs space-y-2">
-                  <Label htmlFor="starting-balance">{t('startingBalance')}</Label>
-                  <Input
-                    id="starting-balance"
-                    type="number"
-                    value={currentStartingBalance}
-                    onChange={handleBalanceChange}
-                    className="mt-1"
-                    placeholder="e.g., 10000"
-                  />
-                </div>
+                <>
+                    <div className="w-full sm:max-w-xs space-y-2">
+                      <Label htmlFor="starting-balance">{t('startingBalance')}</Label>
+                      <Input
+                        id="starting-balance"
+                        type="number"
+                        value={currentStartingBalance}
+                        onChange={handleBalanceChange}
+                        className="mt-1"
+                        placeholder="e.g., 10000"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="account-color">{t('accountColor')}</Label>
+                        <Input
+                            id="account-color"
+                            type="color"
+                            value={currentAccountColor}
+                            onChange={handleColorChange}
+                            className="p-1 h-10 w-14"
+                        />
+                    </div>
+                </>
               )}
             </div>
           </CardHeader>
@@ -287,7 +318,7 @@ export default function Dashboard() {
             </div>
         </div>
         
-        <TradeTable trades={filteredTrades} onEditTrade={handleOpenEditDialog} onDeleteTrade={handleDeleteTrade} />
+        <TradeTable trades={filteredTrades} accountSettings={accountSettings} onEditTrade={handleOpenEditDialog} onDeleteTrade={handleDeleteTrade} />
 
       </main>
       <AddTradeDialog
