@@ -61,10 +61,10 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                   <Plus className="mr-2 h-4 w-4" />
                   {t('addTrade')}
               </Button>
-               <Button variant="ghost" size="icon" asChild>
+               <Button variant="ghost" asChild>
                  <Link href="/settings">
-                    <Cog className="h-5 w-5" />
-                    <span className="sr-only">{t('settings')}</span>
+                    <Cog className="mr-2 h-4 w-4" />
+                    {t('settings')}
                  </Link>
               </Button>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
