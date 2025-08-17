@@ -179,5 +179,15 @@
     "registerPasskeyTitle": "Enable Passwordless Login",
     "registerPasskeyDescription": "Secure your account and sign in with your face, fingerprint, or PIN. It's faster and more secure than a password.",
     "skipForNow": "Skip for Now",
-    "passkeyReady": "Your passkey is all set. You can now use it to sign in on this device."
+    "passkeyReady": "Your passkey is all set. You can now use it to sign in on this device.",
+
+    "topMovers": "Top Movers",
+    "topGainers": "Top Gainers",
+    "topLosers": "Top Losers",
+    "topMoversDescription": "Today's biggest market gainers and losers.",
+    "ticker": "Ticker",
+    "name": "Name",
+    "price": "Price",
+    "change": "Change",
+    "changePercent": "% Change"
 }

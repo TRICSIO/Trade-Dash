@@ -171,5 +171,14 @@
     "registerPasskeyTitle": "Activer la connexion sans mot de passe",
     "registerPasskeyDescription": "Sécurisez votre compte et connectez-vous avec votre visage, votre empreinte digitale ou votre code PIN. C'est plus rapide et plus sécurisé qu'un mot de passe.",
     "skipForNow": "Ignorer pour l'instant",
-    "passkeyReady": "Votre clé d'accès est prête. Vous pouvez maintenant l'utiliser pour vous connecter sur cet appareil."
+    "passkeyReady": "Votre clé d'accès est prête. Vous pouvez maintenant l'utiliser pour vous connecter sur cet appareil.",
+    "topMovers": "Top Mouvements",
+    "topGainers": "Top Gagnants",
+    "topLosers": "Top Perdants",
+    "topMoversDescription": "Les plus grands gagnants et perdants du marché aujourd'hui.",
+    "ticker": "Ticker",
+    "name": "Nom",
+    "price": "Prix",
+    "change": "Changement",
+    "changePercent": "% Changement"
 }

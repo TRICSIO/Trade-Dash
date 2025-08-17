@@ -36,3 +36,11 @@ export interface UserData {
     authenticators: Authenticator[];
     currentChallenge?: string;
 }
+
+export type StockMover = {
+    ticker: string;
+    name: string;
+    price: string;
+    change: string;
+    changePercent: string;
+};
