@@ -19,3 +19,20 @@ export type AccountSettings = {
     accountProvider?: string;
   };
 };
+
+// Types for WebAuthn
+export interface Authenticator {
+  credentialID: string; // Base64URL encoded
+  credentialPublicKey: string; // Base64URL encoded
+  counter: number;
+  credentialDeviceType: 'singleDevice' | 'multiDevice';
+  credentialBackedUp: boolean;
+  transports?: AuthenticatorTransport[];
+}
+
+export interface UserData {
+    id: string;
+    email: string;
+    authenticators: Authenticator[];
+    currentChallenge?: string;
+}

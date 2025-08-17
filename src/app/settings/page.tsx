@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileDown, Plus, Mail } from 'lucide-react';
+import { FileDown, Plus, Mail, Fingerprint } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -18,6 +18,8 @@ import { useFontSize } from '@/context/font-size-context';
 import { Slider } from '@/components/ui/slider';
 import { useLanguage } from '@/context/language-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { startRegistration } from '@simplewebauthn/browser';
+import { getRegistrationOptions, verifyRegistration } from '@/ai/flows/passkey-flow';
 
 function SettingsPage() {
   const { user } = useAuth();
@@ -28,6 +30,7 @@ function SettingsPage() {
   const { fontSize, setFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
   const [newAccountName, setNewAccountName] = useState('');
+  const [isRegisteringPasskey, setIsRegisteringPasskey] = useState(false);
 
   const fontSizeMapping: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
 
@@ -91,6 +94,40 @@ function SettingsPage() {
         });
     }
   };
+
+    const handleRegisterPasskey = async () => {
+        if (!user) return;
+        setIsRegisteringPasskey(true);
+        try {
+            const options = await getRegistrationOptions({ userId: user.uid, userEmail: user.email! });
+            const registrationResponse = await startRegistration(options);
+            const { verified } = await verifyRegistration({
+                response: registrationResponse,
+                expectedChallenge: options.challenge,
+                userId: user.uid,
+            });
+
+            if (verified) {
+                toast({
+                    title: t('passkeyRegistered'),
+                    description: t('passkeyRegisteredSuccess'),
+                });
+            } else {
+                throw new Error(t('passkeyVerificationFailed'));
+            }
+        } catch (error: any) {
+            console.error(error);
+             const errorMessage = error.name === 'NotAllowedError' ? t('authCancelled') : error.message;
+            toast({
+                title: t('passkeyRegistrationFailed'),
+                description: errorMessage,
+                variant: 'destructive',
+            });
+        } finally {
+            setIsRegisteringPasskey(false);
+        }
+    };
+
 
   const allAccounts = Array.from(new Set(Object.keys(startingBalances)));
 
@@ -241,6 +278,18 @@ function SettingsPage() {
                         />
                         <span className="text-lg text-muted-foreground">{t('large')}</span>
                     </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('security')}</CardTitle>
+                    <CardDescription>{t('securityDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button onClick={handleRegisterPasskey} disabled={isRegisteringPasskey}>
+                       <Fingerprint className="mr-2 h-4 w-4" /> 
+                       {isRegisteringPasskey ? t('registeringPasskey') : t('registerPasskey')}
+                    </Button>
                 </CardContent>
             </Card>
             <Card>

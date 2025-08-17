@@ -154,5 +154,17 @@
     "contactDeveloperDescription": "Pour des questions, du support ou des commentaires, veuillez nous contacter.",
     "other": "Autre...",
     "otherBroker": "Autre courtier",
-    "enterBrokerName": "Entrez le nom du courtier"
+    "enterBrokerName": "Entrez le nom du courtier",
+    "security": "Sécurité",
+    "securityDescription": "Gérez vos paramètres de sécurité, y compris les clés d'accès.",
+    "registerPasskey": "Enregistrer une nouvelle clé d'accès",
+    "registeringPasskey": "Enregistrement de la clé d'accès...",
+    "passkeyRegistered": "Clé d'accès enregistrée avec succès",
+    "passkeyRegisteredSuccess": "Vous pouvez maintenant utiliser votre clé d'accès pour vous connecter.",
+    "passkeyRegistrationFailed": "Échec de l'enregistrement de la clé d'accès",
+    "passkeyVerificationFailed": "La vérification de la clé d'accès a échoué.",
+    "signInWithPasskey": "Se connecter avec une clé d'accès",
+    "orContinueWith": "Ou continuer avec",
+    "loginSuccessful": "Connexion réussie",
+    "authCancelled": "L'authentification a été annulée par l'utilisateur."
 }

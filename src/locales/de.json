@@ -154,5 +154,17 @@
     "contactDeveloperDescription": "Bei Fragen, Unterstützung oder Feedback wenden Sie sich bitte an uns.",
     "other": "Andere...",
     "otherBroker": "Anderer Broker",
-    "enterBrokerName": "Brokernamen eingeben"
+    "enterBrokerName": "Brokernamen eingeben",
+    "security": "Sicherheit",
+    "securityDescription": "Verwalten Sie Ihre Sicherheitseinstellungen, einschließlich Passkeys.",
+    "registerPasskey": "Neuen Passkey registrieren",
+    "registeringPasskey": "Passkey wird registriert...",
+    "passkeyRegistered": "Passkey erfolgreich registriert",
+    "passkeyRegisteredSuccess": "Sie können sich jetzt mit Ihrem Passkey anmelden.",
+    "passkeyRegistrationFailed": "Passkey-Registrierung fehlgeschlagen",
+    "passkeyVerificationFailed": "Passkey-Verifizierung fehlgeschlagen.",
+    "signInWithPasskey": "Mit einem Passkey anmelden",
+    "orContinueWith": "Oder fortfahren mit",
+    "loginSuccessful": "Anmeldung erfolgreich",
+    "authCancelled": "Authentifizierung vom Benutzer abgebrochen."
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { setDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { CandlestickChart } from 'lucide-react';
+import { CandlestickChart, Fingerprint } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { startRegistration } from '@simplewebauthn/browser';
+import {
+  getRegistrationOptions,
+  verifyRegistration,
+} from '@/ai/flows/passkey-flow';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -38,19 +43,23 @@ export default function RegisterPage() {
       const user = userCredential.user;
       
       await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
         trades: [],
         startingBalances: {},
-        accountSettings: {}
+        accountSettings: {},
+        authenticators: [],
+        currentChallenge: null,
       });
 
-      router.push('/');
+      router.push('/?action=registerPasskey');
     } catch (error: any) {
       toast({
         title: t('registrationFailed'),
         description: error.message,
         variant: 'destructive',
       });
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -80,6 +89,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete='username webauthn'
               />
             </div>
             <div className="space-y-2">

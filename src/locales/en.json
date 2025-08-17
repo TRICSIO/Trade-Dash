@@ -162,5 +162,17 @@
     "contactDeveloperDescription": "For questions, support, or feedback, please reach out.",
     "other": "Other...",
     "otherBroker": "Other Broker",
-    "enterBrokerName": "Enter broker name"
+    "enterBrokerName": "Enter broker name",
+    "security": "Security",
+    "securityDescription": "Manage your security settings, including passkeys.",
+    "registerPasskey": "Register a New Passkey",
+    "registeringPasskey": "Registering Passkey...",
+    "passkeyRegistered": "Passkey Registered Successfully",
+    "passkeyRegisteredSuccess": "You can now use your passkey to sign in.",
+    "passkeyRegistrationFailed": "Passkey Registration Failed",
+    "passkeyVerificationFailed": "Passkey verification failed.",
+    "signInWithPasskey": "Sign in with a passkey",
+    "orContinueWith": "Or continue with",
+    "loginSuccessful": "Login Successful",
+    "authCancelled": "Authentication was cancelled by the user."
 }

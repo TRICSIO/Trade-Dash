@@ -10,8 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { CandlestickChart } from 'lucide-react';
+import { CandlestickChart, Fingerprint } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { Separator } from '@/components/ui/separator';
+import {
+    getAuthenticationOptions,
+    verifyAuthentication,
+} from '@/ai/flows/passkey-flow';
+import { startAuthentication } from '@simplewebauthn/browser';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -33,9 +39,44 @@ export default function LoginPage() {
         description: error.message,
         variant: 'destructive',
       });
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
+
+  const handlePasskeyLogin = async () => {
+    setLoading(true);
+    try {
+        const options = await getAuthenticationOptions();
+        const authResponse = await startAuthentication(options);
+        const { verified, user } = await verifyAuthentication({
+            response: authResponse,
+            expectedChallenge: options.challenge,
+        });
+
+        if (verified && user) {
+             // Manually sign in the user with the custom token from the server
+            await signInWithEmailAndPassword(auth, user.email, user.passkey)
+            toast({
+                title: t('loginSuccessful'),
+                description: t('welcomeBack'),
+            });
+            router.push('/');
+        } else {
+            throw new Error(t('passkeyVerificationFailed'));
+        }
+    } catch (error: any) {
+        console.error(error);
+        const errorMessage = error.name === 'NotAllowedError' ? t('authCancelled') : error.message;
+        toast({
+            title: t('loginFailed'),
+            description: errorMessage,
+            variant: 'destructive',
+        });
+    } finally {
+        setLoading(false);
+    }
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -52,34 +93,50 @@ export default function LoginPage() {
           <CardDescription>{t('enterCredentials')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('password')}</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? t('loggingIn') : t('login')}
+          <div className="space-y-4">
+            <Button onClick={handlePasskeyLogin} variant="outline" className="w-full">
+                <Fingerprint className="mr-2 h-4 w-4" />
+                {t('signInWithPasskey')}
             </Button>
-          </form>
+            <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                        {t('orContinueWith')}
+                    </span>
+                </div>
+            </div>
+            <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                <Label htmlFor="email">{t('email')}</Label>
+                <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                />
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="password">{t('password')}</Label>
+                <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? t('loggingIn') : t('login')}
+                </Button>
+            </form>
+          </div>
            <p className="mt-4 text-center text-sm text-muted-foreground">
             {t('dontHaveAccount')}{' '}
             <Link href="/register" className="font-semibold text-primary hover:underline">
