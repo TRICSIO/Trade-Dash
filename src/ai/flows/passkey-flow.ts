@@ -59,8 +59,8 @@ export type VerifyAuthenticationRequest = z.infer<
 >;
 
 const RelyingPartyName = 'Trade-Dash';
-const RelyingPartyID = process.env.NEXT_PUBLIC_RELYING_PARTY_ID || 'localhost';
-const Origin = process.env.NEXT_PUBLIC_ORIGIN || 'http://localhost:9002';
+const RelyingPartyID = process.env.NEXT_PUBLIC_RELYING_PARTY_ID;
+const Origin = process.env.NEXT_PUBLIC_ORIGIN;
 
 
 function base64UrlToBuffer(base64Url: string): ArrayBuffer {
@@ -95,6 +95,9 @@ export const getRegistrationOptions = ai.defineFlow(
     outputSchema: z.any(), // PublickeyCredentialCreationOptionsJSON
   },
   async ({ userId, userEmail }) => {
+    if (!RelyingPartyID || !Origin) {
+        throw new Error('Missing NEXT_PUBLIC_RELYING_PARTY_ID or NEXT_PUBLIC_ORIGIN environment variables');
+    }
     const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
@@ -137,6 +140,9 @@ export const verifyRegistration = ai.defineFlow(
     outputSchema: z.object({ verified: z.boolean() }),
   },
   async ({ response, expectedChallenge, userId }) => {
+     if (!RelyingPartyID || !Origin) {
+        throw new Error('Missing NEXT_PUBLIC_RELYING_PARTY_ID or NEXT_PUBLIC_ORIGIN environment variables');
+    }
      const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
@@ -201,6 +207,9 @@ export const getAuthenticationOptions = ai.defineFlow(
     outputSchema: z.any(), // PublicKeyCredentialRequestOptionsJSON
   },
   async () => {
+    if (!RelyingPartyID) {
+        throw new Error('Missing NEXT_PUBLIC_RELYING_PARTY_ID environment variable');
+    }
     const options: GenerateAuthenticationOptionsOpts = {
       timeout: 60000,
       userVerification: 'preferred',
@@ -227,6 +236,9 @@ export const verifyAuthentication = ai.defineFlow(
     }),
   },
   async ({ response, expectedChallenge }) => {
+    if (!RelyingPartyID || !Origin) {
+        throw new Error('Missing NEXT_PUBLIC_RELYING_PARTY_ID or NEXT_PUBLIC_ORIGIN environment variables');
+    }
     const userId = response.id;
     const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
