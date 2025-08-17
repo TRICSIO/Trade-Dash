@@ -1,34 +1,22 @@
-# 1. Install dependencies
-FROM node:20-slim AS deps
+# Use an official Node.js runtime as a parent image
+FROM node:20-alpine
+
+# Set the working directory in the container
 WORKDIR /app
-COPY package.json package-lock.json ./
+
+# Copy package.json and install dependencies
+COPY package.json ./
 RUN npm install
 
-# 2. Build the app
-FROM node:20-slim AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy the rest of the application's code
 COPY . .
+
+# Build the Next.js application for production
 RUN npm run build
 
-# 3. Run the app
-FROM node:20-slim AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
-
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.ts ./next.config.ts
-
-
-USER nextjs
-
+# Expose port 3000 to the outside world
 EXPOSE 3000
 
-ENV PORT 3000
-
+# The command to run when the container starts
+# Using "npm start" which is defined in package.json as "next start"
 CMD ["npm", "start"]
