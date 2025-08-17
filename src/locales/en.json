@@ -17,6 +17,7 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "registrationFailed": "Registration Failed",
 
+    "dashboard": "Dashboard",
     "backup": "Backup",
     "import": "Import",
     "addTrade": "Add Trade",

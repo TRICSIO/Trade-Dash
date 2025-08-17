@@ -17,6 +17,7 @@
     "passwordsDoNotMatch": "Las contraseñas no coinciden",
     "registrationFailed": "Fallo en el Registro",
 
+    "dashboard": "Panel",
     "backup": "Copia",
     "import": "Importar",
     "addTrade": "Añadir Operación",
