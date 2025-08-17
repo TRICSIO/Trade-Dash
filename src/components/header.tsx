@@ -67,9 +67,9 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                     {t('settings')}
                  </Link>
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-4 w-4" />
-                <span className="sr-only">{t('logout')}</span>
+              <Button variant="ghost" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                {t('logout')}
               </Button>
             </>
           )}
