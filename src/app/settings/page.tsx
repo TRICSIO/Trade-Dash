@@ -260,9 +260,9 @@ function SettingsPage() {
                     <CardDescription>{t('contactDeveloperDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <a href="mailto:pbolouvi@gmail.com" className="inline-flex items-center">
+                    <a href="mailto:pbolouvi@gmail.com?subject=Trade-Dash" className="inline-flex items-center">
                         <Button variant="outline" className="w-full sm:w-auto justify-start">
-                        <Mail className="mr-2 h-4 w-4" /> pbolouvi@gmail.com
+                           <Mail className="mr-2 h-4 w-4" /> {t('contactDeveloper')}
                         </Button>
                     </a>
                 </CardContent>
