@@ -17,6 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from '@/hooks/use-translation';
 import StyleDistributionChart from './style-distribution-chart';
+import { useSearchParams, useRouter } from 'next/navigation';
+import RegisterPasskeyDialog from './register-passkey-dialog';
 
 
 export default function Dashboard() {
@@ -25,10 +27,22 @@ export default function Dashboard() {
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);
+  const [isRegisterPasskeyOpen, setRegisterPasskeyOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
   const [selectedAccount, setSelectedAccount] = useState('all');
   const { toast } = useToast();
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'registerPasskey' && user) {
+        setRegisterPasskeyOpen(true);
+        // Remove the query param from the URL so the dialog doesn't re-open on refresh
+        router.replace('/', {scroll: false});
+    }
+  }, [searchParams, user, router]);
 
   const accounts = useMemo(() => {
     const allAccounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
@@ -249,6 +263,10 @@ export default function Dashboard() {
         onImport={handleImportTrades}
         accounts={accounts.filter(acc => acc !== 'all')}
       />
+       <RegisterPasskeyDialog
+        isOpen={isRegisterPasskeyOpen}
+        onOpenChange={setRegisterPasskeyOpen}
+       />
     </div>
   );
 }

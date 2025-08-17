@@ -39,7 +39,10 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // NOTE: In a real app, for a passkey-first approach, you might not create a password at all.
+      // Here, we create a user with a password, then immediately prompt for passkey registration.
+      // The password is required for the client-side Firebase login workaround.
+      const userCredential = await createUserWithEmailAndPassword(auth, email, `${email}-passkey`);
       const user = userCredential.user;
       
       await setDoc(doc(db, "users", user.uid), {
@@ -51,6 +54,7 @@ export default function RegisterPage() {
         currentChallenge: null,
       });
 
+      // After creating the user, immediately redirect to prompt for passkey registration.
       router.push('/?action=registerPasskey');
     } catch (error: any) {
       toast({

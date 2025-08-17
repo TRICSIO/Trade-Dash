@@ -174,5 +174,10 @@
     "signInWithPasskey": "Sign in with a passkey",
     "orContinueWith": "Or continue with",
     "loginSuccessful": "Login Successful",
-    "authCancelled": "Authentication was cancelled by the user."
+    "authCancelled": "Authentication was cancelled by the user.",
+
+    "registerPasskeyTitle": "Enable Passwordless Login",
+    "registerPasskeyDescription": "Secure your account and sign in with your face, fingerprint, or PIN. It's faster and more secure than a password.",
+    "skipForNow": "Skip for Now",
+    "passkeyReady": "Your passkey is all set. You can now use it to sign in on this device."
 }

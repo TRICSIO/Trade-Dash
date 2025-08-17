@@ -174,5 +174,10 @@
     "signInWithPasskey": "Iniciar sesión con una clave de acceso",
     "orContinueWith": "O continuar con",
     "loginSuccessful": "Inicio de sesión exitoso",
-    "authCancelled": "La autenticación fue cancelada por el usuario."
+    "authCancelled": "La autenticación fue cancelada por el usuario.",
+
+    "registerPasskeyTitle": "Habilitar inicio de sesión sin contraseña",
+    "registerPasskeyDescription": "Asegure su cuenta e inicie sesión con su rostro, huella digital o PIN. Es más rápido y seguro que una contraseña.",
+    "skipForNow": "Omitir por ahora",
+    "passkeyReady": "Su clave de acceso está lista. Ahora puede usarla para iniciar sesión en este dispositivo."
 }

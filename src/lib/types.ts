@@ -22,8 +22,8 @@ export type AccountSettings = {
 
 // Types for WebAuthn
 export interface Authenticator {
-  credentialID: string; // Base64URL encoded
-  credentialPublicKey: string; // Base64URL encoded
+  credentialID: string; // base64 string
+  credentialPublicKey: string; // base64 string
   counter: number;
   credentialDeviceType: 'singleDevice' | 'multiDevice';
   credentialBackedUp: boolean;

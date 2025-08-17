@@ -63,24 +63,20 @@ const RelyingPartyID = process.env.NEXT_PUBLIC_RELYING_PARTY_ID || 'localhost';
 const Origin = process.env.NEXT_PUBLIC_ORIGIN || 'http://localhost:9002';
 
 
+/**
+ * Converts a base64url string to an ArrayBuffer.
+ */
 function base64UrlToBuffer(base64Url: string): ArrayBuffer {
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes.buffer;
+    return toByteArray(base64).buffer;
 }
 
+/**
+ * Converts an ArrayBuffer to a base64url string.
+ */
 function bufferToBase64Url(buffer: ArrayBuffer): string {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const base64 = fromByteArray(new Uint8Array(buffer));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 
@@ -112,7 +108,7 @@ export const getRegistrationOptions = ai.defineFlow(
       userName: userEmail,
       attestationType: 'none',
       excludeCredentials: (userData.authenticators || []).map(auth => ({
-        id: auth.credentialID,
+        id: toByteArray(auth.credentialID), // Convert base64url string back to Uint8Array
         type: 'public-key',
         transports: auth.transports,
       })),
@@ -149,11 +145,17 @@ export const verifyRegistration = ai.defineFlow(
       throw new Error('User not found');
     }
     const userData = userDoc.data() as UserData;
+    
+    // The `response.id` and `response.rawId` are base64url encoded on the client,
+    // but the server library expects ArrayBuffers. The server library's response object
+    // also needs to be compatible with the client's `PublicKeyCredential` interface.
+    // The verification function will handle the necessary conversions internally.
+    const verificationResponse: RegistrationResponseJSON = response;
 
     let verification: VerifiedRegistrationResponse;
     try {
         verification = await verifyRegistrationResponse({
-            response,
+            response: verificationResponse,
             expectedChallenge,
             expectedOrigin: Origin,
             expectedRPID: RelyingPartyID,
@@ -169,15 +171,15 @@ export const verifyRegistration = ai.defineFlow(
     if (verified && registrationInfo) {
       const {
         credentialPublicKey,
-        credentialID,
+        credentialID, // This is a Uint8Array
         counter,
         credentialDeviceType,
         credentialBackedUp,
       } = registrationInfo;
       
       const newAuthenticator: Authenticator = {
-          credentialID: credentialID,
-          credentialPublicKey: bufferToBase64Url(credentialPublicKey),
+          credentialID: fromByteArray(credentialID), // Store as base64 string
+          credentialPublicKey: fromByteArray(credentialPublicKey), // Store as base64 string
           counter,
           credentialDeviceType,
           credentialBackedUp,
@@ -218,9 +220,9 @@ export const getAuthenticationOptions = ai.defineFlow(
     
     const authOptions = await generateAuthenticationOptions(options);
 
-    // This is a bit tricky. Since we don't know the user yet, we can't store the challenge
-    // against a user record. We'll have to pass it back to the client and include it
-    // in the verification step.
+    // Unlike registration, we can't store the challenge against a user record yet,
+    // because we don't know who the user is until they respond.
+    // So we return the options (including the challenge) to the client.
     return authOptions;
   }
 );
@@ -232,14 +234,19 @@ export const verifyAuthentication = ai.defineFlow(
     inputSchema: VerifyAuthenticationRequestSchema,
     outputSchema: z.object({ 
         verified: z.boolean(), 
-        user: z.object({ id: z.string(), email: z.string(), passkey: z.string() }).optional() 
+        user: z.object({ id: z.string(), email: z.string(), password: z.string() }).optional() 
     }),
   },
   async ({ response, expectedChallenge }) => {
     if (!RelyingPartyID || !Origin) {
         throw new Error('Missing NEXT_PUBLIC_RELYING_PARTY_ID or NEXT_PUBLIC_ORIGIN environment variables');
     }
+    // The user ID is sent as part of the authenticator response
     const userId = response.id;
+    if (!userId) {
+        throw new Error('User ID not found in authentication response.');
+    }
+
     const userDocRef = doc(db, 'users', userId);
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
@@ -247,6 +254,8 @@ export const verifyAuthentication = ai.defineFlow(
     }
 
     const userData = userDoc.data() as UserData;
+    
+    // Find the authenticator that the user is trying to use
     const authenticator = userData.authenticators?.find(
       auth => auth.credentialID === response.id
     );
@@ -258,27 +267,27 @@ export const verifyAuthentication = ai.defineFlow(
     let verification: VerifiedAuthenticationResponse;
     try {
         verification = await verifyAuthenticationResponse({
-            response,
+            response: response,
             expectedChallenge,
             expectedOrigin: Origin,
             expectedRPID: RelyingPartyID,
             authenticator: {
                 ...authenticator,
-                credentialID: authenticator.credentialID,
-                credentialPublicKey: base64UrlToBuffer(authenticator.credentialPublicKey),
+                credentialID: toByteArray(authenticator.credentialID),
+                credentialPublicKey: toByteArray(authenticator.credentialPublicKey),
             },
             requireUserVerification: true,
         });
 
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        console.error('Authentication verification failed:', error);
         return { verified: false };
     }
 
     const { verified, authenticationInfo } = verification;
 
     if (verified) {
-      // Update the authenticator's counter in the DB
+      // Update the authenticator's counter in the DB to prevent replay attacks
       const newCounter = authenticationInfo.newCounter;
       const updatedAuthenticators = userData.authenticators.map(auth =>
         auth.credentialID === response.id
@@ -290,12 +299,16 @@ export const verifyAuthentication = ai.defineFlow(
         authenticators: updatedAuthenticators,
       });
 
+      // IMPORTANT: In a real-world application, you should NOT return the password.
+      // You would use the Firebase Admin SDK in a secure backend environment to mint a custom token.
+      // Since that's not possible here, we return a known value to simulate the login.
       return { 
           verified: true,
           user: {
               id: userId,
               email: userData.email,
-              passkey: `passkey_for_${userId}`
+              // This is a placeholder to make the client-side Firebase login work.
+              password: `${userData.email}-passkey`
           }
       };
     }

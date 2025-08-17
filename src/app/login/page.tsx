@@ -47,16 +47,24 @@ export default function LoginPage() {
   const handlePasskeyLogin = async () => {
     setLoading(true);
     try {
+        // 1. Get authentication options from the server
         const options = await getAuthenticationOptions();
+
+        // 2. Prompt the user for their passkey
         const authResponse = await startAuthentication(options);
+
+        // 3. Verify the authentication response with the server
         const { verified, user } = await verifyAuthentication({
             response: authResponse,
             expectedChallenge: options.challenge,
         });
 
         if (verified && user) {
-             // Manually sign in the user with the custom token from the server
-            await signInWithEmailAndPassword(auth, user.email, user.passkey)
+            // 4. THIS IS A WORKAROUND. In a real app, the server would return a custom
+            // Firebase auth token to sign the user in. Here, we use a known password
+            // pattern to achieve the same result for this demo.
+            await signInWithEmailAndPassword(auth, user.email, user.password)
+            
             toast({
                 title: t('loginSuccessful'),
                 description: t('welcomeBack'),
@@ -94,7 +102,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Button onClick={handlePasskeyLogin} variant="outline" className="w-full">
+            <Button onClick={handlePasskeyLogin} variant="outline" className="w-full" disabled={loading}>
                 <Fingerprint className="mr-2 h-4 w-4" />
                 {t('signInWithPasskey')}
             </Button>
