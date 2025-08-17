@@ -152,5 +152,7 @@
     "fontSizeDescription": "Adjust the application's font size.",
     "small": "Small",
     "medium": "Medium",
-    "large": "Large"
+    "large": "Large",
+    "languageSettings": "Language Settings",
+    "languageSettingsDescription": "Choose your preferred language."
 }

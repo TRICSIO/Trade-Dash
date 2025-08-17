@@ -8,13 +8,14 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Moon, Plus, Sun, Type } from 'lucide-react';
+import { Languages, Moon, Plus, Sun, Type } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTheme } from 'next-themes';
 import { useFontSize } from '@/context/font-size-context';
 import { Slider } from '@/components/ui/slider';
+import { useLanguage } from '@/context/language-context';
 
 function SettingsPage() {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ function SettingsPage() {
   const { toast } = useToast();
   const { setTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
+  const { setLanguage } = useLanguage();
   const [newAccountName, setNewAccountName] = useState('');
 
   const fontSizeMapping: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
@@ -184,6 +186,20 @@ function SettingsPage() {
                             />
                             <span className="text-lg text-muted-foreground">{t('large')}</span>
                         </div>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>{t('languageSettings')}</CardTitle>
+                        <CardDescription>{t('languageSettingsDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("en")}>
+                           English
+                        </Button>
+                         <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("es")}>
+                           Español
+                        </Button>
                     </CardContent>
                 </Card>
             </div>

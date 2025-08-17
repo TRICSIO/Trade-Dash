@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, CandlestickChart, FileUp, LogOut, FileDown, Languages, Cog, Menu, Home } from 'lucide-react';
+import { Plus, CandlestickChart, FileUp, LogOut, FileDown, Cog, Menu, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -13,14 +13,7 @@ import {
   SheetTrigger,
   SheetClose
 } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { useTranslation } from '@/hooks/use-translation';
-import { useLanguage } from '@/context/language-context';
 
 
 type AppHeaderProps = {
@@ -34,7 +27,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
   const { user } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
-  const { setLanguage } = useLanguage();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -80,22 +72,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                     <span className="sr-only">{t('settings')}</span>
                  </Link>
               </Button>
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Languages className="h-5 w-5" />
-                    <span className="sr-only">{t('changeLanguage')}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setLanguage("en")}>
-                    English
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLanguage("es")}>
-                    Español
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
               <Button variant="ghost" size="icon" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
                 <span className="sr-only">{t('logout')}</span>
@@ -146,18 +122,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                                 <Button onClick={onAddTradeClick} className="w-full justify-start">
                                     <Plus className="mr-2 h-4 w-4" />
                                     {t('addTrade')}
-                                </Button>
-                             </SheetClose>
-                             <div className="border-t -mx-6 my-2"></div>
-                             <h4 className="px-2 text-sm font-medium text-muted-foreground">{t('language')}</h4>
-                             <SheetClose asChild>
-                                <Button variant="ghost" onClick={() => setLanguage("en")} className="w-full justify-start">
-                                    English
-                                </Button>
-                             </SheetClose>
-                             <SheetClose asChild>
-                                <Button variant="ghost" onClick={() => setLanguage("es")} className="w-full justify-start">
-                                    Español
                                 </Button>
                              </SheetClose>
                              <div className="border-t -mx-6 my-2"></div>
