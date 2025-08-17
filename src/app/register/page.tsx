@@ -58,12 +58,13 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-             <div className="flex justify-center items-center gap-2 mb-4">
+             <div className="flex justify-center items-center gap-2 mb-2">
                 <CandlestickChart className="h-10 w-10 text-primary" />
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
                     Trade-Dash
                 </h1>
             </div>
+            <p className="text-sm italic mb-4">by TRICSIO</p>
           <CardTitle>{t('createAnAccount')}</CardTitle>
           <CardDescription>{t('joinToStart')}</CardDescription>
         </CardHeader>
