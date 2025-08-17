@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-provider';
 import { LanguageProvider } from '@/context/language-context';
+import { FontSizeProvider } from '@/context/font-size-context';
 
 export const metadata: Metadata = {
   title: 'Trade-Dash',
@@ -24,12 +25,14 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-            <AuthProvider>
-              <LanguageProvider>
+          <AuthProvider>
+            <LanguageProvider>
+              <FontSizeProvider>
                 {children}
                 <Toaster />
-              </LanguageProvider>
-            </AuthProvider>
+              </FontSizeProvider>
+            </LanguageProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

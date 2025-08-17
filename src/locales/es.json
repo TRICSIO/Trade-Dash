@@ -147,5 +147,10 @@
     "accountProvider": "Proveedor/Bróker",
     "accountNumber": "Número de Cuenta",
     "themeSettings": "Ajustes de Tema",
-    "themeSettingsDescription": "Ajusta la apariencia de la aplicación."
+    "themeSettingsDescription": "Ajusta la apariencia de la aplicación.",
+    "fontSize": "Tamaño de Fuente",
+    "fontSizeDescription": "Ajusta el tamaño de la fuente de la aplicación.",
+    "small": "Pequeño",
+    "medium": "Mediano",
+    "large": "Grande"
 }

@@ -8,11 +8,12 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Moon, Plus, Sun } from 'lucide-react';
+import { Moon, Plus, Sun, Type } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTheme } from 'next-themes';
+import { useFontSize } from '@/context/font-size-context';
 
 function SettingsPage() {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ function SettingsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { setTheme } = useTheme();
+  const { setFontSize } = useFontSize();
   const [newAccountName, setNewAccountName] = useState('');
 
   const handleBalanceChange = (accountName: string, value: string) => {
@@ -159,6 +161,23 @@ function SettingsPage() {
                         </Button>
                          <Button variant="outline" className="w-full justify-start" onClick={() => setTheme("system")}>
                            <Sun className="mr-2 h-4 w-4" />/{' '}<Moon className="ml-1 mr-2 h-4 w-4" /> {t('system')}
+                        </Button>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>{t('fontSize')}</CardTitle>
+                        <CardDescription>{t('fontSizeDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => setFontSize("small")}>
+                           <Type className="mr-2 h-4 w-4" /> {t('small')}
+                        </Button>
+                         <Button variant="outline" className="w-full justify-start" onClick={() => setFontSize("medium")}>
+                           <Type className="mr-2 h-4 w-4" /> {t('medium')}
+                        </Button>
+                         <Button variant="outline" className="w-full justify-start" onClick={() => setFontSize("large")}>
+                           <Type className="mr-2 h-4 w-4" /> {t('large')}
                         </Button>
                     </CardContent>
                 </Card>

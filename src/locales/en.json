@@ -147,5 +147,10 @@
     "accountProvider": "Provider/Broker",
     "accountNumber": "Account Number",
     "themeSettings": "Theme Settings",
-    "themeSettingsDescription": "Adjust the application's appearance."
+    "themeSettingsDescription": "Adjust the application's appearance.",
+    "fontSize": "Font Size",
+    "fontSizeDescription": "Adjust the application's font size.",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
 }
