@@ -1,11 +1,12 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, CandlestickChart, FileUp, LogOut, FileDown, Moon, Sun, Languages, Cog, Menu } from 'lucide-react';
+import { Plus, CandlestickChart, FileUp, LogOut, FileDown, Moon, Sun, Languages, Cog, Menu, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Sheet,
   SheetContent,
@@ -27,11 +28,10 @@ type AppHeaderProps = {
   onAddTradeClick: () => void;
   onImportClick: () => void;
   onBackupClick: () => void;
-  onSettingsClick: () => void;
 };
 
 
-export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick, onSettingsClick }: AppHeaderProps) {
+export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick }: AppHeaderProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { setTheme } = useTheme();
@@ -55,6 +55,12 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
         <div className="hidden sm:flex flex-1 items-center justify-end space-x-2">
           {user && (
             <>
+               <Button variant="ghost" size="icon" asChild>
+                <Link href="/">
+                    <Home className="h-5 w-5" />
+                    <span className="sr-only">Dashboard</span>
+                </Link>
+              </Button>
               <Button variant="outline" onClick={onBackupClick}>
                   <FileDown className="mr-2 h-4 w-4" />
                   {t('backup')}
@@ -67,9 +73,11 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                   <Plus className="mr-2 h-4 w-4" />
                   {t('addTrade')}
               </Button>
-               <Button variant="ghost" size="icon" onClick={onSettingsClick}>
-                <Cog className="h-5 w-5" />
-                <span className="sr-only">{t('settings')}</span>
+               <Button variant="ghost" size="icon" asChild>
+                 <Link href="/settings">
+                    <Cog className="h-5 w-5" />
+                    <span className="sr-only">{t('settings')}</span>
+                 </Link>
               </Button>
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -125,6 +133,14 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                     </SheetTrigger>
                     <SheetContent>
                         <div className="grid gap-4 py-4">
+                              <SheetClose asChild>
+                                <Button variant="ghost" asChild className="w-full justify-start">
+                                    <Link href="/">
+                                        <Home className="mr-2 h-4 w-4" />
+                                        Dashboard
+                                    </Link>
+                                </Button>
+                             </SheetClose>
                              <SheetClose asChild>
                                 <Button variant="outline" onClick={onBackupClick} className="w-full justify-start">
                                     <FileDown className="mr-2 h-4 w-4" />
@@ -138,9 +154,11 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                                 </Button>
                              </SheetClose>
                               <SheetClose asChild>
-                                <Button variant="outline" onClick={onSettingsClick} className="w-full justify-start">
-                                    <Cog className="mr-2 h-4 w-4" />
-                                    {t('settings')}
+                                <Button variant="outline" asChild className="w-full justify-start">
+                                     <Link href="/settings">
+                                        <Cog className="mr-2 h-4 w-4" />
+                                        {t('settings')}
+                                     </Link>
                                 </Button>
                              </SheetClose>
                              <SheetClose asChild>

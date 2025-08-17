@@ -17,16 +17,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from '@/hooks/use-translation';
 import StyleDistributionChart from './style-distribution-chart';
-import AccountSettingsDialog from './account-settings-dialog';
 
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, setAccountSettings, loading } = useFirestoreTrades(user?.uid);
+  const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
   const [selectedAccount, setSelectedAccount] = useState('all');
   const { toast } = useToast();
@@ -206,7 +204,6 @@ export default function Dashboard() {
         onAddTradeClick={handleOpenAddDialog} 
         onImportClick={() => setImportTradeOpen(true)}
         onBackupClick={handleBackup} 
-        onSettingsClick={() => setSettingsOpen(true)}
       />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
@@ -283,14 +280,6 @@ export default function Dashboard() {
         onOpenChange={setImportTradeOpen}
         onImport={handleImportTrades}
         accounts={accounts.filter(acc => acc !== 'all')}
-      />
-      <AccountSettingsDialog
-        isOpen={isSettingsOpen}
-        onOpenChange={setSettingsOpen}
-        startingBalances={startingBalances}
-        accountSettings={accountSettings}
-        onStartingBalancesChange={setStartingBalances}
-        onAccountSettingsChange={setAccountSettings}
       />
     </div>
   );
