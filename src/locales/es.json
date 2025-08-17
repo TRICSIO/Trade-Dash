@@ -1,3 +1,4 @@
+
 {
     "welcomeBack": "Bienvenido de Nuevo",
     "enterCredentials": "Introduce tus credenciales para acceder a tu panel.",
@@ -156,5 +157,7 @@
     "languageSettings": "Ajustes de Idioma",
     "languageSettingsDescription": "Elige tu idioma preferido.",
     "dataManagement": "Gestión de Datos",
-    "dataManagementDescription": "Gestiona los datos de tu aplicación."
+    "dataManagementDescription": "Gestiona los datos de tu aplicación.",
+    "contactDeveloper": "Contactar al Desarrollador",
+    "contactDeveloperDescription": "Para preguntas, soporte o comentarios, por favor contáctenos."
 }

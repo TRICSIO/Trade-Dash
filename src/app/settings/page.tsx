@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileDown, Plus } from 'lucide-react';
+import { FileDown, Plus, Mail } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -252,6 +252,19 @@ function SettingsPage() {
                     <Button variant="outline" className="w-full sm:w-auto justify-start" onClick={handleBackup}>
                        <FileDown className="mr-2 h-4 w-4" /> {t('backupData')}
                     </Button>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('contactDeveloper')}</CardTitle>
+                    <CardDescription>{t('contactDeveloperDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <a href="mailto:pbolouvi@gmail.com" className="inline-flex items-center">
+                        <Button variant="outline" className="w-full sm:w-auto justify-start">
+                        <Mail className="mr-2 h-4 w-4" /> pbolouvi@gmail.com
+                        </Button>
+                    </a>
                 </CardContent>
             </Card>
         </div>

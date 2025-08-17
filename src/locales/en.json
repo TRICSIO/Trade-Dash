@@ -1,3 +1,4 @@
+
 {
     "welcomeBack": "Welcome Back",
     "enterCredentials": "Enter your credentials to access your dashboard.",
@@ -156,5 +157,7 @@
     "languageSettings": "Language Settings",
     "languageSettingsDescription": "Choose your preferred language.",
     "dataManagement": "Data Management",
-    "dataManagementDescription": "Manage your application data."
+    "dataManagementDescription": "Manage your application data.",
+    "contactDeveloper": "Contact Developer",
+    "contactDeveloperDescription": "For questions, support, or feedback, please reach out."
 }

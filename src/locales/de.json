@@ -149,5 +149,7 @@
     "languageSettings": "Spracheinstellungen",
     "languageSettingsDescription": "Wählen Sie Ihre bevorzugte Sprache.",
     "dataManagement": "Datenverwaltung",
-    "dataManagementDescription": "Verwalten Sie Ihre Anwendungsdaten."
+    "dataManagementDescription": "Verwalten Sie Ihre Anwendungsdaten.",
+    "contactDeveloper": "Entwickler kontaktieren",
+    "contactDeveloperDescription": "Bei Fragen, Unterstützung oder Feedback wenden Sie sich bitte an uns."
 }
