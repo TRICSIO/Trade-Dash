@@ -19,7 +19,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useTheme } from '@/context/theme-provider';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
 
@@ -34,7 +33,6 @@ type AppHeaderProps = {
 export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick }: AppHeaderProps) {
   const { user } = useAuth();
   const router = useRouter();
-  const { setTheme } = useTheme();
   const { t } = useTranslation();
   const { setLanguage } = useLanguage();
 
@@ -92,26 +90,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setLanguage("es")}>
                     Español
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">{t('toggleTheme')}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setTheme("light")}>
-                    {t('light')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    {t('dark')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme("system")}>
-                    {t('system')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -179,20 +157,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                                     Español
                                 </Button>
                              </SheetClose>
-                             <div className="border-t -mx-6 my-2"></div>
-                             <h4 className="px-2 text-sm font-medium text-muted-foreground">{t('theme')}</h4>
-                              <SheetClose asChild>
-                                 <Button variant="ghost" onClick={() => setTheme("light")} className="w-full justify-start">
-                                    <Sun className="mr-2 h-4 w-4" />
-                                    {t('light')}
-                                </Button>
-                              </SheetClose>
-                              <SheetClose asChild>
-                                 <Button variant="ghost" onClick={() => setTheme("dark")} className="w-full justify-start">
-                                    <Moon className="mr-2 h-4 w-4" />
-                                    {t('dark')}
-                                </Button>
-                              </SheetClose>
                              <div className="border-t -mx-6 my-2"></div>
                              <SheetClose asChild>
                                 <Button variant="ghost" onClick={handleLogout} className="w-full justify-start">

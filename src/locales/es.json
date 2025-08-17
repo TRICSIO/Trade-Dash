@@ -144,5 +144,7 @@
     "add": "Añadir",
     "accountNickname": "Apodo de la Cuenta",
     "accountProvider": "Proveedor/Bróker",
-    "accountNumber": "Número de Cuenta"
+    "accountNumber": "Número de Cuenta",
+    "themeSettings": "Ajustes de Tema",
+    "themeSettingsDescription": "Ajusta la apariencia de la aplicación."
 }
