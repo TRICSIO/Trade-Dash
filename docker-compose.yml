@@ -2,6 +2,6 @@ services:
   web:
     build: .
     ports:
-      - "9002:3000"
+      - "9002:9002"
     environment:
       - NODE_ENV=production
