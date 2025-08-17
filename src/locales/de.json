@@ -151,5 +151,8 @@
     "dataManagement": "Datenverwaltung",
     "dataManagementDescription": "Verwalten Sie Ihre Anwendungsdaten.",
     "contactDeveloper": "Entwickler kontaktieren",
-    "contactDeveloperDescription": "Bei Fragen, Unterstützung oder Feedback wenden Sie sich bitte an uns."
+    "contactDeveloperDescription": "Bei Fragen, Unterstützung oder Feedback wenden Sie sich bitte an uns.",
+    "other": "Andere...",
+    "otherBroker": "Anderer Broker",
+    "enterBrokerName": "Brokernamen eingeben"
 }

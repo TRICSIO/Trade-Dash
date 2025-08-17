@@ -159,5 +159,8 @@
     "dataManagement": "Gestión de Datos",
     "dataManagementDescription": "Gestiona los datos de tu aplicación.",
     "contactDeveloper": "Contactar al Desarrollador",
-    "contactDeveloperDescription": "Para preguntas, soporte o comentarios, por favor contáctenos."
+    "contactDeveloperDescription": "Para preguntas, soporte o comentarios, por favor contáctenos.",
+    "other": "Otro...",
+    "otherBroker": "Otro Bróker",
+    "enterBrokerName": "Introducir nombre del bróker"
 }

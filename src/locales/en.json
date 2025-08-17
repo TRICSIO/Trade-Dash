@@ -159,5 +159,8 @@
     "dataManagement": "Data Management",
     "dataManagementDescription": "Manage your application data.",
     "contactDeveloper": "Contact Developer",
-    "contactDeveloperDescription": "For questions, support, or feedback, please reach out."
+    "contactDeveloperDescription": "For questions, support, or feedback, please reach out.",
+    "other": "Other...",
+    "otherBroker": "Other Broker",
+    "enterBrokerName": "Enter broker name"
 }

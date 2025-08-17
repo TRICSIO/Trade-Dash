@@ -151,5 +151,8 @@
     "dataManagement": "Gestion des données",
     "dataManagementDescription": "Gérez les données de votre application.",
     "contactDeveloper": "Contacter le développeur",
-    "contactDeveloperDescription": "Pour des questions, du support ou des commentaires, veuillez nous contacter."
+    "contactDeveloperDescription": "Pour des questions, du support ou des commentaires, veuillez nous contacter.",
+    "other": "Autre...",
+    "otherBroker": "Autre courtier",
+    "enterBrokerName": "Entrez le nom du courtier"
 }
