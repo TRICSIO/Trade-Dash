@@ -14,6 +14,7 @@ import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { useTheme } from 'next-themes';
 import { useFontSize } from '@/context/font-size-context';
+import { Slider } from '@/components/ui/slider';
 
 function SettingsPage() {
   const { user } = useAuth();
@@ -21,8 +22,10 @@ function SettingsPage() {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { setTheme } = useTheme();
-  const { setFontSize } = useFontSize();
+  const { fontSize, setFontSize } = useFontSize();
   const [newAccountName, setNewAccountName] = useState('');
+
+  const fontSizeMapping: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
 
   const handleBalanceChange = (accountName: string, value: string) => {
     const newBalances = { ...startingBalances, [accountName]: Number(value) };
@@ -169,16 +172,18 @@ function SettingsPage() {
                         <CardTitle>{t('fontSize')}</CardTitle>
                         <CardDescription>{t('fontSizeDescription')}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => setFontSize("small")}>
-                           <Type className="mr-2 h-4 w-4" /> {t('small')}
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setFontSize("medium")}>
-                           <Type className="mr-2 h-4 w-4" /> {t('medium')}
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setFontSize("large")}>
-                           <Type className="mr-2 h-4 w-4" /> {t('large')}
-                        </Button>
+                    <CardContent className="pt-4">
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-muted-foreground">{t('small')}</span>
+                            <Slider
+                                defaultValue={[fontSizeMapping.indexOf(fontSize)]}
+                                min={0}
+                                max={2}
+                                step={1}
+                                onValueChange={(value) => setFontSize(fontSizeMapping[value[0]])}
+                            />
+                            <span className="text-lg text-muted-foreground">{t('large')}</span>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

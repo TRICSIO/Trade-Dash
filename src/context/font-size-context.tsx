@@ -9,6 +9,12 @@ interface FontSizeContextType {
   setFontSize: (fontSize: FontSize) => void;
 }
 
+const fontSizeValueMap: Record<FontSize, string> = {
+  small: '14px',
+  medium: '16px',
+  large: '18px',
+};
+
 export const FontSizeContext = createContext<FontSizeContextType | undefined>(undefined);
 
 export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
@@ -23,8 +29,7 @@ export const FontSizeProvider = ({ children }: { children: ReactNode }) => {
   
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('font-size-small', 'font-size-medium', 'font-size-large');
-    root.classList.add(`font-size-${fontSize}`);
+    root.style.setProperty('--font-size-base', fontSizeValueMap[fontSize]);
   }, [fontSize]);
 
 
