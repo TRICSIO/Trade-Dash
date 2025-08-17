@@ -1,12 +1,14 @@
 
+'use client';
+
 import AppHeader from "@/components/header";
 import ProtectedRoute from "@/components/protected-route";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getTopMovers, type TopMoversOutput } from "@/ai/flows/get-top-movers";
 import type { StockMover } from "@/lib/types";
 import { ArrowDownLeft, ArrowUpRight, TrendingUp } from "lucide-react";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
@@ -51,19 +53,20 @@ function MoverTable({ title, data, isGainers }: { title: string, data: StockMove
     );
 }
 
-function TopMoversClientPage({ initialData }: { initialData?: TopMoversOutput }) {
-    'use client';
-    const [movers, setMovers] = useState<TopMoversOutput | undefined>(initialData);
-    const [loading, setLoading] = useState(!initialData);
+
+function TopMoversPage() {
+    const [movers, setMovers] = useState<TopMoversOutput | undefined>(undefined);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!initialData) {
-            getTopMovers().then(data => {
-                setMovers(data);
-                setLoading(false);
-            });
-        }
-    }, [initialData]);
+        getTopMovers().then(data => {
+            setMovers(data);
+            setLoading(false);
+        }).catch(err => {
+            console.error("Failed to fetch top movers:", err);
+            setLoading(false);
+        });
+    }, []);
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -95,19 +98,10 @@ function TopMoversClientPage({ initialData }: { initialData?: TopMoversOutput })
     );
 }
 
-// This is the Server Component that fetches the data
-async function TopMoversPage() {
-    const data = await getTopMovers();
-    return <TopMoversClientPage initialData={data} />;
-}
-
-// This remains the default export for the route
 export default function TopMovers() {
     return (
         <ProtectedRoute>
-            <Suspense fallback={<TopMoversClientPage />}>
-              <TopMoversPage />
-            </Suspense>
+            <TopMoversPage />
         </ProtectedRoute>
     );
 }
