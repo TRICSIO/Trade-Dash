@@ -8,11 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getTopMovers } from "@/ai/flows/get-top-movers";
 import type { StockMover } from "@/lib/types";
 import { ArrowDownLeft, ArrowUpRight, TrendingUp } from "lucide-react";
+import { Suspense } from "react";
 
-async function TopMoversPage() {
-    const { gainers, losers } = await getTopMovers();
 
-    const MoverTable = ({ title, data, isGainers }: { title: string, data: StockMover[], isGainers: boolean }) => (
+function MoverTable({ title, data, isGainers }: { title: string, data: StockMover[], isGainers: boolean }) {
+    return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -50,6 +50,10 @@ async function TopMoversPage() {
             </CardContent>
         </Card>
     );
+}
+
+async function TopMoversPage() {
+    const { gainers, losers } = await getTopMovers();
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -74,11 +78,12 @@ async function TopMoversPage() {
     );
 }
 
-
-export default function TopMovers() {
+export default async function TopMovers() {
     return (
         <ProtectedRoute>
-            <TopMoversPage />
+            <Suspense fallback={<div>Loading...</div>}>
+              <TopMoversPage />
+            </Suspense>
         </ProtectedRoute>
-    )
+    );
 }
