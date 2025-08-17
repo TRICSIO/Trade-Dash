@@ -1,6 +1,4 @@
 
-'use client';
-
 import AppHeader from "@/components/header";
 import ProtectedRoute from "@/components/protected-route";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -54,6 +52,7 @@ function MoverTable({ title, data, isGainers }: { title: string, data: StockMove
 }
 
 function TopMoversClientPage({ initialData }: { initialData?: TopMoversOutput }) {
+    'use client';
     const [movers, setMovers] = useState<TopMoversOutput | undefined>(initialData);
     const [loading, setLoading] = useState(!initialData);
 
