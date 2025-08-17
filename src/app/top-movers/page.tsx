@@ -1,14 +1,15 @@
 
-'use server';
+'use client';
 
 import AppHeader from "@/components/header";
 import ProtectedRoute from "@/components/protected-route";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getTopMovers } from "@/ai/flows/get-top-movers";
+import { getTopMovers, type TopMoversOutput } from "@/ai/flows/get-top-movers";
 import type { StockMover } from "@/lib/types";
 import { ArrowDownLeft, ArrowUpRight, TrendingUp } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 function MoverTable({ title, data, isGainers }: { title: string, data: StockMover[], isGainers: boolean }) {
@@ -52,8 +53,18 @@ function MoverTable({ title, data, isGainers }: { title: string, data: StockMove
     );
 }
 
-async function TopMoversPage() {
-    const { gainers, losers } = await getTopMovers();
+function TopMoversClientPage({ initialData }: { initialData?: TopMoversOutput }) {
+    const [movers, setMovers] = useState<TopMoversOutput | undefined>(initialData);
+    const [loading, setLoading] = useState(!initialData);
+
+    useEffect(() => {
+        if (!initialData) {
+            getTopMovers().then(data => {
+                setMovers(data);
+                setLoading(false);
+            });
+        }
+    }, [initialData]);
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -67,21 +78,35 @@ async function TopMoversPage() {
                             <p className="text-muted-foreground">Today's biggest market gainers and losers.</p>
                          </div>
                     </div>
-                   
-                    <div className="grid gap-8 md:grid-cols-2">
-                        <MoverTable title="Top Gainers" data={gainers} isGainers={true} />
-                        <MoverTable title="Top Losers" data={losers} isGainers={false} />
-                    </div>
+
+                    {loading || !movers ? (
+                         <div className="grid gap-8 md:grid-cols-2">
+                            <Skeleton className="h-96 w-full" />
+                            <Skeleton className="h-96 w-full" />
+                         </div>
+                    ) : (
+                        <div className="grid gap-8 md:grid-cols-2">
+                            <MoverTable title="Top Gainers" data={movers.gainers} isGainers={true} />
+                            <MoverTable title="Top Losers" data={movers.losers} isGainers={false} />
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
     );
 }
 
-export default async function TopMovers() {
+// This is the Server Component that fetches the data
+async function TopMoversPage() {
+    const data = await getTopMovers();
+    return <TopMoversClientPage initialData={data} />;
+}
+
+// This remains the default export for the route
+export default function TopMovers() {
     return (
         <ProtectedRoute>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<TopMoversClientPage />}>
               <TopMoversPage />
             </Suspense>
         </ProtectedRoute>
