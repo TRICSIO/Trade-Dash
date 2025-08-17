@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import {
   SheetClose
 } from "@/components/ui/sheet";
 import { useTranslation } from '@/hooks/use-translation';
+import useFirestoreTrades from '@/hooks/use-firestore-trades';
 
 
 type AppHeaderProps = {
@@ -24,6 +26,7 @@ type AppHeaderProps = {
 
 export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderProps) {
   const { user } = useAuth();
+  const { displayName } = useFirestoreTrades(user?.uid);
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -47,6 +50,8 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
         <div className="hidden sm:flex flex-1 items-center justify-end space-x-2">
           {user && (
             <>
+               <span className="text-sm text-muted-foreground">{t('welcome', { name: displayName })}</span>
+               <div className="border-l h-6 mx-2"></div>
                <Button variant="ghost" asChild>
                 <Link href="/">
                     <Home className="mr-2 h-4 w-4" />
@@ -90,6 +95,10 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                         </Button>
                     </SheetTrigger>
                     <SheetContent>
+                        <div className="py-4">
+                           <span className="text-sm font-medium text-muted-foreground px-4">{t('welcome', { name: displayName })}</span>
+                        </div>
+                        <div className="border-t -mx-6 my-2"></div>
                         <div className="grid gap-4 py-4">
                               <SheetClose asChild>
                                 <Button variant="ghost" asChild className="w-full justify-start">

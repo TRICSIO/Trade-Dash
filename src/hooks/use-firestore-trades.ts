@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Trade, AccountSettings } from '@/lib/types';
+import type { Trade, AccountSettings, UserData } from '@/lib/types';
 import { useToast } from './use-toast';
 
 // Debounce function
@@ -22,11 +23,17 @@ function useFirestoreTrades(userId?: string) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [startingBalances, setStartingBalances] = useState<Record<string, number>>({});
   const [accountSettings, setAccountSettings] = useState<AccountSettings>({});
+  const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const saveDataToFirestore = useCallback(
-    async (newTrades: Trade[], newBalances: Record<string, number>, newSettings: AccountSettings) => {
+    async (
+        newTrades: Trade[], 
+        newBalances: Record<string, number>, 
+        newSettings: AccountSettings,
+        newDisplayName?: string
+    ) => {
       if (!userId) return;
       try {
         const userDocRef = doc(db, 'users', userId);
@@ -39,7 +46,8 @@ function useFirestoreTrades(userId?: string) {
         await setDoc(userDocRef, { 
             trades: tradesToStore, 
             startingBalances: newBalances, 
-            accountSettings: newSettings 
+            accountSettings: newSettings,
+            ...(newDisplayName && { displayName: newDisplayName })
         }, { merge: true });
 
       } catch (error) {
@@ -63,7 +71,7 @@ function useFirestoreTrades(userId?: string) {
     
     const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
-            const data = docSnap.data();
+            const data = docSnap.data() as UserData;
             const tradesFromDb = (data.trades || []).map((t: any) => ({
               ...t,
               entryDate: new Date(t.entryDate),
@@ -72,11 +80,13 @@ function useFirestoreTrades(userId?: string) {
             setTrades(tradesFromDb);
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
+            setDisplayName(data.displayName);
         } else {
             console.log("No such document! A new one will be created on first save.");
             setTrades([]);
             setStartingBalances({});
             setAccountSettings({});
+            setDisplayName(undefined);
         }
         setLoading(false);
     }, (error) => {
@@ -107,7 +117,16 @@ function useFirestoreTrades(userId?: string) {
   }
 
 
-  return { trades, startingBalances, accountSettings, setTrades: handleSetTrades, setStartingBalances: handleSetStartingBalances, setAccountSettings: handleSetAccountSettings, loading };
+  return { 
+      trades, 
+      startingBalances, 
+      accountSettings, 
+      displayName,
+      setTrades: handleSetTrades, 
+      setStartingBalances: handleSetStartingBalances, 
+      setAccountSettings: handleSetAccountSettings, 
+      loading 
+    };
 }
 
 export default useFirestoreTrades;

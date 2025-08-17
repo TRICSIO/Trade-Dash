@@ -12,6 +12,8 @@
 
     "createAnAccount": "Create an Account",
     "joinToStart": "Join to start tracking your trades and improving your strategy.",
+    "firstName": "First Name",
+    "firstNameRequired": "First name is required.",
     "confirmPassword": "Confirm Password",
     "registering": "Registering...",
     "alreadyHaveAccount": "Already have an account?",
@@ -33,6 +35,7 @@
     "backupData": "Backup Data",
     "language": "Language",
     "theme": "Theme",
+    "welcome": "Welcome, {{name}}",
 
     "performanceOverview": "Performance Overview",
     "kpiDescription": "Your key trading metrics. Use the dropdown to filter by account.",

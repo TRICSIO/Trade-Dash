@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Trade, AccountSettings } from '@/lib/types';
+import type { Trade } from '@/lib/types';
 import useFirestoreTrades from '@/hooks/use-firestore-trades';
 import AppHeader from '@/components/header';
 import AddTradeDialog from '@/components/add-trade-dialog';
@@ -23,7 +24,14 @@ import RegisterPasskeyDialog from './register-passkey-dialog';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
+  const { 
+    trades, 
+    startingBalances, 
+    accountSettings,
+    setTrades, 
+    setStartingBalances, 
+    setAccountSettings 
+  } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
   const [isImportTradeOpen, setImportTradeOpen] = useState(false);

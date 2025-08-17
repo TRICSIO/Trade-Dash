@@ -1,3 +1,4 @@
+
 export type Trade = {
   id: string;
   instrument: string;
@@ -33,6 +34,7 @@ export interface Authenticator {
 export interface UserData {
     id: string;
     email: string;
+    displayName?: string;
     authenticators: Authenticator[];
     currentChallenge?: string;
 }

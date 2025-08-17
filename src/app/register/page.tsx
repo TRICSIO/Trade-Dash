@@ -1,8 +1,9 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { setDoc, doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -11,18 +12,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
-import { CandlestickChart, Fingerprint } from 'lucide-react';
+import { CandlestickChart } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
-import { startRegistration } from '@simplewebauthn/browser';
-import {
-  getRegistrationOptions,
-  verifyRegistration,
-} from '@/ai/flows/passkey-flow';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -30,6 +27,13 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!displayName) {
+        toast({
+            title: t('firstNameRequired'),
+            variant: 'destructive',
+        });
+        return;
+    }
     if (password !== confirmPassword) {
       toast({
         title: t('passwordsDoNotMatch'),
@@ -47,6 +51,7 @@ export default function RegisterPage() {
       
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
+        displayName: displayName,
         trades: [],
         startingBalances: {},
         accountSettings: {},
@@ -83,6 +88,18 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-4">
+             <div className="space-y-2">
+              <Label htmlFor="displayName">{t('firstName')}</Label>
+              <Input
+                id="displayName"
+                type="text"
+                placeholder="Alex"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                disabled={loading}
+              />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="email">{t('email')}</Label>
               <Input

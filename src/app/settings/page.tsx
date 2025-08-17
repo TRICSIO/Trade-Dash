@@ -23,7 +23,7 @@ import { getRegistrationOptions, verifyRegistration } from '@/ai/flows/passkey-f
 
 function SettingsPage() {
   const { user } = useAuth();
-  const { trades, startingBalances, accountSettings, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
+  const { trades, startingBalances, accountSettings, displayName, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
   const { t } = useTranslation();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -99,7 +99,11 @@ function SettingsPage() {
         if (!user) return;
         setIsRegisteringPasskey(true);
         try {
-            const options = await getRegistrationOptions({ userId: user.uid, userEmail: user.email! });
+            const options = await getRegistrationOptions({ 
+                userId: user.uid, 
+                userEmail: user.email!,
+                displayName: displayName
+            });
             const registrationResponse = await startRegistration(options);
             const { verified } = await verifyRegistration({
                 response: registrationResponse,

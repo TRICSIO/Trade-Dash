@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,7 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
-import { Fingerprint, CheckCircle2, XCircle } from 'lucide-react';
+import { Fingerprint, CheckCircle2 } from 'lucide-react';
 import { getRegistrationOptions, verifyRegistration } from '@/ai/flows/passkey-flow';
 import { startRegistration } from '@simplewebauthn/browser';
 import {
@@ -16,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import useFirestoreTrades from '@/hooks/use-firestore-trades';
 
 type RegisterPasskeyDialogProps = {
     isOpen: boolean;
@@ -24,6 +26,7 @@ type RegisterPasskeyDialogProps = {
 
 export default function RegisterPasskeyDialog({ isOpen, onOpenChange }: RegisterPasskeyDialogProps) {
   const { user } = useAuth();
+  const { displayName } = useFirestoreTrades(user?.uid);
   const { toast } = useToast();
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +38,11 @@ export default function RegisterPasskeyDialog({ isOpen, onOpenChange }: Register
     setIsLoading(true);
     try {
       // 1. Get registration options from the server
-      const options = await getRegistrationOptions({ userId: user.uid, userEmail: user.email });
+      const options = await getRegistrationOptions({ 
+        userId: user.uid, 
+        userEmail: user.email,
+        displayName: displayName,
+      });
 
       // 2. Prompt the user to create a passkey
       const registrationResponse = await startRegistration(options);

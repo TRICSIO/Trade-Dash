@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -36,6 +37,7 @@ import { fromByteArray, toByteArray } from 'base64-js';
 const RegistrationOptionsRequestSchema = z.object({
   userId: z.string(),
   userEmail: z.string(),
+  displayName: z.string().optional(),
 });
 export type RegistrationOptionsRequest = z.infer<
   typeof RegistrationOptionsRequestSchema
@@ -90,7 +92,7 @@ export const getRegistrationOptions = ai.defineFlow(
     inputSchema: RegistrationOptionsRequestSchema,
     outputSchema: z.any(), // PublickeyCredentialCreationOptionsJSON
   },
-  async ({ userId, userEmail }) => {
+  async ({ userId, userEmail, displayName }) => {
     if (!RelyingPartyID || !Origin) {
         throw new Error('Missing NEXT_PUBLIC_RELYING_PARTY_ID or NEXT_PUBLIC_ORIGIN environment variables');
     }
@@ -106,6 +108,7 @@ export const getRegistrationOptions = ai.defineFlow(
       rpID: RelyingPartyID,
       userID: userId,
       userName: userEmail,
+      userDisplayName: displayName || userEmail,
       attestationType: 'none',
       excludeCredentials: (userData.authenticators || []).map(auth => ({
         id: toByteArray(auth.credentialID), // Convert base64url string back to Uint8Array
