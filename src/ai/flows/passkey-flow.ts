@@ -59,8 +59,8 @@ export type VerifyAuthenticationRequest = z.infer<
 >;
 
 const RelyingPartyName = 'Trade-Dash';
-const RelyingPartyID = process.env.NEXT_PUBLIC_RELYING_PARTY_ID;
-const Origin = process.env.NEXT_PUBLIC_ORIGIN;
+const RelyingPartyID = process.env.NEXT_PUBLIC_RELYING_PARTY_ID || 'localhost';
+const Origin = process.env.NEXT_PUBLIC_ORIGIN || 'http://localhost:9002';
 
 
 function base64UrlToBuffer(base64Url: string): ArrayBuffer {
