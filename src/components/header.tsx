@@ -49,7 +49,7 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
         <div className="flex gap-2 items-center">
             <CandlestickChart className="h-8 w-8 text-primary" />
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                Trade Insights <span className="hidden sm:inline-block text-xl sm:text-2xl font-normal text-muted-foreground">by TRICSIO</span>
+                Trade-Dash
             </h1>
         </div>
         <div className="hidden sm:flex flex-1 items-center justify-end space-x-2">

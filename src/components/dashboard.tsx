@@ -123,7 +123,7 @@ export default function Dashboard() {
         const link = document.createElement('a');
         link.href = url;
         const date = new Date().toISOString().slice(0, 10);
-        link.download = `trade-insights-backup-${date}.json`;
+        link.download = `trade-dash-backup-${date}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

@@ -44,7 +44,7 @@ export default function LoginPage() {
             <div className="flex justify-center items-center gap-2 mb-4">
                 <CandlestickChart className="h-10 w-10 text-primary" />
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
-                    Trade Insights <span className="text-2xl sm:text-3xl font-normal text-muted-foreground">by TRICSIO</span>
+                    Trade-Dash
                 </h1>
             </div>
           <CardTitle>{t('welcomeBack')}</CardTitle>

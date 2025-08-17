@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/context/theme-provider';
 import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
-  title: 'Trade Insights by TRICSIO',
+  title: 'Trade-Dash',
   description: 'A dedicated trade journaling and analysis app to log and review your financial trades.',
 };
 
