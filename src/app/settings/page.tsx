@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -8,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileDown, Languages, Moon, Plus, Sun, Type } from 'lucide-react';
+import { FileDown, Plus } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -16,15 +17,16 @@ import { useTheme } from 'next-themes';
 import { useFontSize } from '@/context/font-size-context';
 import { Slider } from '@/components/ui/slider';
 import { useLanguage } from '@/context/language-context';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function SettingsPage() {
   const { user } = useAuth();
   const { trades, startingBalances, accountSettings, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
-  const { setLanguage } = useLanguage();
+  const { language, setLanguage } = useLanguage();
   const [newAccountName, setNewAccountName] = useState('');
 
   const fontSizeMapping: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
@@ -95,8 +97,8 @@ function SettingsPage() {
   return (
     <div className="flex flex-col min-h-screen bg-background">
        <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}} />
-       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
-        <div className="grid gap-8 md:grid-cols-2">
+       <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <div className="max-w-4xl mx-auto space-y-8">
             <Card>
                 <CardHeader>
                     <CardTitle>{t('accountSettings')}</CardTitle>
@@ -182,41 +184,24 @@ function SettingsPage() {
                     </div>
                 </CardContent>
             </Card>
-             <div className="space-y-8">
+
+            <div className="grid gap-8 md:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle>{t('themeSettings')}</CardTitle>
                         <CardDescription>{t('themeSettingsDescription')}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => setTheme("light")}>
-                           <Sun className="mr-2 h-4 w-4" /> {t('light')}
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setTheme("dark")}>
-                           <Moon className="mr-2 h-4 w-4" /> {t('dark')}
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setTheme("system")}>
-                           <Sun className="mr-2 h-4 w-4" />/{' '}<Moon className="ml-1 mr-2 h-4 w-4" /> {t('system')}
-                        </Button>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>{t('fontSize')}</CardTitle>
-                        <CardDescription>{t('fontSizeDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-4">
-                        <div className="flex items-center gap-4">
-                            <span className="text-sm text-muted-foreground">{t('small')}</span>
-                            <Slider
-                                defaultValue={[fontSizeMapping.indexOf(fontSize)]}
-                                min={0}
-                                max={2}
-                                step={1}
-                                onValueChange={(value) => setFontSize(fontSizeMapping[value[0]])}
-                            />
-                            <span className="text-lg text-muted-foreground">{t('large')}</span>
-                        </div>
+                    <CardContent>
+                        <Select value={theme} onValueChange={setTheme}>
+                            <SelectTrigger>
+                                <SelectValue placeholder={t('theme')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="light">{t('light')}</SelectItem>
+                                <SelectItem value="dark">{t('dark')}</SelectItem>
+                                <SelectItem value="system">{t('system')}</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </CardContent>
                 </Card>
                  <Card>
@@ -224,33 +209,51 @@ function SettingsPage() {
                         <CardTitle>{t('languageSettings')}</CardTitle>
                         <CardDescription>{t('languageSettingsDescription')}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("en")}>
-                           English
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("es")}>
-                           Español
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("fr")}>
-                           Français
-                        </Button>
-                         <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("de")}>
-                           Deutsch
-                        </Button>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('dataManagement')}</CardTitle>
-                        <CardDescription>{t('dataManagementDescription')}</CardDescription>
-                    </CardHeader>
                     <CardContent>
-                        <Button variant="outline" className="w-full justify-start" onClick={handleBackup}>
-                           <FileDown className="mr-2 h-4 w-4" /> {t('backupData')}
-                        </Button>
+                         <Select value={language} onValueChange={(value) => setLanguage(value as any)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder={t('language')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Español</SelectItem>
+                                <SelectItem value="fr">Français</SelectItem>
+                                <SelectItem value="de">Deutsch</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </CardContent>
                 </Card>
             </div>
+             <Card>
+                <CardHeader>
+                    <CardTitle>{t('fontSize')}</CardTitle>
+                    <CardDescription>{t('fontSizeDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4">
+                    <div className="flex items-center gap-4">
+                        <span className="text-sm text-muted-foreground">{t('small')}</span>
+                        <Slider
+                            value={[fontSizeMapping.indexOf(fontSize)]}
+                            min={0}
+                            max={2}
+                            step={1}
+                            onValueChange={(value) => setFontSize(fontSizeMapping[value[0]])}
+                        />
+                        <span className="text-lg text-muted-foreground">{t('large')}</span>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('dataManagement')}</CardTitle>
+                    <CardDescription>{t('dataManagementDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button variant="outline" className="w-full sm:w-auto justify-start" onClick={handleBackup}>
+                       <FileDown className="mr-2 h-4 w-4" /> {t('backupData')}
+                    </Button>
+                </CardContent>
+            </Card>
         </div>
        </main>
     </div>
