@@ -154,5 +154,7 @@
     "medium": "Mediano",
     "large": "Grande",
     "languageSettings": "Ajustes de Idioma",
-    "languageSettingsDescription": "Elige tu idioma preferido."
+    "languageSettingsDescription": "Elige tu idioma preferido.",
+    "dataManagement": "Gestión de Datos",
+    "dataManagementDescription": "Gestiona los datos de tu aplicación."
 }

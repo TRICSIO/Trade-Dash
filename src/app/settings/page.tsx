@@ -8,7 +8,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Languages, Moon, Plus, Sun, Type } from 'lucide-react';
+import { FileDown, Languages, Moon, Plus, Sun, Type } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -19,7 +19,7 @@ import { useLanguage } from '@/context/language-context';
 
 function SettingsPage() {
   const { user } = useAuth();
-  const { startingBalances, accountSettings, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
+  const { trades, startingBalances, accountSettings, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
   const { t } = useTranslation();
   const { toast } = useToast();
   const { setTheme } = useTheme();
@@ -59,11 +59,42 @@ function SettingsPage() {
     setNewAccountName('');
   }
 
+  const handleBackup = () => {
+    try {
+        const backupData = {
+            trades,
+            startingBalances,
+            accountSettings
+        };
+        const jsonString = JSON.stringify(backupData, null, 2);
+        const blob = new Blob([jsonString], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const date = new Date().toISOString().slice(0, 10);
+        link.download = `trade-dash-backup-${date}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast({
+            title: t('backupSuccessful'),
+            description: t('yourDataHasBeenDownloaded'),
+        });
+    } catch (error) {
+        toast({
+            title: t('backupFailed'),
+            description: t('couldNotCreateBackup'),
+            variant: "destructive",
+        });
+    }
+  };
+
   const allAccounts = Array.from(new Set(Object.keys(startingBalances)));
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-       <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}} onBackupClick={() => {}} />
+       <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}} />
        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <div className="grid gap-8 md:grid-cols-2">
             <Card>
@@ -199,6 +230,17 @@ function SettingsPage() {
                         </Button>
                          <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("es")}>
                            Español
+                        </Button>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{t('dataManagement')}</CardTitle>
+                        <CardDescription>{t('dataManagementDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleBackup}>
+                           <FileDown className="mr-2 h-4 w-4" /> {t('backupData')}
                         </Button>
                     </CardContent>
                 </Card>

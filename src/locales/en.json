@@ -154,5 +154,7 @@
     "medium": "Medium",
     "large": "Large",
     "languageSettings": "Language Settings",
-    "languageSettingsDescription": "Choose your preferred language."
+    "languageSettingsDescription": "Choose your preferred language.",
+    "dataManagement": "Data Management",
+    "dataManagementDescription": "Manage your application data."
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, CandlestickChart, FileUp, LogOut, FileDown, Cog, Menu, Home } from 'lucide-react';
+import { Plus, CandlestickChart, FileUp, LogOut, Cog, Menu, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -19,11 +19,10 @@ import { useTranslation } from '@/hooks/use-translation';
 type AppHeaderProps = {
   onAddTradeClick: () => void;
   onImportClick: () => void;
-  onBackupClick: () => void;
 };
 
 
-export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClick }: AppHeaderProps) {
+export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderProps) {
   const { user } = useAuth();
   const router = useRouter();
   const { t } = useTranslation();
@@ -53,10 +52,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                     <Home className="mr-2 h-4 w-4" />
                     {t('dashboard')}
                 </Link>
-              </Button>
-              <Button variant="outline" onClick={onBackupClick}>
-                  <FileDown className="mr-2 h-4 w-4" />
-                  {t('backup')}
               </Button>
               <Button variant="outline" onClick={onImportClick}>
                   <FileUp className="mr-2 h-4 w-4" />
@@ -96,12 +91,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick, onBackupClic
                                         <Home className="mr-2 h-4 w-4" />
                                         {t('dashboard')}
                                     </Link>
-                                </Button>
-                             </SheetClose>
-                             <SheetClose asChild>
-                                <Button variant="outline" onClick={onBackupClick} className="w-full justify-start">
-                                    <FileDown className="mr-2 h-4 w-4" />
-                                    {t('backupData')}
                                 </Button>
                              </SheetClose>
                              <SheetClose asChild>

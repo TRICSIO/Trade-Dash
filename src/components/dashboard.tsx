@@ -107,37 +107,6 @@ export default function Dashboard() {
     });
     setImportTradeOpen(false);
   };
-  
-  const handleBackup = () => {
-    try {
-        const backupData = {
-            trades,
-            startingBalances,
-            accountSettings
-        };
-        const jsonString = JSON.stringify(backupData, null, 2);
-        const blob = new Blob([jsonString], {type: 'application/json'});
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        const date = new Date().toISOString().slice(0, 10);
-        link.download = `trade-dash-backup-${date}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast({
-            title: t('backupSuccessful'),
-            description: t('yourDataHasBeenDownloaded'),
-        });
-    } catch (error) {
-        toast({
-            title: t('backupFailed'),
-            description: t('couldNotCreateBackup'),
-            variant: "destructive",
-        });
-    }
-  };
 
   const {
     totalTrades,
@@ -203,7 +172,6 @@ export default function Dashboard() {
       <AppHeader 
         onAddTradeClick={handleOpenAddDialog} 
         onImportClick={() => setImportTradeOpen(true)}
-        onBackupClick={handleBackup} 
       />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         <Card>
