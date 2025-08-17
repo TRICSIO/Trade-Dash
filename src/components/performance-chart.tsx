@@ -8,7 +8,12 @@ import type { Trade } from '@/lib/types';
 import { format } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
-import { enUS, es } from 'date-fns/locale';
+import { enUS, es, fr, de } from 'date-fns/locale';
+
+type PerformanceChartProps = {
+  trades: Trade[];
+  startingBalance: number;
+};
 
 const chartConfig = {
   equity: {
@@ -17,10 +22,17 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+const dateLocaleMap = {
+  en: enUS,
+  es: es,
+  fr: fr,
+  de: de,
+};
+
 export default function PerformanceChart({ trades, startingBalance }: PerformanceChartProps) {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const dateLocale = language === 'es' ? es : enUS;
+  const dateLocale = dateLocaleMap[language] || enUS;
 
   const chartData = useMemo(() => {
     if (trades.length < 1) return [{ date: t('start'), equity: startingBalance }];

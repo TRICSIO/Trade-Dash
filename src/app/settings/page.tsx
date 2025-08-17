@@ -231,6 +231,12 @@ function SettingsPage() {
                          <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("es")}>
                            Español
                         </Button>
+                         <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("fr")}>
+                           Français
+                        </Button>
+                         <Button variant="outline" className="w-full justify-start" onClick={() => setLanguage("de")}>
+                           Deutsch
+                        </Button>
                     </CardContent>
                 </Card>
                 <Card>

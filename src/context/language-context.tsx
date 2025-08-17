@@ -3,8 +3,10 @@
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import en from '@/locales/en.json';
 import es from '@/locales/es.json';
+import fr from '@/locales/fr.json';
+import de from '@/locales/de.json';
 
-type Language = 'en' | 'es';
+type Language = 'en' | 'es' | 'fr' | 'de';
 
 type Translations = typeof en;
 
@@ -14,7 +16,7 @@ interface LanguageContextType {
   translations: Translations;
 }
 
-const translationsMap = { en, es };
+const translationsMap = { en, es, fr, de };
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
@@ -23,7 +25,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const storedLang = localStorage.getItem('language') as Language;
-    if (storedLang && ['en', 'es'].includes(storedLang)) {
+    if (storedLang && ['en', 'es', 'fr', 'de'].includes(storedLang)) {
       setLanguageState(storedLang);
     }
   }, []);

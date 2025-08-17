@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
-import { enUS, es } from 'date-fns/locale';
+import { enUS, es, fr, de } from 'date-fns/locale';
 
 type TradeTableProps = {
   trades: Trade[];
@@ -37,12 +37,19 @@ type TradeTableProps = {
   onDeleteTrade: (tradeId: string) => void;
 };
 
+const dateLocaleMap = {
+    en: enUS,
+    es: es,
+    fr: fr,
+    de: de,
+};
+
 export default function TradeTable({ trades, accountSettings, onEditTrade, onDeleteTrade }: TradeTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteCandidate, setDeleteCandidate] = useState<Trade | null>(null);
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const dateLocale = language === 'es' ? es : enUS;
+  const dateLocale = dateLocaleMap[language] || enUS;
 
   const filteredTrades = useMemo(() => {
     return trades
@@ -118,7 +125,7 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                             </Badge>
                         </TableCell>
                         <TableCell>
-                            <Badge variant="secondary">{t(trade.tradeStyle.toLowerCase().replace(' ',''))}</Badge>
+                            <Badge variant="secondary">{t(trade.tradeStyle.toLowerCase().replace(' ','') as any)}</Badge>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">${cost.toFixed(2)}</TableCell>
                         <TableCell className="hidden md:table-cell">{proceeds !== null ? `$${proceeds.toFixed(2)}` : '-'}</TableCell>

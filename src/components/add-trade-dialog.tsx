@@ -33,7 +33,7 @@ import type { Trade } from '@/lib/types';
 import { useEffect } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
-import { enUS, es } from 'date-fns/locale';
+import { enUS, es, fr, de } from 'date-fns/locale';
 
 const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
@@ -67,13 +67,20 @@ type AddTradeDialogProps = {
   trade?: Trade;
 };
 
+const dateLocaleMap = {
+  en: enUS,
+  es: es,
+  fr: fr,
+  de: de,
+};
+
 export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trade }: AddTradeDialogProps) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const formSchema = useFormSchema();
   const isEditing = !!trade;
 
-  const dateLocale = language === 'es' ? es : enUS;
+  const dateLocale = dateLocaleMap[language] || enUS;
     
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -273,7 +280,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                       </FormControl>
                       <SelectContent>
                         {tradeStyles.map(style => (
-                          <SelectItem key={style} value={style}>{t(style.toLowerCase().replace(' ', ''))}</SelectItem>
+                          <SelectItem key={style} value={style}>{t(style.toLowerCase().replace(' ', '') as any)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
