@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock, Percent } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock, Percent, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from './ui/button';
 import {
@@ -29,6 +29,7 @@ import {
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
 import { enUS, es, fr, de } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 type TradeTableProps = {
   trades: Trade[];
@@ -44,19 +45,58 @@ const dateLocaleMap = {
     de: de,
 };
 
+type TradeStatus = 'all' | 'profit' | 'loss' | 'open';
+const tradeStyles = ["All", "Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
+
 export default function TradeTable({ trades, accountSettings, onEditTrade, onDeleteTrade }: TradeTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteCandidate, setDeleteCandidate] = useState<Trade | null>(null);
+  const [statusFilter, setStatusFilter] = useState<TradeStatus>('all');
+  const [styleFilter, setStyleFilter] = useState('All');
+  const [tagFilter, setTagFilter] = useState<string | 'all'>('all');
   const { t } = useTranslation();
   const { language } = useLanguage();
   const dateLocale = dateLocaleMap[language] || enUS;
+  
+  const allTags = useMemo(() => {
+    const tags = new Set<string>();
+    trades.forEach(trade => {
+        trade.tags?.forEach(tag => tags.add(tag));
+    });
+    return ['all', ...Array.from(tags)];
+  }, [trades]);
 
   const filteredTrades = useMemo(() => {
     return trades
-        .filter(trade =>
-            trade.instrument.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-  }, [trades, searchTerm]);
+        .filter(trade => {
+            // Search term filter
+            const instrumentMatch = trade.instrument.toLowerCase().includes(searchTerm.toLowerCase());
+            
+            // Status filter
+            const isClosed = trade.exitDate && trade.exitPrice;
+            const multiplier = trade.tradeStyle === 'Option' ? 100 : 1;
+            const cost = trade.entryPrice * trade.quantity * multiplier;
+            const proceeds = isClosed ? (trade.exitPrice ?? 0) * trade.quantity * multiplier : null;
+            const pl = isClosed && proceeds ? proceeds - cost - (trade.commissions || 0) - (trade.fees || 0) : null;
+            
+            let statusMatch = true;
+            if (statusFilter === 'profit') {
+                statusMatch = pl !== null && pl > 0;
+            } else if (statusFilter === 'loss') {
+                statusMatch = pl !== null && pl < 0;
+            } else if (statusFilter === 'open') {
+                statusMatch = pl === null;
+            }
+
+            // Style filter
+            const styleMatch = styleFilter === 'All' || trade.tradeStyle === styleFilter;
+
+            // Tag filter
+            const tagMatch = tagFilter === 'all' || (trade.tags && trade.tags.includes(tagFilter));
+
+            return instrumentMatch && statusMatch && styleMatch && tagMatch;
+        });
+  }, [trades, searchTerm, statusFilter, styleFilter, tagFilter]);
   
   const handleDeleteConfirm = () => {
     if(deleteCandidate) {
@@ -74,12 +114,45 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                 <CardTitle>{t('tradeHistory')}</CardTitle>
                 <CardDescription>{t('tradeHistoryDescription')}</CardDescription>
             </div>
-            <Input
-                placeholder={t('filterByInstrument')}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-sm"
-            />
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Input
+                    placeholder={t('filterByInstrument')}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full sm:max-w-xs"
+                />
+                 <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as TradeStatus)}>
+                    <SelectTrigger className="w-full sm:w-[150px]">
+                        <SelectValue placeholder={t('filterByStatus')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">{t('allTrades')}</SelectItem>
+                        <SelectItem value="profit">{t('winningTrades')}</SelectItem>
+                        <SelectItem value="loss">{t('losingTrades')}</SelectItem>
+                        <SelectItem value="open">{t('openTrades')}</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select value={styleFilter} onValueChange={setStyleFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder={t('filterByStyle')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {tradeStyles.map(style => (
+                            <SelectItem key={style} value={style}>{style === 'All' ? t('allStyles') : t(style.toLowerCase().replace(' ', '') as any)}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={tagFilter} onValueChange={(v) => setTagFilter(v)}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder={t('filterByTag')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {allTags.map(tag => (
+                            <SelectItem key={tag} value={tag}>{tag === 'all' ? t('allTags') : tag}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -96,8 +169,7 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                 <TableHead className="hidden md:table-cell">{t('plPercent')}</TableHead>
                 <TableHead>{t('entryDate')}</TableHead>
                 <TableHead>{t('exitDate')}</TableHead>
-                <TableHead>{t('qty')}</TableHead>
-                <TableHead className="hidden lg:table-cell max-w-[250px]">{t('notes')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('tags')}</TableHead>
                 <TableHead className="text-right">{t('actions')}</TableHead>
                 </TableRow>
             </TableHeader>
@@ -108,7 +180,7 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                     const multiplier = trade.tradeStyle === 'Option' ? 100 : 1;
                     const cost = trade.entryPrice * trade.quantity * multiplier;
                     const proceeds = isClosed ? (trade.exitPrice ?? 0) * trade.quantity * multiplier : null;
-                    const pl = isClosed && proceeds ? proceeds - cost : null;
+                    const pl = isClosed && proceeds ? proceeds - cost - (trade.commissions || 0) - (trade.fees || 0) : null;
                     const plPercent = pl !== null && cost !== 0 ? (pl / cost) * 100 : null;
                     const isProfit = pl !== null && pl >= 0;
                     const accountColor = accountSettings[trade.account]?.color;
@@ -143,8 +215,13 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                         </TableCell>
                         <TableCell>{format(new Date(trade.entryDate), 'PP', { locale: dateLocale })}</TableCell>
                         <TableCell>{trade.exitDate ? format(new Date(trade.exitDate), 'PP', { locale: dateLocale }) : '-'}</TableCell>
-                        <TableCell>{trade.quantity}</TableCell>
-                        <TableCell className="hidden lg:table-cell max-w-[250px] truncate">{trade.notes || '-'}</TableCell>
+                         <TableCell className="hidden lg:table-cell">
+                            <div className="flex flex-wrap gap-1">
+                                {trade.tags?.map(tag => (
+                                    <Badge key={tag} variant="outline">{tag}</Badge>
+                                ))}
+                            </div>
+                        </TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
                                 <Button variant="ghost" size="icon" onClick={() => onEditTrade(trade)}>

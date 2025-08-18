@@ -53,10 +53,11 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
                 if (t.tradeStyle === 'Option') {
                   pl *= 100;
                 }
+                pl = pl - (t.commissions || 0) - (t.fees || 0);
                 plString = `$${pl.toFixed(2)}`;
             }
             
-            return `Trade ${i + 1}: Instrument: ${t.instrument}, Style: ${t.tradeStyle}, Qty: ${t.quantity}, Entry: ${format(new Date(t.entryDate), 'yyyy-MM-dd')} at $${t.entryPrice.toFixed(2)}, Exit: ${isClosed ? format(new Date(t.exitDate!), 'yyyy-MM-dd') : 'Open'} at ${isClosed ? `$${t.exitPrice!.toFixed(2)}` : 'N/A'}, P/L: ${plString}, Notes: ${t.notes || 'N/A'}`
+            return `Trade ${i + 1}: Instrument: ${t.instrument}, Style: ${t.tradeStyle}, Qty: ${t.quantity}, Entry: ${format(new Date(t.entryDate), 'yyyy-MM-dd')} at $${t.entryPrice.toFixed(2)}, Exit: ${isClosed ? format(new Date(t.exitDate!), 'yyyy-MM-dd') : 'Open'} at ${isClosed ? `$${t.exitPrice!.toFixed(2)}` : 'N/A'}, Commissions: $${(t.commissions || 0).toFixed(2)}, Fees: $${(t.fees || 0).toFixed(2)}, P/L: ${plString}, Tags: ${(t.tags || []).join(', ') || 'N/A'}, Notes: ${t.notes || 'N/A'}`
           }
         )
         .join('\n');

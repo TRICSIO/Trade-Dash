@@ -127,12 +127,18 @@
     "saveTrade": "Save Trade",
     
     "importTrades": "Import Trades",
-    "importDescription": "Select your broker, account, and upload the trade history file (usually a CSV).",
+    "importDescription": "Select your account and upload the trade history file (must be a CSV). The AI will attempt to parse it automatically.",
     "broker": "Broker",
     "selectBroker": "Select a broker",
     "selectAnAccount": "Select an account",
     "file": "File",
     "importStarted": "Import Started",
+    "importProcessing": "Your file is being processed by the AI. This may take a moment.",
+    "importFailed": "Import Failed",
+    "importError": "The AI could not process your CSV file. Please check the format and try again.",
+    "importNoTrades": "The AI was unable to find any valid trades in the provided file.",
+    "importSuccessful": "Import Successful",
+    "importSuccessMessage": "Successfully imported {{count}} new trades.",
     "backupSuccessful": "Backup Successful",
     "yourDataHasBeenDownloaded": "Your data has been downloaded.",
     "backupFailed": "Backup Failed",
@@ -187,5 +193,25 @@
     "registerPasskeyDescription": "Secure your account and sign in with your face, fingerprint, or PIN. It's faster and more secure than a password.",
     "skipForNow": "Skip for Now",
     "passkeyReady": "Your passkey is all set. You can now use it to sign in on this device.",
-    "stockNews": "Stock News"
+    "stockNews": "Stock News",
+
+    "commissions": "Commissions",
+    "fees": "Fees",
+    "tags": "Tags",
+    "addTagPlaceholder": "Add a tag...",
+    "addTag": "Add Tag",
+
+    "filterByStatus": "Filter by status",
+    "allTrades": "All Trades",
+    "openTrades": "Open Trades",
+    "filterByStyle": "Filter by style",
+    "allStyles": "All Styles",
+    "filterByTag": "Filter by tag",
+    "allTags": "All Tags",
+
+    "monthlyPL": "Monthly P/L",
+    "monthlyPLDescription": "Your net profit and loss for each month.",
+    "month": "Month",
+    "netPL": "Net P/L",
+    "monthlyPLPlaceholder": "Log some closed trades to see your monthly performance."
 }

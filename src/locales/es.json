@@ -127,12 +127,18 @@
     "saveTrade": "Guardar Operación",
 
     "importTrades": "Importar Operaciones",
-    "importDescription": "Selecciona tu bróker, cuenta y sube el archivo de historial de operaciones (generalmente un CSV).",
+    "importDescription": "Seleccione su cuenta y cargue el archivo del historial de operaciones (debe ser un CSV). La IA intentará analizarlo automáticamente.",
     "broker": "Bróker",
     "selectBroker": "Selecciona un bróker",
     "selectAnAccount": "Selecciona una cuenta",
     "file": "Archivo",
     "importStarted": "Importación Iniciada",
+    "importProcessing": "Tu archivo está siendo procesado por la IA. Esto puede tardar un momento.",
+    "importFailed": "Importación Fallida",
+    "importError": "La IA no pudo procesar tu archivo CSV. Por favor, comprueba el formato e inténtalo de nuevo.",
+    "importNoTrades": "La IA no pudo encontrar ninguna operación válida en el archivo proporcionado.",
+    "importSuccessful": "Importación Exitosa",
+    "importSuccessMessage": "Se han importado con éxito {{count}} nuevas operaciones.",
     "backupSuccessful": "Copia de Seguridad Exitosa",
     "yourDataHasBeenDownloaded": "Tus datos han sido descargados.",
     "backupFailed": "Fallo en la Copia de Seguridad",
@@ -187,5 +193,25 @@
     "registerPasskeyDescription": "Asegure su cuenta e inicie sesión con su rostro, huella digital o PIN. Es más rápido y seguro que una contraseña.",
     "skipForNow": "Omitir por ahora",
     "passkeyReady": "Su clave de acceso está lista. Ahora puede usarla para iniciar sesión en este dispositivo.",
-    "stockNews": "Noticias de la Bolsa"
+    "stockNews": "Noticias de la Bolsa",
+
+    "commissions": "Comisiones",
+    "fees": "Tasas",
+    "tags": "Etiquetas",
+    "addTagPlaceholder": "Añadir una etiqueta...",
+    "addTag": "Añadir Etiqueta",
+
+    "filterByStatus": "Filtrar por estado",
+    "allTrades": "Todas las Operaciones",
+    "openTrades": "Operaciones Abiertas",
+    "filterByStyle": "Filtrar por estilo",
+    "allStyles": "Todos los Estilos",
+    "filterByTag": "Filtrar por etiqueta",
+    "allTags": "Todas las Etiquetas",
+
+    "monthlyPL": "G/P Mensual",
+    "monthlyPLDescription": "Su ganancia y pérdida neta para cada mes.",
+    "month": "Mes",
+    "netPL": "G/P Neto",
+    "monthlyPLPlaceholder": "Registre algunas operaciones cerradas para ver su rendimiento mensual."
 }

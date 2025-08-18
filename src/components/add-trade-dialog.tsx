@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, Save } from 'lucide-react';
+import { CalendarIcon, Plus, Save, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,10 +30,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Trade } from '@/lib/types';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
 import { enUS, es, fr, de } from 'date-fns/locale';
+import { Badge } from './ui/badge';
 
 const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
@@ -49,6 +50,9 @@ const useFormSchema = () => {
     quantity: z.coerce.number().positive(t('quantityPositive')),
     tradeStyle: z.string().min(1, t('tradeStyleRequired')),
     notes: z.string().optional(),
+    commissions: z.coerce.number().optional(),
+    fees: z.coerce.number().optional(),
+    tags: z.array(z.string()).optional(),
   }).refine(data => {
       if (data.exitDate && data.entryDate) {
           return data.exitDate >= data.entryDate;
@@ -81,6 +85,8 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
   const isEditing = !!trade;
 
   const dateLocale = dateLocaleMap[language] || enUS;
+  
+  const [tagInput, setTagInput] = useState('');
     
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,12 +94,28 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         ...trade,
         entryDate: new Date(trade.entryDate),
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+        tags: trade.tags || [],
     } : {
       instrument: '',
       account: 'Primary',
       notes: '',
+      tags: [],
     },
   });
+
+  const tags = form.watch('tags') || [];
+
+  const handleAddTag = () => {
+    if (tagInput && !tags.includes(tagInput)) {
+        form.setValue('tags', [...tags, tagInput]);
+        setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    form.setValue('tags', tags.filter(tag => tag !== tagToRemove));
+  };
+
 
   useEffect(() => {
     if(isOpen) {
@@ -101,6 +123,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
             ...trade,
             entryDate: new Date(trade.entryDate),
             exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+            tags: trade.tags || [],
         } : {
           instrument: '',
           account: 'Primary',
@@ -111,6 +134,9 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
           entryDate: undefined,
           exitDate: undefined,
           notes: '',
+          commissions: undefined,
+          fees: undefined,
+          tags: [],
         });
     }
   }, [isOpen, isEditing, trade, form]);
@@ -120,6 +146,9 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         ...values,
         exitPrice: values.exitPrice || undefined,
         exitDate: values.exitDate || undefined,
+        commissions: values.commissions || undefined,
+        fees: values.fees || undefined,
+        tags: values.tags || [],
     };
     onSaveTrade(tradeToSave, trade?.id);
     form.reset();
@@ -128,7 +157,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? t('editTrade') : t('logNewTrade')}</DialogTitle>
           <DialogDescription>
@@ -253,19 +282,47 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 )}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="quantity"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('quantity')}</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" placeholder="e.g., 100" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>{t('quantity')}</FormLabel>
+                    <FormControl>
+                        <Input type="number" step="any" placeholder="e.g., 100" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <FormField
+                    control={form.control}
+                    name="commissions"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>{t('commissions')}</FormLabel>
+                        <FormControl>
+                            <Input type="number" step="any" placeholder="0.00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="fees"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>{t('fees')}</FormLabel>
+                        <FormControl>
+                            <Input type="number" step="any" placeholder="0.00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
              <FormField
                 control={form.control}
                 name="tradeStyle"
@@ -301,6 +358,33 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 </FormItem>
               )}
             />
+            <FormItem>
+                <FormLabel>{t('tags')}</FormLabel>
+                <div className="flex gap-2">
+                    <Input
+                        placeholder={t('addTagPlaceholder')}
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleAddTag();
+                            }
+                        }}
+                    />
+                    <Button type="button" onClick={handleAddTag}>{t('addTag')}</Button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-2">
+                    {tags.map(tag => (
+                        <Badge key={tag} variant="secondary">
+                            {tag}
+                            <button type="button" className="ml-2" onClick={() => handleRemoveTag(tag)}>
+                                <X className="h-3 w-3" />
+                            </button>
+                        </Badge>
+                    ))}
+                </div>
+            </FormItem>
             <DialogFooter>
               <Button type="submit">
                 {isEditing ? <Save className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}

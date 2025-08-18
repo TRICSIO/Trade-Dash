@@ -18,6 +18,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { useTranslation } from '@/hooks/use-translation';
 import StyleDistributionChart from './style-distribution-chart';
+import MonthlyPLChart from './monthly-pl-chart';
+import { parse } from 'papaparse';
+import { processCsvData } from '@/ai/flows/process-csv-data';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -106,14 +109,69 @@ export default function Dashboard() {
     setTrades(updatedTrades);
   }
 
-  const handleImportTrades = (broker: string, file: File, account: string) => {
-    console.log(`Importing from ${broker} into ${account}`, file);
+  const handleImportTrades = (file: File, account: string) => {
+    setImportTradeOpen(false);
     toast({
         title: t('importStarted'),
-        description: `Parsing for ${broker} into ${account} is not yet implemented.`,
+        description: t('importProcessing'),
     });
-    setImportTradeOpen(false);
-  };
+
+    parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async (results) => {
+            try {
+                const csvString = parse(results.data, { header: false }).toString();
+                const processedData = await processCsvData({ csvData: csvString });
+
+                if (processedData.trades.length === 0) {
+                    toast({
+                        title: t('importFailed'),
+                        description: t('importNoTrades'),
+                        variant: 'destructive'
+                    });
+                    return;
+                }
+
+                const newTrades: Omit<Trade, 'id'>[] = processedData.trades.map(t => ({
+                  ...t,
+                  account,
+                  entryDate: new Date(t.entryDate),
+                  exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
+                  tags: t.tags || [],
+                }));
+
+                const updatedTrades = [...newTrades.map(t => ({...t, id: crypto.randomUUID()})), ...trades];
+
+                setTrades(updatedTrades.map(trade => ({
+                    ...trade,
+                    entryDate: new Date(trade.entryDate),
+                    exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+                })));
+
+                toast({
+                    title: t('importSuccessful'),
+                    description: t('importSuccessMessage', {count: newTrades.length}),
+                });
+
+            } catch (error) {
+                console.error("CSV processing error:", error);
+                toast({
+                    title: t('importFailed'),
+                    description: t('importError'),
+                    variant: 'destructive'
+                });
+            }
+        },
+        error: (error) => {
+             toast({
+                title: t('importFailed'),
+                description: error.message,
+                variant: 'destructive'
+            });
+        }
+    });
+};
 
   const {
     totalTrades,
@@ -139,7 +197,8 @@ export default function Dashboard() {
         const cost = t.entryPrice * t.quantity * multiplier;
         totalInvested += cost;
         const proceeds = (t.exitPrice ?? 0) * t.quantity * multiplier;
-        return {pl: proceeds - cost, exitDate: t.exitDate!};
+        const netPl = proceeds - cost - (t.commissions || 0) - (t.fees || 0);
+        return {pl: netPl, exitDate: t.exitDate!};
     });
     
     const totalNetPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
@@ -236,8 +295,11 @@ export default function Dashboard() {
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
             </div>
-             <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
                 <StyleDistributionChart trades={filteredTrades} />
+            </div>
+            <div className="lg:col-span-3">
+                <MonthlyPLChart trades={filteredTrades} />
             </div>
         </div>
         

@@ -10,6 +10,9 @@ export type Trade = {
   tradeStyle: string;
   notes?: string;
   account: string;
+  commissions?: number;
+  fees?: number;
+  tags?: string[];
 };
 
 export type AccountSettings = {
@@ -28,11 +31,3 @@ export interface UserData {
     email: string;
     displayName?: string;
 }
-
-export type StockMover = {
-    ticker: string;
-    name: string;
-    price: string;
-    change: string;
-    changePercent: string;
-};

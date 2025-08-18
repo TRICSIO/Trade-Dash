@@ -25,11 +25,9 @@ import { useTranslation } from '@/hooks/use-translation';
 type ImportTradesDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onImport: (broker: string, file: File, account: string) => void;
+  onImport: (file: File, account: string) => void;
   accounts: string[];
 };
-
-const brokers = ['Webull', 'Schwab', 'Moomoo', 'Sofi'];
 
 export default function ImportTradesDialog({
   isOpen,
@@ -37,8 +35,6 @@ export default function ImportTradesDialog({
   onImport,
   accounts,
 }: ImportTradesDialogProps) {
-  const [selectedBroker, setSelectedBroker] = useState('');
-  const [customBroker, setCustomBroker] = useState('');
   const [selectedAccount, setSelectedAccount] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { t } = useTranslation();
@@ -50,20 +46,10 @@ export default function ImportTradesDialog({
   };
 
   const handleImportClick = () => {
-    const broker = selectedBroker === 'Other' ? customBroker : selectedBroker;
-    if (broker && selectedFile && selectedAccount) {
-      onImport(broker, selectedFile, selectedAccount);
+    if (selectedFile && selectedAccount) {
+      onImport(selectedFile, selectedAccount);
     }
   };
-
-  const handleBrokerChange = (value: string) => {
-    setSelectedBroker(value);
-    if (value !== 'Other') {
-        setCustomBroker('');
-    }
-  }
-
-  const finalBroker = selectedBroker === 'Other' ? customBroker : selectedBroker;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -75,38 +61,6 @@ export default function ImportTradesDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="broker-select" className="text-right">
-              {t('broker')}
-            </Label>
-            <Select onValueChange={handleBrokerChange} value={selectedBroker}>
-              <SelectTrigger id="broker-select" className="col-span-3">
-                <SelectValue placeholder={t('selectBroker')} />
-              </SelectTrigger>
-              <SelectContent>
-                {brokers.map((broker) => (
-                  <SelectItem key={broker} value={broker}>
-                    {broker}
-                  </SelectItem>
-                ))}
-                <SelectItem value="Other">{t('other')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedBroker === 'Other' && (
-             <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="custom-broker" className="text-right">
-                    {t('otherBroker')}
-                </Label>
-                <Input 
-                    id="custom-broker"
-                    value={customBroker}
-                    onChange={(e) => setCustomBroker(e.target.value)}
-                    className="col-span-3"
-                    placeholder={t('enterBrokerName')}
-                />
-             </div>
-          )}
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="account-import-select" className="text-right">
               {t('account')}
@@ -140,7 +94,7 @@ export default function ImportTradesDialog({
         <DialogFooter>
           <Button
             onClick={handleImportClick}
-            disabled={!finalBroker || !selectedFile || !selectedAccount}
+            disabled={!selectedFile || !selectedAccount}
           >
             <FileUp className="mr-2 h-4 w-4" />
             {t('import')}

@@ -51,6 +51,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
       if (trade.tradeStyle === 'Option') {
         pl *= 100;
       }
+      pl = pl - (trade.commissions || 0) - (trade.fees || 0);
       cumulativePL += pl;
       return {
         date: format(trade.exitDate, 'MMM d', { locale: dateLocale }),
