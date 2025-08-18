@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
 import { useToast } from './use-toast';
@@ -30,7 +30,7 @@ function useFirestoreTrades(userId?: string) {
     };
     try {
       const userDocRef = doc(db, 'users', userId);
-      await setDoc(userDocRef, dataToUpdate, { merge: true });
+      await updateDoc(userDocRef, dataToUpdate);
     } catch (error) {
       console.error("Error saving data to Firestore:", error);
       toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
@@ -59,7 +59,7 @@ function useFirestoreTrades(userId?: string) {
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
-            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? false : data.hasSeenWelcomeMessage);
+            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? true : data.hasSeenWelcomeMessage);
             
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
@@ -92,9 +92,8 @@ function useFirestoreTrades(userId?: string) {
     return () => unsubscribe();
   }, [userId, toast, updateUserDoc]);
 
-  const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
-    const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
-    const sorted = sortTrades(updatedTrades);
+  const handleSetTrades = (newTrades: Trade[]) => {
+    const sorted = sortTrades(newTrades);
     updateUserDoc({ trades: sorted });
   }
   
@@ -125,7 +124,6 @@ function useFirestoreTrades(userId?: string) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
     }
-
     const newBalances = { ...startingBalances, [trimmedName]: balance };
     const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
