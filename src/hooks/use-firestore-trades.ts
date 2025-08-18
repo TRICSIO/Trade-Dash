@@ -126,19 +126,23 @@ function useFirestoreTrades(userId?: string) {
       return;
     }
     
-    const currentSettings = accountSettings || {};
-    if (Object.keys(currentSettings).includes(trimmedName)) {
+    if (Object.keys(accountSettings).includes(trimmedName)) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
     }
     
     const newBalances = { ...startingBalances, [trimmedName]: balance };
-    const newSettings = { ...currentSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
+    const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
     await updateUserDoc({ 
       startingBalances: newBalances,
       accountSettings: newSettings,
     });
+    
+    // Manually update local state to trigger re-render immediately
+    setStartingBalances(newBalances);
+    setAccountSettings(newSettings);
+    
     toast({ title: 'Success', description: `Account '${trimmedName}' has been added.` });
   }, [userId, accountSettings, startingBalances, t, toast, updateUserDoc]);
   
