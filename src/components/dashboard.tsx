@@ -245,7 +245,7 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return null; // The AuthProvider will show a loading skeleton
+    return null;
   }
 
   if (!hasSeenWelcomeMessage) {
