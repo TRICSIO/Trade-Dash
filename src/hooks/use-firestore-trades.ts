@@ -63,7 +63,7 @@ function useFirestoreTrades(userId?: string) {
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
-            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage || false);
+            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? false : data.hasSeenWelcomeMessage);
             
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
@@ -110,7 +110,8 @@ function useFirestoreTrades(userId?: string) {
     updateUserDoc({ hasSeenWelcomeMessage: true });
   }
   
-  const handleAddNewAccount = async (accountName: string, balance: number) => {
+  const handleAddNewAccount = useCallback(async (accountName: string, balance: number) => {
+    if (!userId) return;
     if (!accountName.trim()) {
       toast({ title: t('accountNameRequired'), variant: 'destructive' });
       return;
@@ -130,7 +131,7 @@ function useFirestoreTrades(userId?: string) {
       accountSettings: newSettings,
     });
     toast({ title: 'Success', description: `Account '${trimmedName}' has been added.` });
-  }
+  }, [userId, accountSettings, startingBalances, t, toast, updateUserDoc]);
   
   const handleSetTransactionsForAccount = (account: string, newTransactions: AccountTransaction[]) => {
     const updatedTransactions = { ...transactions, [account]: newTransactions };

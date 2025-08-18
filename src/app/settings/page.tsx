@@ -9,7 +9,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileDown, Plus, Mail, Save } from 'lucide-react';
+import { FileDown, Plus, Mail, Save, Settings2 } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
@@ -20,6 +20,7 @@ import { useLanguage } from '@/context/language-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AccountSettings } from '@/lib/types';
 import { isEqual } from 'lodash';
+import AccountTransactionsDialog from '@/components/account-transactions-dialog';
 
 
 function SettingsPage() {
@@ -29,10 +30,12 @@ function SettingsPage() {
     startingBalances: initialStartingBalances, 
     accountSettings: initialAccountSettings,
     displayName: initialDisplayName, 
+    transactions,
     setStartingBalances, 
     setAccountSettings,
     setDisplayName,
-    addAccount
+    addAccount,
+    setTransactionsForAccount,
   } = useFirestoreTrades(user?.uid);
 
   const { t } = useTranslation();
@@ -43,6 +46,9 @@ function SettingsPage() {
   
   const [newAccountName, setNewAccountName] = useState('');
   const [newAccountBalance, setNewAccountBalance] = useState<number>(0);
+
+  const [isTransactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [selectedAccountForTransactions, setSelectedAccountForTransactions] = useState<string | null>(null);
   
   // Local state for edits
   const [currentDisplayName, setCurrentDisplayName] = useState(initialDisplayName || '');
@@ -142,9 +148,15 @@ function SettingsPage() {
     toast({ title: 'Success', description: 'Account settings have been saved.' });
   }
 
+  const handleOpenTransactionDialog = (accountName: string) => {
+      setSelectedAccountForTransactions(accountName);
+      setTransactionDialogOpen(true);
+  }
+
   const allAccounts = Array.from(new Set([...Object.keys(initialStartingBalances), ...trades.map(t => t.account)]));
 
   return (
+    <>
     <div className="flex flex-col min-h-screen bg-background">
        <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}} />
        <main className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -181,59 +193,64 @@ function SettingsPage() {
                     <div className="space-y-6 max-h-[60vh] overflow-y-auto px-1">
                     {allAccounts.map((account) => (
                         <div key={account} className="space-y-4 rounded-md border p-4">
-                        <h4 className="font-semibold">{account}</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                            <div className="space-y-2">
-                            <Label htmlFor={`balance-${account}`}>{t('startingBalance')}</Label>
-                            <Input
-                                id={`balance-${account}`}
-                                type="number"
-                                value={localStartingBalances[account] || 0}
-                                onChange={(e) => handleBalanceChange(account, e.target.value)}
-                                placeholder="e.g., 10000"
-                            />
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-semibold">{account}</h4>
+                                <Button variant="outline" size="sm" onClick={() => handleOpenTransactionDialog(account)}>
+                                    <Settings2 className="mr-2 h-4 w-4"/> {t('manageAccount')}
+                                </Button>
                             </div>
-                            <div className="space-y-2">
-                            <Label htmlFor={`nickname-${account}`}>{t('accountNickname')}</Label>
-                            <Input
-                                id={`nickname-${account}`}
-                                type="text"
-                                value={localAccountSettings[account]?.accountNickname || ''}
-                                onChange={(e) => handleSettingChange(account, 'accountNickname', e.target.value)}
-                                placeholder="e.g., My Roth IRA"
-                            />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                                <div className="space-y-2">
+                                <Label htmlFor={`balance-${account}`}>{t('startingBalance')}</Label>
+                                <Input
+                                    id={`balance-${account}`}
+                                    type="number"
+                                    value={localStartingBalances[account] || 0}
+                                    onChange={(e) => handleBalanceChange(account, e.target.value)}
+                                    placeholder="e.g., 10000"
+                                />
+                                </div>
+                                <div className="space-y-2">
+                                <Label htmlFor={`nickname-${account}`}>{t('accountNickname')}</Label>
+                                <Input
+                                    id={`nickname-${account}`}
+                                    type="text"
+                                    value={localAccountSettings[account]?.accountNickname || ''}
+                                    onChange={(e) => handleSettingChange(account, 'accountNickname', e.target.value)}
+                                    placeholder="e.g., My Roth IRA"
+                                />
+                                </div>
+                                <div className="space-y-2">
+                                <Label htmlFor={`provider-${account}`}>{t('accountProvider')}</Label>
+                                <Input
+                                    id={`provider-${account}`}
+                                    type="text"
+                                    value={localAccountSettings[account]?.accountProvider || ''}
+                                    onChange={(e) => handleSettingChange(account, 'accountProvider', e.target.value)}
+                                    placeholder="e.g., Fidelity"
+                                />
+                                </div>
+                                <div className="space-y-2">
+                                <Label htmlFor={`number-${account}`}>{t('accountNumber')}</Label>
+                                <Input
+                                    id={`number-${account}`}
+                                    type="text"
+                                    value={localAccountSettings[account]?.accountNumber || ''}
+                                    onChange={(e) => handleSettingChange(account, 'accountNumber', e.target.value)}
+                                    placeholder="e.g., X12345678"
+                                />
+                                </div>
+                                <div className="space-y-2">
+                                <Label htmlFor={`color-${account}`}>{t('accountColor')}</Label>
+                                <Input
+                                    id={`color-${account}`}
+                                    type="color"
+                                    value={localAccountSettings[account]?.color || '#ffffff'}
+                                    onChange={(e) => handleSettingChange(account, 'color', e.target.value)}
+                                    className="p-1 h-10 w-full"
+                                />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                            <Label htmlFor={`provider-${account}`}>{t('accountProvider')}</Label>
-                            <Input
-                                id={`provider-${account}`}
-                                type="text"
-                                value={localAccountSettings[account]?.accountProvider || ''}
-                                onChange={(e) => handleSettingChange(account, 'accountProvider', e.target.value)}
-                                placeholder="e.g., Fidelity"
-                            />
-                            </div>
-                            <div className="space-y-2">
-                            <Label htmlFor={`number-${account}`}>{t('accountNumber')}</Label>
-                            <Input
-                                id={`number-${account}`}
-                                type="text"
-                                value={localAccountSettings[account]?.accountNumber || ''}
-                                onChange={(e) => handleSettingChange(account, 'accountNumber', e.target.value)}
-                                placeholder="e.g., X12345678"
-                            />
-                            </div>
-                            <div className="space-y-2">
-                            <Label htmlFor={`color-${account}`}>{t('accountColor')}</Label>
-                            <Input
-                                id={`color-${account}`}
-                                type="color"
-                                value={localAccountSettings[account]?.color || '#ffffff'}
-                                onChange={(e) => handleSettingChange(account, 'color', e.target.value)}
-                                className="p-1 h-10 w-full"
-                            />
-                            </div>
-                        </div>
                         </div>
                     ))}
                     <form onSubmit={handleAddNewAccount} className="space-y-4 rounded-md border p-4 mt-6">
@@ -360,6 +377,16 @@ function SettingsPage() {
         </div>
        </main>
     </div>
+    {selectedAccountForTransactions && (
+        <AccountTransactionsDialog
+            isOpen={isTransactionDialogOpen}
+            onOpenChange={setTransactionDialogOpen}
+            accountName={selectedAccountForTransactions}
+            transactions={transactions[selectedAccountForTransactions] || []}
+            onSaveTransactions={(newTransactions) => setTransactionsForAccount(selectedAccountForTransactions, newTransactions)}
+        />
+    )}
+    </>
   );
 }
 
@@ -371,5 +398,3 @@ export default function Settings() {
         </ProtectedRoute>
     )
 }
-
-    
