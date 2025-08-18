@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData } from '@/lib/types';
 import { useToast } from './use-toast';
@@ -28,28 +28,15 @@ function useFirestoreTrades(userId?: string) {
   const { toast } = useToast();
 
   const saveDataToFirestore = useCallback(
-    async (
-        newTrades: Trade[], 
-        newBalances: Record<string, number>, 
-        newSettings: AccountSettings
-    ) => {
+    async (dataToSave: Partial<UserData>) => {
       if (!userId) return;
       try {
         const userDocRef = doc(db, 'users', userId);
-        const tradesToStore = newTrades.map(t => ({
-          ...t,
-          entryDate: new Date(t.entryDate).toISOString(),
-          exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
-        }));
+        
+        // Ensure we don't accidentally overwrite with undefined
+        const finalData = Object.fromEntries(Object.entries(dataToSave).filter(([_, v]) => v !== undefined));
 
-        // Construct the data object to save, ensuring we don't overwrite displayName if it exists
-        const dataToSave: Partial<UserData> = {
-            trades: tradesToStore, 
-            startingBalances: newBalances, 
-            accountSettings: newSettings,
-        };
-
-        await setDoc(userDocRef, dataToSave, { merge: true });
+        await setDoc(userDocRef, finalData, { merge: true });
 
       } catch (error) {
         console.error("Error saving data to Firestore:", error);
@@ -102,19 +89,30 @@ function useFirestoreTrades(userId?: string) {
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
     const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
     setTrades(updatedTrades);
-    debouncedSave(updatedTrades, startingBalances, accountSettings);
+    const tradesToStore = updatedTrades.map(t => ({
+      ...t,
+      entryDate: new Date(t.entryDate).toISOString(),
+      exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
+    }));
+    debouncedSave({ trades: tradesToStore, startingBalances, accountSettings, displayName });
   }
   
   const handleSetStartingBalances = (newBalances: Record<string, number> | ((val: Record<string, number>) => Record<string, number>)) => {
     const updatedBalances = newBalances instanceof Function ? newBalances(startingBalances) : newBalances;
     setStartingBalances(updatedBalances);
-    debouncedSave(trades, updatedBalances, accountSettings);
+    debouncedSave({ trades: trades, startingBalances: updatedBalances, accountSettings, displayName });
   }
 
   const handleSetAccountSettings = (newSettings: AccountSettings | ((val: AccountSettings) => AccountSettings)) => {
     const updatedSettings = newSettings instanceof Function ? newSettings(accountSettings) : newSettings;
     setAccountSettings(updatedSettings);
-    debouncedSave(trades, startingBalances, updatedSettings);
+    debouncedSave({ trades: trades, startingBalances, accountSettings: updatedSettings, displayName });
+  }
+
+  const handleSetDisplayName = (newName: string) => {
+      setDisplayName(newName);
+      saveDataToFirestore({ displayName: newName });
+      toast({ title: 'Success', description: 'Your display name has been updated.' });
   }
 
 
@@ -125,7 +123,8 @@ function useFirestoreTrades(userId?: string) {
       displayName,
       setTrades: handleSetTrades, 
       setStartingBalances: handleSetStartingBalances, 
-      setAccountSettings: handleSetAccountSettings, 
+      setAccountSettings: handleSetAccountSettings,
+      setDisplayName: handleSetDisplayName, 
       loading 
     };
 }

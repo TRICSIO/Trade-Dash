@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useFirestoreTrades from '@/hooks/use-firestore-trades';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
@@ -9,10 +9,10 @@ import { useTranslation } from '@/hooks/use-translation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FileDown, Plus, Mail } from 'lucide-react';
+import { FileDown, Plus, Mail, Save } from 'lucide-react';
 import ProtectedRoute from '@/components/protected-route';
 import AppHeader from '@/components/header';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useTheme } from 'next-themes';
 import { useFontSize } from '@/context/font-size-context';
 import { Slider } from '@/components/ui/slider';
@@ -21,13 +21,28 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 function SettingsPage() {
   const { user } = useAuth();
-  const { trades, startingBalances, accountSettings, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
+  const { 
+    trades, 
+    startingBalances, 
+    accountSettings,
+    displayName, 
+    setStartingBalances, 
+    setAccountSettings,
+    setDisplayName 
+  } = useFirestoreTrades(user?.uid);
   const { t } = useTranslation();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
   const [newAccountName, setNewAccountName] = useState('');
+  const [currentDisplayName, setCurrentDisplayName] = useState(displayName || '');
+
+  useEffect(() => {
+    if (displayName) {
+      setCurrentDisplayName(displayName);
+    }
+  }, [displayName]);
 
   const fontSizeMapping: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
 
@@ -92,6 +107,14 @@ function SettingsPage() {
     }
   };
 
+  const handleDisplayNameSave = () => {
+    if (currentDisplayName.trim()) {
+      setDisplayName(currentDisplayName.trim());
+    } else {
+      toast({ title: 'Error', description: 'Display name cannot be empty.', variant: 'destructive' });
+    }
+  };
+
   const allAccounts = Array.from(new Set(Object.keys(startingBalances)));
 
   return (
@@ -99,6 +122,27 @@ function SettingsPage() {
        <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}} />
        <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('profileSettings')}</CardTitle>
+                    <CardDescription>{t('profileSettingsDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-2">
+                        <Label htmlFor="displayName">{t('displayName')}</Label>
+                        <div className="flex gap-2">
+                            <Input
+                                id="displayName"
+                                value={currentDisplayName}
+                                onChange={(e) => setCurrentDisplayName(e.target.value)}
+                                placeholder="Your display name"
+                            />
+                             <Button onClick={handleDisplayNameSave}><Save className="mr-2 h-4 w-4"/> {t('save')}</Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
             <Card>
                 <CardHeader>
                     <CardTitle>{t('accountSettings')}</CardTitle>
