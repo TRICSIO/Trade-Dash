@@ -90,11 +90,7 @@ export default function Dashboard() {
         const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
         updatedTrades = [tradeWithId, ...trades];
     }
-    setTrades(updatedTrades.map(trade => ({
-        ...trade,
-        entryDate: new Date(trade.entryDate),
-        exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
-    })));
+    setTrades(updatedTrades);
 
     if (!(tradeData.account in startingBalances)) {
       setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
@@ -143,11 +139,7 @@ export default function Dashboard() {
 
                 const updatedTrades = [...newTrades.map(t => ({...t, id: crypto.randomUUID()})), ...trades];
 
-                setTrades(updatedTrades.map(trade => ({
-                    ...trade,
-                    entryDate: new Date(trade.entryDate),
-                    exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
-                })));
+                setTrades(updatedTrades);
 
                 toast({
                     title: t('importSuccessful'),
@@ -289,16 +281,16 @@ export default function Dashboard() {
         </Card>
 
         <div className="grid gap-8 lg:grid-cols-6">
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-4">
                 <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
             </div>
-            <div className="lg:col-span-2">
+             <div className="lg:col-span-3">
                 <StyleDistributionChart trades={filteredTrades} />
             </div>
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-3">
                 <MonthlyPLChart trades={filteredTrades} />
             </div>
         </div>
@@ -311,6 +303,7 @@ export default function Dashboard() {
         onOpenChange={handleDialogClose}
         onSaveTrade={handleAddOrUpdateTrade}
         trade={editingTrade}
+        accounts={accounts.filter(acc => acc !== 'all')}
       />
       <ImportTradesDialog
         isOpen={isImportTradeOpen}

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,6 +36,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
 import { enUS, es, fr, de } from 'date-fns/locale';
 import { Badge } from './ui/badge';
+import { Combobox } from './ui/combobox';
 
 const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
@@ -69,6 +71,7 @@ type AddTradeDialogProps = {
   onOpenChange: (isOpen: boolean) => void;
   onSaveTrade: (trade: Omit<Trade, 'id'>, id?: string) => void;
   trade?: Trade;
+  accounts: string[];
 };
 
 const dateLocaleMap = {
@@ -78,7 +81,7 @@ const dateLocaleMap = {
   de: de,
 };
 
-export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trade }: AddTradeDialogProps) {
+export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trade, accounts }: AddTradeDialogProps) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const formSchema = useFormSchema();
@@ -184,11 +187,15 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   control={form.control}
                   name="account"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>{t('account')}</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Fidelity, IBKR" {...field} />
-                      </FormControl>
+                       <Combobox
+                          options={accounts.map(acc => ({ value: acc, label: acc }))}
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder={t('selectAccount')}
+                          addText={t('addNewAccount')}
+                        />
                       <FormMessage />
                     </FormItem>
                   )}
