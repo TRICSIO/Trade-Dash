@@ -22,7 +22,9 @@ export type AccountSettings = {
 };
 
 export interface UserData {
-    id: string;
+    trades: Trade[];
+    startingBalances: Record<string, number>;
+    accountSettings: AccountSettings;
     email: string;
     displayName?: string;
 }

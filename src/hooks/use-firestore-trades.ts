@@ -31,8 +31,7 @@ function useFirestoreTrades(userId?: string) {
     async (
         newTrades: Trade[], 
         newBalances: Record<string, number>, 
-        newSettings: AccountSettings,
-        newDisplayName?: string
+        newSettings: AccountSettings
     ) => {
       if (!userId) return;
       try {
@@ -43,12 +42,14 @@ function useFirestoreTrades(userId?: string) {
           exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
         }));
 
-        await setDoc(userDocRef, { 
+        // Construct the data object to save, ensuring we don't overwrite displayName if it exists
+        const dataToSave: Partial<UserData> = {
             trades: tradesToStore, 
             startingBalances: newBalances, 
             accountSettings: newSettings,
-            ...(newDisplayName && { displayName: newDisplayName })
-        }, { merge: true });
+        };
+
+        await setDoc(userDocRef, dataToSave, { merge: true });
 
       } catch (error) {
         console.error("Error saving data to Firestore:", error);
