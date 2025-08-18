@@ -151,9 +151,11 @@
     "profileSettingsDescription": "Mettez à jour vos informations de profil public.",
     "displayName": "Nom d'affichage",
     "save": "Enregistrer",
-    "accountSettings": "Ajouter/Modifier des comptes",
-    "accountSettingsDescription": "Gérez vos comptes, soldes de départ et autres détails facultatifs.",
+    "yourAccounts": "Vos comptes",
+    "yourAccountsDescription": "Affichez, gérez et modifiez vos comptes de trading ici.",
+    "noAccountsFound": "Aucun compte trouvé. Ajoutez-en un ci-dessous pour commencer.",
     "addNewAccount": "Ajouter un nouveau compte",
+    "addNewAccountDescription": "Créez un nouveau compte de trading pour y enregistrer des transactions.",
     "accountName": "Nom du compte",
     "accountNameRequired": "Le nom du compte est requis.",
     "accountExists": "Un compte avec ce nom existe déjà.",
@@ -248,3 +250,5 @@
     "noTransactions": "Aucune transaction enregistrée pour le moment.",
     "transactionNotesPlaceholder": "par ex. Épargne mensuelle, prise de bénéfices"
 }
+
+    

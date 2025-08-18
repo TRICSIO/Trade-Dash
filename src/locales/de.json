@@ -151,9 +151,11 @@
     "profileSettingsDescription": "Aktualisieren Sie Ihre öffentlichen Profilinformationen.",
     "displayName": "Anzeigename",
     "save": "Speichern",
-    "accountSettings": "Konten hinzufügen/bearbeiten",
-    "accountSettingsDescription": "Verwalten Sie Ihre Konten, Anfangssalden und andere optionale Details.",
+    "yourAccounts": "Ihre Konten",
+    "yourAccountsDescription": "Sehen, verwalten und bearbeiten Sie hier Ihre Handelskonten.",
+    "noAccountsFound": "Keine Konten gefunden. Fügen Sie unten eines hinzu, um zu beginnen.",
     "addNewAccount": "Neues Konto hinzufügen",
+    "addNewAccountDescription": "Erstellen Sie ein neues Handelskonto, um Trades dagegen zu protokollieren.",
     "accountName": "Kontoname",
     "accountNameRequired": "Kontoname ist erforderlich.",
     "accountExists": "Ein Konto mit diesem Namen existiert bereits.",
@@ -243,3 +245,5 @@
     "noTransactions": "Noch keine Transaktionen protokolliert.",
     "transactionNotesPlaceholder": "z.B. Monatliche Ersparnisse, Gewinnmitnahmen"
 }
+
+    

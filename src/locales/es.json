@@ -159,9 +159,11 @@
     "profileSettingsDescription": "Actualiza tu información de perfil público.",
     "displayName": "Nombre de Pantalla",
     "save": "Guardar",
-    "accountSettings": "Añadir/Editar Cuentas",
-    "accountSettingsDescription": "Gestiona tus cuentas, saldos iniciales y otros detalles opcionales.",
+    "yourAccounts": "Tus Cuentas",
+    "yourAccountsDescription": "Vea, gestione y edite sus cuentas de trading aquí.",
+    "noAccountsFound": "No se encontraron cuentas. Añada una a continuación para empezar.",
     "addNewAccount": "Añadir Nueva Cuenta",
+    "addNewAccountDescription": "Cree una nueva cuenta de trading para registrar operaciones.",
     "accountName": "Nombre de la Cuenta",
     "accountNameRequired": "El nombre de la cuenta es obligatorio.",
     "accountExists": "Ya existe una cuenta con este nombre.",
@@ -257,3 +259,5 @@
     "noTransactions": "Aún no se han registrado transacciones.",
     "transactionNotesPlaceholder": "p. ej., ahorros mensuales, toma de ganancias"
 }
+
+    

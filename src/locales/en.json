@@ -160,9 +160,11 @@
     "profileSettingsDescription": "Update your public profile information.",
     "displayName": "Display Name",
     "save": "Save",
-    "accountSettings": "Add/Edit Accounts",
-    "accountSettingsDescription": "Manage your accounts, starting balances, and other optional details.",
+    "yourAccounts": "Your Accounts",
+    "yourAccountsDescription": "View, manage, and edit your trading accounts here.",
+    "noAccountsFound": "No accounts found. Add one below to get started.",
     "addNewAccount": "Add New Account",
+    "addNewAccountDescription": "Create a new trading account to log trades against.",
     "accountName": "Account Name",
     "accountNameRequired": "Account name is required.",
     "accountExists": "An account with this name already exists.",
@@ -258,3 +260,5 @@
     "noTransactions": "No transactions logged yet.",
     "transactionNotesPlaceholder": "e.g., Monthly savings, profit taking"
 }
+
+    
