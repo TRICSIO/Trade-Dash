@@ -126,8 +126,14 @@ function useFirestoreTrades(userId?: string) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
     }
-    const newBalances = { ...startingBalances, [trimmedName]: balance };
-    const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
+    
+    // Fetch existing data to avoid overwriting
+    const userDocRef = doc(db, 'users', userId!);
+    const docSnap = await getDoc(userDocRef);
+    const existingData = docSnap.exists() ? docSnap.data() as UserData : {};
+
+    const newBalances = { ...(existingData.startingBalances || {}), [trimmedName]: balance };
+    const newSettings = { ...(existingData.accountSettings || {}), [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
     await updateUserDoc({ 
       startingBalances: newBalances,
