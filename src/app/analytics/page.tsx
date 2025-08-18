@@ -24,7 +24,7 @@ function AnalyticsPage() {
     const [editingTrade, setEditingTrade] = useState<Trade | undefined>(undefined);
     const [isImportTradeOpen, setImportTradeOpen] = useState(false);
     const { user } = useAuth();
-    const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
+    const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, addAccount } = useFirestoreTrades(user?.uid);
     const { toast } = useToast();
     const { t } = useTranslation();
     const [selectedAccount, setSelectedAccount] = useState('all');
@@ -55,11 +55,8 @@ function AnalyticsPage() {
             exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
         })));
 
-        if (!(tradeData.account in startingBalances)) {
-            setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
-        }
-        if (!(tradeData.account in accountSettings)) {
-            setAccountSettings(prev => ({...prev, [tradeData.account]: { color: '#000000' }}));
+        if (!accounts.includes(tradeData.account)) {
+          addAccount(tradeData.account);
         }
     };
     
@@ -173,6 +170,7 @@ function AnalyticsPage() {
                 onOpenChange={handleDialogClose}
                 onSaveTrade={handleAddOrUpdateTrade}
                 trade={editingTrade}
+                accounts={accounts.filter(acc => acc !== 'all')}
             />
             <ImportTradesDialog
                 isOpen={isImportTradeOpen}
