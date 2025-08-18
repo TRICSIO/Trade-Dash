@@ -32,7 +32,7 @@ export default function Dashboard() {
     displayName,
     setTrades, 
     setStartingBalances, 
-    setAccountSettings 
+    addAccount 
   } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
@@ -92,13 +92,14 @@ export default function Dashboard() {
         const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
         updatedTrades = [tradeWithId, ...trades];
     }
-    setTrades(updatedTrades);
+    setTrades(updatedTrades.map(trade => ({
+        ...trade,
+        entryDate: new Date(trade.entryDate),
+        exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+    })));
 
-    if (!(tradeData.account in startingBalances)) {
-      setStartingBalances(prev => ({...prev, [tradeData.account]: 0}));
-    }
-     if (!(tradeData.account in accountSettings)) {
-      setAccountSettings(prev => ({...prev, [tradeData.account]: { color: '#000000' }}));
+    if (!accounts.includes(tradeData.account)) {
+      addAccount(tradeData.account);
     }
   };
 
@@ -141,7 +142,11 @@ export default function Dashboard() {
 
                 const updatedTrades = [...newTrades.map(t => ({...t, id: crypto.randomUUID()})), ...trades];
 
-                setTrades(updatedTrades);
+                setTrades(updatedTrades.map(trade => ({
+                    ...trade,
+                    entryDate: new Date(trade.entryDate),
+                    exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+                })));
 
                 toast({
                     title: t('importSuccessful'),

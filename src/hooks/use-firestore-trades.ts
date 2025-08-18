@@ -66,7 +66,7 @@ function useFirestoreTrades(userId?: string) {
             const data = docSnap.data() as UserData;
             const tradesFromDb = (data.trades || []).map((t: any) => ({
               ...t,
-              entryDate: new Date(t.entryDate),
+              entryDate: t.entryDate ? new Date(t.entryDate) : new Date(),
               exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
             }));
             setTrades(sortTrades(tradesFromDb));
@@ -99,25 +99,47 @@ function useFirestoreTrades(userId?: string) {
       entryDate: new Date(t.entryDate).toISOString(),
       exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
     }));
-    debouncedSave({ trades: tradesToStore, startingBalances, accountSettings, displayName });
+    debouncedSave({ trades: tradesToStore });
   }
   
   const handleSetStartingBalances = (newBalances: Record<string, number> | ((val: Record<string, number>) => Record<string, number>)) => {
     const updatedBalances = newBalances instanceof Function ? newBalances(startingBalances) : newBalances;
     setStartingBalances(updatedBalances);
-    debouncedSave({ trades: trades, startingBalances: updatedBalances, accountSettings, displayName });
+    debouncedSave({ startingBalances: updatedBalances });
   }
 
   const handleSetAccountSettings = (newSettings: AccountSettings | ((val: AccountSettings) => AccountSettings)) => {
     const updatedSettings = newSettings instanceof Function ? newSettings(accountSettings) : newSettings;
     setAccountSettings(updatedSettings);
-    debouncedSave({ trades: trades, startingBalances, accountSettings: updatedSettings, displayName });
+    debouncedSave({ accountSettings: updatedSettings });
   }
 
   const handleSetDisplayName = (newName: string) => {
       setDisplayName(newName);
       saveDataToFirestore({ displayName: newName });
       toast({ title: 'Success', description: 'Your display name has been updated.' });
+  }
+
+  const handleAddNewAccount = (accountName: string) => {
+    if (!accountName.trim()) {
+      toast({ title: "Account name is required.", variant: 'destructive' });
+      return;
+    }
+    if (Object.keys(startingBalances).includes(accountName.trim())) {
+      toast({ title: "An account with this name already exists.", variant: 'destructive' });
+      return;
+    }
+
+    const newBalances = { ...startingBalances, [accountName]: 0 };
+    const newSettings = { ...accountSettings, [accountName]: { color: '#ffffff' } };
+
+    setStartingBalances(newBalances);
+    setAccountSettings(newSettings);
+    
+    debouncedSave({ 
+      startingBalances: newBalances,
+      accountSettings: newSettings,
+    });
   }
 
 
@@ -129,7 +151,8 @@ function useFirestoreTrades(userId?: string) {
       setTrades: handleSetTrades, 
       setStartingBalances: handleSetStartingBalances, 
       setAccountSettings: handleSetAccountSettings,
-      setDisplayName: handleSetDisplayName, 
+      setDisplayName: handleSetDisplayName,
+      addAccount: handleAddNewAccount,
       loading 
     };
 }

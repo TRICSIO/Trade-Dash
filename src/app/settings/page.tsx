@@ -28,7 +28,8 @@ function SettingsPage() {
     displayName, 
     setStartingBalances, 
     setAccountSettings,
-    setDisplayName 
+    setDisplayName,
+    addAccount
   } = useFirestoreTrades(user?.uid);
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -61,18 +62,7 @@ function SettingsPage() {
   
   const handleAddNewAccount = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newAccountName.trim()) {
-        toast({ title: t('accountNameRequired'), variant: 'destructive'});
-        return;
-    }
-    if (Object.keys(startingBalances).includes(newAccountName.trim())) {
-        toast({ title: t('accountExists'), variant: 'destructive'});
-        return;
-    }
-    const newBalances = { ...startingBalances, [newAccountName]: 0 };
-    const newSettings = { ...accountSettings, [newAccountName]: { color: '#ffffff' } };
-    setStartingBalances(newBalances);
-    setAccountSettings(newSettings);
+    addAccount(newAccountName);
     setNewAccountName('');
   }
 
