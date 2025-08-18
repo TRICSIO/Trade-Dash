@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
 import { useToast } from './use-toast';
@@ -30,7 +30,18 @@ function useFirestoreTrades(userId?: string) {
     };
     try {
       const userDocRef = doc(db, 'users', userId);
-      await updateDoc(userDocRef, dataToUpdate);
+      
+      // Atomically update the document. This is the correct way to handle this.
+      // `updateDoc` will fail if the document does not exist, so we handle that case.
+      const docSnap = await getDoc(userDocRef);
+      if(docSnap.exists()){
+        await updateDoc(userDocRef, dataToUpdate);
+      } else {
+        // If the document doesn't exist, create it with the initial data.
+        // This is crucial for new user registration.
+        await setDoc(userDocRef, dataToUpdate, { merge: true });
+      }
+
     } catch (error) {
       console.error("Error saving data to Firestore:", error);
       toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
@@ -72,15 +83,17 @@ function useFirestoreTrades(userId?: string) {
 
         } else {
             console.log("No such document! A new one will be created on first save.");
-            // If the document doesn't exist, we should create it with some defaults.
-            updateUserDoc({ 
-                email: userId, // Assuming userId is email from auth, might need to get real email
-                trades: [], 
-                startingBalances: {}, 
-                accountSettings: {},
-                hasSeenWelcomeMessage: false,
-                transactions: {}
-            });
+            // If the document doesn't exist, we should create it with some defaults for a new user.
+            // This is especially important for the welcome message logic.
+            const initialUserData: UserData = {
+              email: userId, // Assuming userId is email, might need to get real one from auth object
+              trades: [],
+              startingBalances: {},
+              accountSettings: {},
+              hasSeenWelcomeMessage: false,
+              transactions: {}
+            };
+            setDoc(doc(db, 'users', userId), initialUserData);
         }
         setLoading(false);
     }, (error) => {
@@ -90,7 +103,7 @@ function useFirestoreTrades(userId?: string) {
     });
 
     return () => unsubscribe();
-  }, [userId, toast, updateUserDoc]);
+  }, [userId, toast]);
 
   const handleSetTrades = (newTrades: Trade[]) => {
     const sorted = sortTrades(newTrades);
