@@ -2,9 +2,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Trade, AccountSettings, UserData } from '@/lib/types';
+import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
 import { useToast } from './use-toast';
 
 // Debounce function
@@ -29,6 +29,8 @@ function useFirestoreTrades(userId?: string) {
   const [accountSettings, setAccountSettings] = useState<AccountSettings>({});
   const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
+  const [hasSeenWelcomeMessage, setHasSeenWelcomeMessage] = useState(true);
+  const [transactions, setTransactions] = useState<Record<string, AccountTransaction[]>>({});
   const { toast } = useToast();
 
   const saveDataToFirestore = useCallback(
@@ -73,12 +75,26 @@ function useFirestoreTrades(userId?: string) {
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
+            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage || false);
+            
+            // For transactions
+            const transactionsFromDb = data.transactions || {};
+            Object.keys(transactionsFromDb).forEach(acc => {
+                transactionsFromDb[acc] = (transactionsFromDb[acc] || []).map((t: any) => ({
+                    ...t,
+                    date: t.date ? new Date(t.date) : new Date(),
+                }));
+            });
+            setTransactions(transactionsFromDb);
+
         } else {
             console.log("No such document! A new one will be created on first save.");
             setTrades([]);
             setStartingBalances({});
             setAccountSettings({});
             setDisplayName(undefined);
+            setHasSeenWelcomeMessage(false);
+            setTransactions({});
         }
         setLoading(false);
     }, (error) => {
@@ -92,9 +108,9 @@ function useFirestoreTrades(userId?: string) {
 
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
     const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
-    const sortedTrades = sortTrades(updatedTrades);
-    setTrades(sortedTrades);
-    const tradesToStore = sortedTrades.map(t => ({
+    const sorted = sortTrades(updatedTrades);
+    setTrades(sorted);
+    const tradesToStore = sorted.map(t => ({
       ...t,
       entryDate: new Date(t.entryDate).toISOString(),
       exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
@@ -120,23 +136,43 @@ function useFirestoreTrades(userId?: string) {
       toast({ title: 'Success', description: 'Your display name has been updated.' });
   }
 
+  const handleMarkWelcomeMessageAsSeen = () => {
+    setHasSeenWelcomeMessage(true);
+    saveDataToFirestore({ hasSeenWelcomeMessage: true });
+  }
+
+  const handleSetTransactions = (account: string, newTransactions: AccountTransaction[]) => {
+    const updatedTransactions = { ...transactions, [account]: newTransactions };
+    setTransactions(updatedTransactions);
+    const transactionsToStore = { ...updatedTransactions };
+    Object.keys(transactionsToStore).forEach(acc => {
+      transactionsToStore[acc] = transactionsToStore[acc].map(t => ({
+        ...t,
+        date: new Date(t.date).toISOString() as any,
+      }));
+    });
+    debouncedSave({ transactions: transactionsToStore });
+  }
+
   const handleAddNewAccount = (accountName: string) => {
     if (!accountName.trim()) {
       toast({ title: "Account name is required.", variant: 'destructive' });
       return;
     }
-    if (Object.keys(startingBalances).includes(accountName.trim())) {
+    const trimmedName = accountName.trim();
+    const allAccounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
+    if (allAccounts.includes(trimmedName)) {
       toast({ title: "An account with this name already exists.", variant: 'destructive' });
       return;
     }
 
-    const newBalances = { ...startingBalances, [accountName]: 0 };
-    const newSettings = { ...accountSettings, [accountName]: { color: '#ffffff' } };
-
+    const newBalances = { ...startingBalances, [trimmedName]: 0 };
+    const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff' } };
+    
     setStartingBalances(newBalances);
     setAccountSettings(newSettings);
     
-    debouncedSave({ 
+    saveDataToFirestore({ 
       startingBalances: newBalances,
       accountSettings: newSettings,
     });
@@ -148,12 +184,16 @@ function useFirestoreTrades(userId?: string) {
       startingBalances, 
       accountSettings, 
       displayName,
+      loading,
+      hasSeenWelcomeMessage,
+      transactions,
       setTrades: handleSetTrades, 
       setStartingBalances: handleSetStartingBalances, 
       setAccountSettings: handleSetAccountSettings,
       setDisplayName: handleSetDisplayName,
       addAccount: handleAddNewAccount,
-      loading 
+      markWelcomeMessageAsSeen: handleMarkWelcomeMessageAsSeen,
+      setTransactionsForAccount: handleSetTransactions,
     };
 }
 

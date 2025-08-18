@@ -30,9 +30,11 @@ export default function Dashboard() {
     startingBalances, 
     accountSettings,
     displayName,
+    hasSeenWelcomeMessage,
+    transactions,
     setTrades, 
-    setStartingBalances, 
-    addAccount 
+    addAccount,
+    markWelcomeMessageAsSeen
   } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
@@ -227,12 +229,19 @@ export default function Dashboard() {
         return acc + (t.entryPrice * t.quantity * multiplier);
     }, 0);
     
-    const accountBalance = currentStartingBalance + totalNetPL - openTradesCost;
+    const accountTransactions = selectedAccount === 'all'
+        ? Object.values(transactions).flat()
+        : transactions[selectedAccount] || [];
+
+    const totalDeposits = accountTransactions.filter(t => t.type === 'deposit').reduce((acc, t) => acc + t.amount, 0);
+    const totalWithdrawals = accountTransactions.filter(t => t.type === 'withdrawal').reduce((acc, t) => acc + t.amount, 0);
+
+    const accountBalance = currentStartingBalance + totalNetPL + totalDeposits - totalWithdrawals - openTradesCost;
 
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
-  }, [filteredTrades, currentStartingBalance]);
+  }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
-  const isNewUser = trades.length === 0 && Object.keys(startingBalances).length === 0;
+  const showWelcome = !hasSeenWelcomeMessage && trades.length === 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -241,8 +250,8 @@ export default function Dashboard() {
         onImportClick={() => setImportTradeOpen(true)}
       />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
-        {isNewUser ? (
-          <Welcome displayName={displayName} />
+        {showWelcome ? (
+          <Welcome displayName={displayName} onGetStarted={markWelcomeMessageAsSeen}/>
         ) : (
           <>
             <Card>
