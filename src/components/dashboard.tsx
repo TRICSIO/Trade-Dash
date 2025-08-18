@@ -22,6 +22,7 @@ import MonthlyPLChart from './monthly-pl-chart';
 import { parse } from 'papaparse';
 import { processCsvData } from '@/ai/flows/process-csv-data';
 import Welcome from './welcome';
+import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [selectedAccount, setSelectedAccount] = useState('all');
   const { toast } = useToast();
   const { t } = useTranslation();
+  const router = useRouter();
 
   const accounts = useMemo(() => {
     const allAccounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
@@ -239,6 +241,11 @@ export default function Dashboard() {
 
   const showWelcome = !hasSeenWelcomeMessage && !loading;
 
+  const handleGetStarted = () => {
+    markWelcomeMessageAsSeen();
+    router.push('/settings');
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <AppHeader 
@@ -247,7 +254,7 @@ export default function Dashboard() {
       />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
         {showWelcome ? (
-          <Welcome displayName={displayName} onGetStarted={markWelcomeMessageAsSeen}/>
+          <Welcome displayName={displayName} onGetStarted={handleGetStarted}/>
         ) : (
           !loading && (
           <>
