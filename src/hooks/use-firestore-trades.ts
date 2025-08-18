@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, setDoc, getDoc, FirestoreError } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
 import { useToast } from './use-toast';
@@ -18,7 +18,7 @@ function useFirestoreTrades(userId?: string) {
   const [accountSettings, setAccountSettings] = useState<AccountSettings>({});
   const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [hasSeenWelcomeMessage, setHasSeenWelcomeMessage] = useState(true);
+  const [hasSeenWelcomeMessage, setHasSeenWelcomeMessage] = useState(false);
   const [transactions, setTransactions] = useState<Record<string, AccountTransaction[]>>({});
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -30,21 +30,19 @@ function useFirestoreTrades(userId?: string) {
     };
     try {
       const userDocRef = doc(db, 'users', userId);
-      
-      // Atomically update the document. This is the correct way to handle this.
-      // `updateDoc` will fail if the document does not exist, so we handle that case.
-      const docSnap = await getDoc(userDocRef);
-      if(docSnap.exists()){
-        await updateDoc(userDocRef, dataToUpdate);
-      } else {
-        // If the document doesn't exist, create it with the initial data.
-        // This is crucial for new user registration.
-        await setDoc(userDocRef, dataToUpdate, { merge: true });
-      }
-
+      await updateDoc(userDocRef, dataToUpdate);
     } catch (error) {
-      console.error("Error saving data to Firestore:", error);
-      toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
+       if ((error as FirestoreError).code === 'not-found') {
+          try {
+            await setDoc(doc(db, 'users', userId), dataToUpdate, { merge: true });
+          } catch (e) {
+            console.error("Error creating document:", e);
+            toast({ title: "Error", description: "Could not create user data.", variant: 'destructive'});
+          }
+       } else {
+        console.error("Error saving data to Firestore:", error);
+        toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
+       }
     }
   }, [userId, toast]);
 
@@ -70,7 +68,7 @@ function useFirestoreTrades(userId?: string) {
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
-            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? true : data.hasSeenWelcomeMessage);
+            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage || false);
             
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
@@ -83,16 +81,7 @@ function useFirestoreTrades(userId?: string) {
 
         } else {
             console.log("No such document! A new one will be created on first save.");
-            // If the document doesn't exist, we should create it with some defaults for a new user.
-            // This is especially important for the welcome message logic.
-            const initialUserData: UserData = {
-              email: userId, // Assuming userId is email, might need to get real one from auth object
-              trades: [],
-              startingBalances: {},
-              accountSettings: {},
-              hasSeenWelcomeMessage: false,
-              transactions: {}
-            };
+            const initialUserData: Partial<UserData> = { hasSeenWelcomeMessage: false };
             setDoc(doc(db, 'users', userId), initialUserData);
         }
         setLoading(false);

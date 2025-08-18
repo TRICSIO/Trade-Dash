@@ -31,6 +31,7 @@ export default function Dashboard() {
     accountSettings,
     displayName,
     hasSeenWelcomeMessage,
+    loading,
     transactions,
     setTrades, 
     markWelcomeMessageAsSeen
@@ -236,7 +237,7 @@ export default function Dashboard() {
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
-  const showWelcome = !hasSeenWelcomeMessage && trades.length === 0;
+  const showWelcome = !hasSeenWelcomeMessage && !loading;
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -248,6 +249,7 @@ export default function Dashboard() {
         {showWelcome ? (
           <Welcome displayName={displayName} onGetStarted={markWelcomeMessageAsSeen}/>
         ) : (
+          !loading && (
           <>
             <Card>
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -314,6 +316,7 @@ export default function Dashboard() {
             
             <TradeTable trades={filteredTrades} accountSettings={accountSettings} onEditTrade={handleOpenEditDialog} onDeleteTrade={handleDeleteTrade} />
           </>
+          )
         )}
       </main>
       <AddTradeDialog
