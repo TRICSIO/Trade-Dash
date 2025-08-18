@@ -45,8 +45,7 @@ export default function RegisterPage() {
     try {
       // NOTE: In a real app, for a passkey-first approach, you might not create a password at all.
       // Here, we create a user with a password, then immediately prompt for passkey registration.
-      // The password is required for the client-side Firebase login workaround.
-      const userCredential = await createUserWithEmailAndPassword(auth, email, `${email}-passkey`);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
       await setDoc(doc(db, "users", user.uid), {
