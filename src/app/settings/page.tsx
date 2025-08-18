@@ -373,8 +373,8 @@ function SettingsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle>{t('dataManagement')}</CardTitle>
-                    <CardDescription>{t('dataManagementDescription')}</CardHeader>
-                </CardContent>
+                    <CardDescription>{t('dataManagementDescription')}</CardDescription>
+                </CardHeader>
                 <CardContent>
                     <Button variant="outline" className="w-full sm:w-auto justify-start" onClick={handleBackup}>
                        <FileDown className="mr-2 h-4 w-4" /> {t('backupData')}
