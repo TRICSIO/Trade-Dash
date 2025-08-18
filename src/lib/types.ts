@@ -21,22 +21,10 @@ export type AccountSettings = {
   };
 };
 
-// Types for WebAuthn
-export interface Authenticator {
-  credentialID: string; // base64 string
-  credentialPublicKey: string; // base64 string
-  counter: number;
-  credentialDeviceType: 'singleDevice' | 'multiDevice';
-  credentialBackedUp: boolean;
-  transports?: AuthenticatorTransport[];
-}
-
 export interface UserData {
     id: string;
     email: string;
     displayName?: string;
-    authenticators: Authenticator[];
-    currentChallenge?: string;
 }
 
 export type StockMover = {

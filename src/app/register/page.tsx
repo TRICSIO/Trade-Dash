@@ -43,23 +43,18 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      // Create user with the actual password provided in the form
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // Create the user's document in Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         displayName: displayName,
         trades: [],
         startingBalances: {},
         accountSettings: {},
-        authenticators: [],
-        currentChallenge: null,
       });
 
-      // After creating the user, redirect to prompt for passkey registration.
-      router.push('/?action=registerPasskey');
+      router.push('/');
     } catch (error: any) {
       toast({
         title: t('registrationFailed'),
@@ -109,7 +104,7 @@ export default function RegisterPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
-                autoComplete='username webauthn'
+                autoComplete='username'
               />
             </div>
             <div className="space-y-2">
