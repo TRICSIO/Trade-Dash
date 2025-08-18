@@ -19,6 +19,10 @@ function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
     };
 }
 
+const sortTrades = (trades: Trade[]) => {
+    return trades.sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime());
+};
+
 function useFirestoreTrades(userId?: string) {
   const [trades, setTrades] = useState<Trade[]>([]);
   const [startingBalances, setStartingBalances] = useState<Record<string, number>>({});
@@ -65,7 +69,7 @@ function useFirestoreTrades(userId?: string) {
               entryDate: new Date(t.entryDate),
               exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
             }));
-            setTrades(tradesFromDb);
+            setTrades(sortTrades(tradesFromDb));
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
@@ -88,8 +92,9 @@ function useFirestoreTrades(userId?: string) {
 
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
     const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
-    setTrades(updatedTrades);
-    const tradesToStore = updatedTrades.map(t => ({
+    const sortedTrades = sortTrades(updatedTrades);
+    setTrades(sortedTrades);
+    const tradesToStore = sortedTrades.map(t => ({
       ...t,
       entryDate: new Date(t.entryDate).toISOString(),
       exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
