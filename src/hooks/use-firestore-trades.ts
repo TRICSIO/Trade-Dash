@@ -25,23 +25,38 @@ function useFirestoreTrades(userId?: string) {
 
   const updateUserDoc = useCallback(async (dataToUpdate: Partial<UserData>) => {
     if (!userId) {
+        // This should not happen if the UI is disabled correctly, but as a safeguard.
+        console.error("updateUserDoc called without a userId.");
         toast({ title: "Error", description: "You must be logged in to save data.", variant: 'destructive'});
         return;
     };
+    
+    const userDocRef = doc(db, 'users', userId);
+    
     try {
-      const userDocRef = doc(db, 'users', userId);
-      await updateDoc(userDocRef, dataToUpdate);
+        await updateDoc(userDocRef, dataToUpdate);
     } catch (error) {
        if ((error as FirestoreError).code === 'not-found') {
+          // This happens for a new user, where the document doesn't exist yet.
+          // We'll try to create it.
           try {
-            await setDoc(doc(db, 'users', userId), dataToUpdate, { merge: true });
+            console.log("Document not found, attempting to create it.");
+            const docSnap = await getDoc(userDocRef);
+            // We double-check it doesn't exist to avoid race conditions.
+            if (!docSnap.exists()) {
+                const initialData = await getInitialUserData(userId);
+                await setDoc(userDocRef, { ...initialData, ...dataToUpdate });
+            } else {
+                // In the rare case it was created between our read and write, we just update.
+                await updateDoc(userDocRef, dataToUpdate);
+            }
           } catch (e) {
-            console.error("Error creating document:", e);
+            console.error("Error creating document after not-found error:", e);
             toast({ title: "Error", description: "Could not create user data.", variant: 'destructive'});
           }
        } else {
-        console.error("Error saving data to Firestore:", error);
-        toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
+            console.error("Error saving data to Firestore:", error);
+            toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
        }
     }
   }, [userId, toast]);
@@ -80,9 +95,10 @@ function useFirestoreTrades(userId?: string) {
             setTransactions(transactionsFromDb);
 
         } else {
-            console.log("No such document! A new one will be created on first save.");
-            const initialUserData: Partial<UserData> = { hasSeenWelcomeMessage: false };
-            setDoc(doc(db, 'users', userId), initialUserData);
+            console.log("No user document, it will be created on the first data modification.");
+            // We don't create it here, we let the first write operation create it.
+            // This prevents a race condition on new user signup.
+             setHasSeenWelcomeMessage(false);
         }
         setLoading(false);
     }, (error) => {
@@ -93,6 +109,21 @@ function useFirestoreTrades(userId?: string) {
 
     return () => unsubscribe();
   }, [userId, toast]);
+
+  const getInitialUserData = async (userId: string) => {
+      const userDocRef = doc(db, 'users', userId);
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+          return docSnap.data() as UserData;
+      }
+      return {
+          trades: [],
+          startingBalances: {},
+          accountSettings: {},
+          transactions: {},
+          hasSeenWelcomeMessage: false,
+      };
+  };
 
   const handleSetTrades = (newTrades: Trade[]) => {
     const sorted = sortTrades(newTrades);
@@ -122,18 +153,15 @@ function useFirestoreTrades(userId?: string) {
       return;
     }
     const trimmedName = accountName.trim();
+    
+    // We get the latest data directly from state, which is updated by our real-time listener
     if (Object.keys(accountSettings).includes(trimmedName)) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
     }
     
-    // Fetch existing data to avoid overwriting
-    const userDocRef = doc(db, 'users', userId!);
-    const docSnap = await getDoc(userDocRef);
-    const existingData = docSnap.exists() ? docSnap.data() as UserData : {};
-
-    const newBalances = { ...(existingData.startingBalances || {}), [trimmedName]: balance };
-    const newSettings = { ...(existingData.accountSettings || {}), [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
+    const newBalances = { ...startingBalances, [trimmedName]: balance };
+    const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
     await updateUserDoc({ 
       startingBalances: newBalances,
