@@ -1,14 +1,9 @@
 
 'use client';
 
-import { useState } from "react";
-import AppHeader from "@/components/header";
 import ProtectedRoute from "@/components/protected-route";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getStockNews, type NewsArticle } from "@/ai/flows/get-stock-news";
-import { Newspaper } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+import AppHeader from "@/components/header";
+import { useState } from "react";
 import AddTradeDialog from "@/components/add-trade-dialog";
 import ImportTradesDialog from "@/components/import-trades-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -17,72 +12,13 @@ import { useAuth } from "@/hooks/use-auth";
 import type { Trade } from "@/lib/types";
 import { useTranslation } from "@/hooks/use-translation";
 
-function NewsCard({ article }: { article: NewsArticle }) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{article.title}</CardTitle>
-                <CardDescription>{article.summary}</CardDescription>
-            </CardHeader>
-            <CardFooter className="flex justify-between">
-                <Badge variant="outline">{article.source}</Badge>
-                <span className="text-sm text-muted-foreground">{article.publishedDate}</span>
-            </CardFooter>
-        </Card>
-    )
-}
-
-function LoadingSkeleton() {
-    return (
-        <div className="grid gap-6">
-            {[...Array(5)].map((_, i) => (
-                 <Card key={i}>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-3/4 mb-2" />
-                        <Skeleton className="h-4 w-full" />
-                         <Skeleton className="h-4 w-5/6" />
-                    </CardHeader>
-                    <CardFooter className="flex justify-between">
-                       <Skeleton className="h-6 w-24" />
-                       <Skeleton className="h-6 w-32" />
-                    </CardFooter>
-                </Card>
-            ))}
-        </div>
-    )
-}
-
-// --- Main Page Component (Client) ---
-
-export default function StockNews() {
+function StockNewsPage() {
     const [isAddTradeOpen, setAddTradeOpen] = useState(false);
     const [isImportTradeOpen, setImportTradeOpen] = useState(false);
-    const [news, setNews] = useState<NewsArticle[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
     const { user } = useAuth();
     const { trades, startingBalances, accountSettings, setTrades, setStartingBalances, setAccountSettings } = useFirestoreTrades(user?.uid);
     const { toast } = useToast();
     const { t } = useTranslation();
-
-    useState(() => {
-        async function fetchNews() {
-            try {
-                const newsData = await getStockNews();
-                setNews(newsData.articles);
-            } catch (error) {
-                console.error("Failed to fetch stock news", error);
-                toast({
-                    title: t('error'),
-                    description: "Failed to fetch stock market news.",
-                    variant: 'destructive'
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchNews();
-    });
 
     const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, id?: string) => {
         let updatedTrades;
@@ -114,46 +50,37 @@ export default function StockNews() {
         });
         setImportTradeOpen(false);
     };
-
+    
     const accounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
 
     return (
+        <div className="flex flex-col min-h-screen bg-background">
+            <AppHeader onAddTradeClick={() => setAddTradeOpen(true)} onImportClick={() => setImportTradeOpen(true)} />
+            <main className="flex-1 p-4 sm:p-6 lg:p-8">
+                <div className="max-w-4xl mx-auto space-y-8">
+                   <h1 className="text-2xl font-semibold">This page has been removed.</h1>
+                </div>
+            </main>
+             <AddTradeDialog
+                isOpen={isAddTradeOpen}
+                onOpenChange={setAddTradeOpen}
+                onSaveTrade={handleAddOrUpdateTrade}
+            />
+            <ImportTradesDialog
+                isOpen={isImportTradeOpen}
+                onOpenChange={setImportTradeOpen}
+                onImport={handleImportTrades}
+                accounts={accounts.filter(acc => acc !== 'all')}
+            />
+        </div>
+    );
+}
+
+
+export default function StockNews() {
+    return (
         <ProtectedRoute>
-            <div className="flex flex-col min-h-screen bg-background">
-                <AppHeader onAddTradeClick={() => setAddTradeOpen(true)} onImportClick={() => setImportTradeOpen(true)} />
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">
-                    <div className="max-w-4xl mx-auto space-y-8">
-                        <div className="flex items-center gap-2">
-                            <Newspaper className="h-8 w-8" />
-                            <div>
-                                <h1 className="text-3xl font-bold">Market News & Announcements</h1>
-                                <p className="text-muted-foreground">The latest news moving the stock market.</p>
-                            </div>
-                        </div>
-                        
-                        {isLoading ? (
-                            <LoadingSkeleton />
-                        ) : (
-                            <div className="grid gap-6">
-                                {news.map((article, index) => (
-                                    <NewsCard key={index} article={article} />
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </main>
-                <AddTradeDialog
-                    isOpen={isAddTradeOpen}
-                    onOpenChange={setAddTradeOpen}
-                    onSaveTrade={handleAddOrUpdateTrade}
-                />
-                <ImportTradesDialog
-                    isOpen={isImportTradeOpen}
-                    onOpenChange={setImportTradeOpen}
-                    onImport={handleImportTrades}
-                    accounts={accounts.filter(acc => acc !== 'all')}
-                />
-            </div>
+            <StockNewsPage />
         </ProtectedRoute>
     );
 }

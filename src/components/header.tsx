@@ -58,12 +58,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                     {t('dashboard')}
                 </Link>
               </Button>
-               <Button variant="ghost" asChild>
-                <Link href="/stock-news">
-                    <Newspaper className="mr-2 h-4 w-4" />
-                    {t('stockNews')}
-                </Link>
-              </Button>
               <Button variant="outline" onClick={onImportClick}>
                   <FileUp className="mr-2 h-4 w-4" />
                   {t('import')}
@@ -105,14 +99,6 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                                     <Link href="/">
                                         <Home className="mr-2 h-4 w-4" />
                                         {t('dashboard')}
-                                    </Link>
-                                </Button>
-                             </SheetClose>
-                             <SheetClose asChild>
-                                <Button variant="ghost" asChild className="w-full justify-start">
-                                    <Link href="/stock-news">
-                                        <Newspaper className="mr-2 h-4 w-4" />
-                                        {t('stockNews')}
                                     </Link>
                                 </Button>
                              </SheetClose>
