@@ -23,6 +23,7 @@ import { parse } from 'papaparse';
 import { processCsvData } from '@/ai/flows/process-csv-data';
 import Welcome from './welcome';
 import { useRouter } from 'next/navigation';
+import LoadingScreen from './loading-screen';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -245,7 +246,7 @@ export default function Dashboard() {
   }
 
   if (loading) {
-    return null;
+    return <LoadingScreen />;
   }
 
   if (!hasSeenWelcomeMessage) {
