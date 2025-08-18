@@ -154,7 +154,7 @@ function SettingsPage() {
       setTransactionDialogOpen(true);
   }
 
-  const allAccounts = Array.from(new Set([...Object.keys(initialStartingBalances), ...trades.map(t => t.account)]));
+  const allAccounts = Array.from(new Set([...Object.keys(localStartingBalances), ...trades.map(t => t.account)]));
 
   return (
     <>
@@ -408,3 +408,5 @@ export default function Settings() {
         </ProtectedRoute>
     )
 }
+
+    
