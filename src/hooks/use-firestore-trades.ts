@@ -27,17 +27,25 @@ function useFirestoreTrades(userId?: string) {
     if (!userId) return;
     
     const userDocRef = doc(db, 'users', userId);
-    
     try {
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-            await updateDoc(userDocRef, dataToUpdate);
-        } else {
-            await setDoc(userDocRef, dataToUpdate, { merge: true });
-        }
+      const docSnap = await getDoc(userDocRef);
+      if (docSnap.exists()) {
+        await updateDoc(userDocRef, dataToUpdate);
+      } else {
+        await setDoc(userDocRef, dataToUpdate, { merge: true });
+      }
     } catch (error) {
-        console.error("Error saving data to Firestore:", error);
+      console.error("Error saving data to Firestore:", error);
+      if ((error as FirestoreError).code === 'not-found') {
+        try {
+          await setDoc(userDocRef, dataToUpdate, { merge: true });
+        } catch (e) {
+          console.error("Error creating document after update failed:", e);
+          toast({ title: "Error", description: "Could not create user data.", variant: 'destructive'});
+        }
+      } else {
         toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
+      }
     }
   }, [userId, toast]);
 
@@ -88,27 +96,27 @@ function useFirestoreTrades(userId?: string) {
     return () => unsubscribe();
   }, [userId, toast]);
 
-  const handleSetTrades = (newTrades: Trade[]) => {
+  const handleSetTrades = useCallback((newTrades: Trade[]) => {
     const sorted = sortTrades(newTrades);
     updateUserDoc({ trades: sorted });
-  }
+  }, [updateUserDoc]);
   
-  const handleSetStartingBalances = (newBalances: Record<string, number>) => {
+  const handleSetStartingBalances = useCallback((newBalances: Record<string, number>) => {
     updateUserDoc({ startingBalances: newBalances });
-  }
+  }, [updateUserDoc]);
 
-  const handleSetAccountSettings = (newSettings: AccountSettings) => {
+  const handleSetAccountSettings = useCallback((newSettings: AccountSettings) => {
     updateUserDoc({ accountSettings: newSettings });
-  }
+  }, [updateUserDoc]);
 
-  const handleSetDisplayName = (newName: string) => {
+  const handleSetDisplayName = useCallback((newName: string) => {
       updateUserDoc({ displayName: newName });
       toast({ title: 'Success', description: 'Your display name has been updated.' });
-  }
+  }, [updateUserDoc, toast]);
 
-  const handleMarkWelcomeMessageAsSeen = () => {
+  const handleMarkWelcomeMessageAsSeen = useCallback(() => {
     updateUserDoc({ hasSeenWelcomeMessage: true });
-  }
+  }, [updateUserDoc]);
   
   const handleAddNewAccount = useCallback(async (accountName: string, balance: number) => {
     if (!userId) return;
@@ -118,6 +126,7 @@ function useFirestoreTrades(userId?: string) {
     }
     const trimmedName = accountName.trim();
     
+    // This check uses the local state, which is fine because it prevents duplicates before writing
     if (Object.keys(accountSettings).includes(trimmedName)) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
@@ -133,10 +142,10 @@ function useFirestoreTrades(userId?: string) {
     toast({ title: 'Success', description: `Account '${trimmedName}' has been added.` });
   }, [userId, accountSettings, startingBalances, t, toast, updateUserDoc]);
   
-  const handleSetTransactionsForAccount = (account: string, newTransactions: AccountTransaction[]) => {
+  const handleSetTransactionsForAccount = useCallback((account: string, newTransactions: AccountTransaction[]) => {
     const updatedTransactions = { ...transactions, [account]: newTransactions };
     updateUserDoc({ transactions: updatedTransactions });
-  }
+  }, [transactions, updateUserDoc]);
 
 
   return { 
