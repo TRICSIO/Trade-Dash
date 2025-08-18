@@ -115,7 +115,7 @@ function SettingsPage() {
     }
   };
 
-  const allAccounts = Array.from(new Set(Object.keys(startingBalances)));
+  const allAccounts = Array.from(new Set([...Object.keys(startingBalances), ...trades.map(t => t.account)]));
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
