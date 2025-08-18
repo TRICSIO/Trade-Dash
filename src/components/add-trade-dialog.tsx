@@ -102,7 +102,15 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
     } : {
       instrument: '',
       account: '',
+      entryPrice: undefined,
+      exitPrice: undefined,
+      quantity: undefined,
+      tradeStyle: '',
+      entryDate: undefined,
+      exitDate: undefined,
       notes: '',
+      commissions: undefined,
+      fees: undefined,
       tags: [],
     },
   });
@@ -134,7 +142,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
           entryPrice: undefined,
           exitPrice: undefined,
           quantity: undefined,
-          tradeStyle: undefined,
+          tradeStyle: '',
           entryDate: undefined,
           exitDate: undefined,
           notes: '',
@@ -277,7 +285,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   <FormItem>
                     <FormLabel>{t('entryPrice')}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder="0.00" {...field} />
+                      <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -290,7 +298,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   <FormItem>
                     <FormLabel>{t('exitPrice')}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder="0.00" {...field} />
+                      <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -305,7 +313,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                     <FormItem>
                     <FormLabel>{t('quantity')}</FormLabel>
                     <FormControl>
-                        <Input type="number" step="any" placeholder="e.g., 100" {...field} />
+                        <Input type="number" step="any" placeholder="e.g., 100" {...field} value={field.value ?? ''} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -318,7 +326,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                         <FormItem>
                         <FormLabel>{t('commissions')}</FormLabel>
                         <FormControl>
-                            <Input type="number" step="any" placeholder="0.00" {...field} />
+                            <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -331,7 +339,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                         <FormItem>
                         <FormLabel>{t('fees')}</FormLabel>
                         <FormControl>
-                            <Input type="number" step="any" placeholder="0.00" {...field} />
+                            <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -344,7 +352,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t('tradeStyle')}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={t('selectTradeStyle')} />
