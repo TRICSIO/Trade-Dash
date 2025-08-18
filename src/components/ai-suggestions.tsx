@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from './ui/skeleton';
 import { format } from 'date-fns';
 import { useTranslation } from '@/hooks/use-translation';
+import { useLanguage } from '@/context/language-context';
 
 type AiSuggestionsProps = {
   trades: Trade[];
@@ -28,6 +29,7 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
   const [suggestions, setSuggestions] = useState('');
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { language } = useLanguage();
 
   const handleGenerate = async () => {
     if (trades.length === 0) {
@@ -62,7 +64,7 @@ export default function AiSuggestions({ trades }: AiSuggestionsProps) {
         )
         .join('\n');
 
-      const result = await generateTradeSuggestions({ tradeHistory });
+      const result = await generateTradeSuggestions({ tradeHistory, language });
       setSuggestions(result.suggestions);
     } catch (error) {
       console.error('Failed to generate suggestions:', error);

@@ -201,5 +201,21 @@
     "monthlyPLDescription": "Ihr Nettogewinn und -verlust für jeden Monat.",
     "month": "Monat",
     "netPL": "Netto G/V",
-    "monthlyPLPlaceholder": "Protokollieren Sie einige geschlossene Trades, um Ihre monatliche Leistung anzuzeigen."
+    "monthlyPLPlaceholder": "Protokollieren Sie einige geschlossene Trades, um Ihre monatliche Leistung anzuzeigen.",
+    "analytics": "Analytik",
+    "advancedAnalytics": "Erweiterte Analytik",
+    "advancedAnalyticsDescription": "Tauchen Sie tiefer in Ihre Handelsdaten ein.",
+    "performanceByDay": "Leistung nach Wochentag",
+    "performanceByDayDescription": "Ihr Netto-G/V für jeden Wochentag.",
+    "trades": "Trades",
+    "weekdayPLPlaceholder": "Protokollieren Sie einige geschlossene Trades, um Ihre Leistung nach Wochentag anzuzeigen.",
+    "performanceByInstrument": "Leistung nach Instrument",
+    "performanceByInstrumentDescription": "Top 10 Instrumente nach Netto-G/V.",
+    "instrumentPLPlaceholder": "Protokollieren Sie einige geschlossene Trades, um Ihre Leistung nach Instrument anzuzeigen.",
+    "viewDetails": "Details anzeigen",
+    "tradeDetails": "Trade-Details",
+    "tradeOn": "Trade am",
+    "tradeNotFound": "Trade nicht gefunden",
+    "tradeNotFoundDescription": "Der von Ihnen gesuchte Trade konnte nicht gefunden werden.",
+    "backToDashboard": "Zurück zum Dashboard"
 }

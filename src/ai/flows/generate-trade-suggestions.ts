@@ -17,6 +17,7 @@ const GenerateTradeSuggestionsInputSchema = z.object({
     .describe(
       'A history of the trades that the user has made. This should include entry and exit prices, dates, instruments, and commentary for each trade.'
     ),
+    language: z.string().describe('The language the user has selected for the application, specified as a two-letter ISO 639-1 code (e.g., "en", "es", "fr", "de").'),
 });
 export type GenerateTradeSuggestionsInput = z.infer<typeof GenerateTradeSuggestionsInputSchema>;
 
@@ -40,6 +41,8 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert financial advisor specializing in analyzing past trades and generating suggestions to improve trading strategies.
 
 You will use the trade history to create suggestions on how to improve. 
+
+VERY IMPORTANT: Your entire response, including all analysis and suggestions, MUST be in the following language: {{language}}.
 
 Trade History: {{{tradeHistory}}}`,
 });

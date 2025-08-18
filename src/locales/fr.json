@@ -204,5 +204,23 @@
     "monthlyPLDescription": "Votre profit et perte nets pour chaque mois.",
     "month": "Mois",
     "netPL": "P/L Net",
-    "monthlyPLPlaceholder": "Enregistrez quelques transactions clôturées pour voir vos performances mensuelles."
+    "monthlyPLPlaceholder": "Enregistrez quelques transactions clôturées pour voir vos performances mensuelles.",
+
+    "analytics": "Analyses",
+    "advancedAnalytics": "Analyses Avancées",
+    "advancedAnalyticsDescription": "Plongez plus profondément dans vos données de trading.",
+    "performanceByDay": "Performance par Jour de la Semaine",
+    "performanceByDayDescription": "Votre P/L net pour chaque jour de la semaine.",
+    "trades": "transactions",
+    "weekdayPLPlaceholder": "Enregistrez des transactions clôturées pour voir vos performances par jour de la semaine.",
+    "performanceByInstrument": "Performance par Instrument",
+    "performanceByInstrumentDescription": "Top 10 des instruments par P/L net.",
+    "instrumentPLPlaceholder": "Enregistrez des transactions clôturées pour voir vos performances par instrument.",
+
+    "viewDetails": "Voir les détails",
+    "tradeDetails": "Détails de la Transaction",
+    "tradeOn": "Transaction sur",
+    "tradeNotFound": "Transaction non trouvée",
+    "tradeNotFoundDescription": "La transaction que vous recherchez n'a pas pu être trouvée.",
+    "backToDashboard": "Retour au tableau de bord"
 }

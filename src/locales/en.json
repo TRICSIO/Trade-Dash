@@ -213,5 +213,23 @@
     "monthlyPLDescription": "Your net profit and loss for each month.",
     "month": "Month",
     "netPL": "Net P/L",
-    "monthlyPLPlaceholder": "Log some closed trades to see your monthly performance."
+    "monthlyPLPlaceholder": "Log some closed trades to see your monthly performance.",
+
+    "analytics": "Analytics",
+    "advancedAnalytics": "Advanced Analytics",
+    "advancedAnalyticsDescription": "Take a deeper dive into your trading data.",
+    "performanceByDay": "Performance By Weekday",
+    "performanceByDayDescription": "Your net P/L for each day of the week.",
+    "trades": "trades",
+    "weekdayPLPlaceholder": "Log some closed trades to see your performance by weekday.",
+    "performanceByInstrument": "Performance By Instrument",
+    "performanceByInstrumentDescription": "Top 10 instruments by net P/L.",
+    "instrumentPLPlaceholder": "Log some closed trades to see your performance by instrument.",
+    
+    "viewDetails": "View Details",
+    "tradeDetails": "Trade Details",
+    "tradeOn": "Trade on",
+    "tradeNotFound": "Trade Not Found",
+    "tradeNotFoundDescription": "The trade you are looking for could not be found.",
+    "backToDashboard": "Back to Dashboard"
 }

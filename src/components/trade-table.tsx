@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock, Percent, X } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Pencil, Trash2, Clock, Percent, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from './ui/button';
 import {
@@ -30,6 +30,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useLanguage } from '@/context/language-context';
 import { enUS, es, fr, de } from 'date-fns/locale';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import Link from 'next/link';
 
 type TradeTableProps = {
   trades: Trade[];
@@ -224,6 +225,12 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                         </TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
+                                <Button variant="ghost" size="icon" asChild>
+                                    <Link href={`/trade/${trade.id}`}>
+                                        <ExternalLink className="h-4 w-4" />
+                                        <span className="sr-only">{t('viewDetails')}</span>
+                                    </Link>
+                                </Button>
                                 <Button variant="ghost" size="icon" onClick={() => onEditTrade(trade)}>
                                     <Pencil className="h-4 w-4" />
                                     <span className="sr-only">{t('edit')}</span>

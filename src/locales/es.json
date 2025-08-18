@@ -213,5 +213,23 @@
     "monthlyPLDescription": "Su ganancia y pérdida neta para cada mes.",
     "month": "Mes",
     "netPL": "G/P Neto",
-    "monthlyPLPlaceholder": "Registre algunas operaciones cerradas para ver su rendimiento mensual."
+    "monthlyPLPlaceholder": "Registre algunas operaciones cerradas para ver su rendimiento mensual.",
+    
+    "analytics": "Análisis",
+    "advancedAnalytics": "Análisis Avanzado",
+    "advancedAnalyticsDescription": "Profundice en sus datos de trading.",
+    "performanceByDay": "Rendimiento por Día de la Semana",
+    "performanceByDayDescription": "Su G/P neto para cada día de la semana.",
+    "trades": "operaciones",
+    "weekdayPLPlaceholder": "Registre algunas operaciones cerradas para ver su rendimiento por día de la semana.",
+    "performanceByInstrument": "Rendimiento por Instrumento",
+    "performanceByInstrumentDescription": "Los 10 mejores instrumentos por G/P neto.",
+    "instrumentPLPlaceholder": "Registre algunas operaciones cerradas para ver su rendimiento por instrumento.",
+
+    "viewDetails": "Ver Detalles",
+    "tradeDetails": "Detalles de la Operación",
+    "tradeOn": "Operación en",
+    "tradeNotFound": "Operación no encontrada",
+    "tradeNotFoundDescription": "No se pudo encontrar la operación que está buscando.",
+    "backToDashboard": "Volver al Panel"
 }
