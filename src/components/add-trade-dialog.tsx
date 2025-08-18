@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Plus, Save, X } from 'lucide-react';
+import { CalendarIcon, Plus, Save, X, Settings } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +38,7 @@ import { enUS, es, fr, de } from 'date-fns/locale';
 import { Badge } from './ui/badge';
 import { Combobox } from './ui/combobox';
 import { Alert, AlertDescription } from './ui/alert';
+import Link from 'next/link';
 
 const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
@@ -173,9 +174,14 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         <DialogHeader>
           <DialogTitle>{isEditing ? t('editTrade') : t('logNewTrade')}</DialogTitle>
            {accounts.length === 0 && !isEditing && (
-            <Alert variant="default" className="mt-2">
+            <Alert variant="default" className="mt-4">
+              <Settings className="h-4 w-4" />
               <AlertDescription>
-                It looks like you don't have any accounts yet. Start by typing a new account name (e.g., "Primary", "Robinhood") in the "Account" field below.
+                {t('stepOneDescription')}{' '}
+                 <Link href="/settings" className="font-semibold underline">
+                    {t('goToSettings')}
+                </Link>
+                .
               </AlertDescription>
             </Alert>
           )}
@@ -203,15 +209,20 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   control={form.control}
                   name="account"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                     <FormItem className="flex flex-col">
                       <FormLabel>{t('account')}</FormLabel>
-                       <Combobox
-                          options={accounts.map(acc => ({ value: acc, label: acc }))}
-                          value={field.value}
-                          onChange={field.onChange}
-                          placeholder={t('selectAccount')}
-                          addText={t('addNewAccount')}
-                        />
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={t('selectAnAccount')} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {accounts.map(acc => (
+                              <SelectItem key={acc} value={acc}>{acc}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -409,7 +420,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                 </div>
             </FormItem>
             <DialogFooter>
-              <Button type="submit">
+              <Button type="submit" disabled={accounts.length === 0 && !isEditing}>
                 {isEditing ? <Save className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
                 {isEditing ? t('saveChanges') : t('saveTrade')}
               </Button>

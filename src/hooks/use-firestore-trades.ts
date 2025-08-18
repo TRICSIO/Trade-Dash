@@ -52,7 +52,7 @@ function useFirestoreTrades(userId?: string) {
     [userId, toast]
   );
   
-  const debouncedSave = debounce(saveDataToFirestore, 1500);
+  const debouncedSave = useCallback(debounce(saveDataToFirestore, 1500), [saveDataToFirestore]);
 
   useEffect(() => {
     if (!userId) {
@@ -155,13 +155,13 @@ function useFirestoreTrades(userId?: string) {
 
   const handleAddNewAccount = (accountName: string) => {
     if (!accountName.trim()) {
-      toast({ title: "Account name is required.", variant: 'destructive' });
+      toast({ title: t('accountNameRequired'), variant: 'destructive' });
       return;
     }
     const trimmedName = accountName.trim();
     const allAccounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
     if (allAccounts.includes(trimmedName)) {
-      toast({ title: "An account with this name already exists.", variant: 'destructive' });
+      toast({ title: t('accountExists'), variant: 'destructive' });
       return;
     }
 
@@ -175,6 +175,7 @@ function useFirestoreTrades(userId?: string) {
       startingBalances: newBalances,
       accountSettings: newSettings,
     });
+    toast({ title: 'Success', description: `Account '${trimmedName}' has been added.` });
   }
 
 

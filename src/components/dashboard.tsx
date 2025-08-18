@@ -33,7 +33,6 @@ export default function Dashboard() {
     hasSeenWelcomeMessage,
     transactions,
     setTrades, 
-    addAccount,
     markWelcomeMessageAsSeen
   } = useFirestoreTrades(user?.uid);
   
@@ -99,10 +98,6 @@ export default function Dashboard() {
         entryDate: new Date(trade.entryDate),
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
-
-    if (!accounts.includes(tradeData.account)) {
-      addAccount(tradeData.account);
-    }
   };
 
   const handleDeleteTrade = (tradeId: string) => {

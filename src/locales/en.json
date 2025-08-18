@@ -114,7 +114,7 @@
     "updateTradeDetails": "Update the details of your trade.",
     "enterTradeDetails": "Enter the details of your trade. Click save when you're done.",
     "instrumentRequired": "Instrument is required.",
-    "accountRequired": "Account name is required.",
+    "accountRequired": "Account is required. Please add one in Settings if you haven't.",
     "entryDateRequired": "Entry date is required.",
     "entryPricePositive": "Entry price must be positive.",
     "exitPricePositive": "Exit price must be positive.",

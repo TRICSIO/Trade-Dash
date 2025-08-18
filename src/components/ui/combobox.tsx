@@ -25,7 +25,7 @@ interface ComboboxProps {
     value: string;
     onChange: (value: string) => void;
     placeholder: string;
-    addText: string;
+    addText?: string;
 }
 
 export function Combobox({ options, value, onChange, placeholder, addText }: ComboboxProps) {
@@ -49,25 +49,31 @@ export function Combobox({ options, value, onChange, placeholder, addText }: Com
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command
             filter={(itemValue, search) => {
-                if (itemValue.toLowerCase().includes(search.toLowerCase())) return 1
-                return 0
+                if(addText) {
+                    if (itemValue.toLowerCase().includes(search.toLowerCase())) return 1
+                    return 0
+                }
+                return itemValue.toLowerCase().includes(search.toLowerCase()) ? 1 : 0;
             }}
         >
           <CommandInput placeholder={placeholder} />
           <CommandList>
             <CommandEmpty>
-                <button
-                    className="w-full text-left p-2 text-sm hover:bg-accent rounded-md"
-                    onClick={() => {
-                        const input = document.querySelector<HTMLInputElement>('input[cmdk-input]');
-                        if(input && input.value) {
-                             onChange(input.value)
-                             setOpen(false)
-                        }
-                    }}
-                >
-                    {addText}: <span className="font-bold">{document.querySelector<HTMLInputElement>('input[cmdk-input]')?.value}</span>
-                </button>
+                {addText ? (
+                     <button
+                        className="w-full text-left p-2 text-sm hover:bg-accent rounded-md"
+                        onClick={() => {
+                            const input = document.querySelector<HTMLInputElement>('input[cmdk-input]');
+                            if(input && input.value) {
+                                onChange(input.value)
+                                setOpen(false)
+                            }
+                        }}
+                    >
+                        {addText}: <span className="font-bold">{document.querySelector<HTMLInputElement>('input[cmdk-input]')?.value}</span>
+                    </button>
+                ) : 'No results found.'}
+               
             </CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
