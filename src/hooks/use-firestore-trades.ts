@@ -24,12 +24,7 @@ function useFirestoreTrades(userId?: string) {
   const { t } = useTranslation();
 
   const updateUserDoc = useCallback(async (dataToUpdate: Partial<UserData>) => {
-    if (!userId) {
-        // This should not happen if the UI is disabled correctly, but as a safeguard.
-        console.error("updateUserDoc called without a userId.");
-        toast({ title: "Error", description: "You must be logged in to save data.", variant: 'destructive'});
-        return;
-    };
+    if (!userId) return;
     
     const userDocRef = doc(db, 'users', userId);
     
@@ -37,17 +32,12 @@ function useFirestoreTrades(userId?: string) {
         await updateDoc(userDocRef, dataToUpdate);
     } catch (error) {
        if ((error as FirestoreError).code === 'not-found') {
-          // This happens for a new user, where the document doesn't exist yet.
-          // We'll try to create it.
           try {
-            console.log("Document not found, attempting to create it.");
             const docSnap = await getDoc(userDocRef);
-            // We double-check it doesn't exist to avoid race conditions.
             if (!docSnap.exists()) {
                 const initialData = await getInitialUserData(userId);
                 await setDoc(userDocRef, { ...initialData, ...dataToUpdate });
             } else {
-                // In the rare case it was created between our read and write, we just update.
                 await updateDoc(userDocRef, dataToUpdate);
             }
           } catch (e) {
@@ -96,9 +86,7 @@ function useFirestoreTrades(userId?: string) {
 
         } else {
             console.log("No user document, it will be created on the first data modification.");
-            // We don't create it here, we let the first write operation create it.
-            // This prevents a race condition on new user signup.
-             setHasSeenWelcomeMessage(false);
+            setHasSeenWelcomeMessage(false);
         }
         setLoading(false);
     }, (error) => {
@@ -154,7 +142,6 @@ function useFirestoreTrades(userId?: string) {
     }
     const trimmedName = accountName.trim();
     
-    // We get the latest data directly from state, which is updated by our real-time listener
     if (Object.keys(accountSettings).includes(trimmedName)) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
