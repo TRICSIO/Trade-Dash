@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { doc, onSnapshot, updateDoc, setDoc, getDoc, FirestoreError } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
@@ -120,20 +120,20 @@ function useFirestoreTrades(userId?: string) {
   
   const handleAddNewAccount = useCallback(async (accountName: string, balance: number) => {
     if (!userId) return;
-    if (!accountName.trim()) {
+    const trimmedName = accountName.trim();
+    if (!trimmedName) {
       toast({ title: t('accountNameRequired'), variant: 'destructive' });
       return;
     }
-    const trimmedName = accountName.trim();
     
-    // This check uses the local state, which is fine because it prevents duplicates before writing
-    if (Object.keys(accountSettings).includes(trimmedName)) {
+    const currentSettings = accountSettings || {};
+    if (Object.keys(currentSettings).includes(trimmedName)) {
       toast({ title: t('accountExists'), variant: 'destructive' });
       return;
     }
     
     const newBalances = { ...startingBalances, [trimmedName]: balance };
-    const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
+    const newSettings = { ...currentSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
     await updateUserDoc({ 
       startingBalances: newBalances,
@@ -147,6 +147,14 @@ function useFirestoreTrades(userId?: string) {
     updateUserDoc({ transactions: updatedTransactions });
   }, [transactions, updateUserDoc]);
 
+  const allAccounts = useMemo(() => {
+    return Array.from(new Set([
+      ...trades.map(t => t.account),
+      ...Object.keys(startingBalances),
+      ...Object.keys(accountSettings)
+    ]));
+  }, [trades, startingBalances, accountSettings]);
+
 
   return { 
       trades, 
@@ -156,6 +164,7 @@ function useFirestoreTrades(userId?: string) {
       loading,
       hasSeenWelcomeMessage,
       transactions,
+      allAccounts,
       setTrades: handleSetTrades, 
       setStartingBalances: handleSetStartingBalances, 
       setAccountSettings: handleSetAccountSettings,

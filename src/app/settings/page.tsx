@@ -27,11 +27,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 function SettingsPage() {
   const { user } = useAuth();
   const { 
-    trades, 
     startingBalances: initialStartingBalances, 
     accountSettings: initialAccountSettings,
     displayName: initialDisplayName, 
     transactions,
+    allAccounts,
+    trades,
     setStartingBalances, 
     setAccountSettings,
     setDisplayName,
@@ -153,8 +154,6 @@ function SettingsPage() {
       setSelectedAccountForTransactions(accountName);
       setTransactionDialogOpen(true);
   }
-
-  const allAccounts = Array.from(new Set([...Object.keys(localStartingBalances), ...trades.map(t => t.account)]));
 
   return (
     <>
@@ -408,5 +407,3 @@ export default function Settings() {
         </ProtectedRoute>
     )
 }
-
-    
