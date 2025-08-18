@@ -37,6 +37,7 @@ import { useLanguage } from '@/context/language-context';
 import { enUS, es, fr, de } from 'date-fns/locale';
 import { Badge } from './ui/badge';
 import { Combobox } from './ui/combobox';
+import { Alert, AlertDescription } from './ui/alert';
 
 const tradeStyles = ["Day Trade", "Swing Trade", "Position Trade", "Scalp", "Option"];
 
@@ -100,7 +101,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         tags: trade.tags || [],
     } : {
       instrument: '',
-      account: 'Primary',
+      account: '',
       notes: '',
       tags: [],
     },
@@ -129,7 +130,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
             tags: trade.tags || [],
         } : {
           instrument: '',
-          account: 'Primary',
+          account: '',
           entryPrice: undefined,
           exitPrice: undefined,
           quantity: undefined,
@@ -163,6 +164,13 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{isEditing ? t('editTrade') : t('logNewTrade')}</DialogTitle>
+           {accounts.length === 0 && !isEditing && (
+            <Alert variant="default" className="mt-2">
+              <AlertDescription>
+                It looks like you don't have any accounts yet. Start by typing a new account name (e.g., "Primary", "Robinhood") in the "Account" field below.
+              </AlertDescription>
+            </Alert>
+          )}
           <DialogDescription>
             {isEditing ? t('updateTradeDetails') : t('enterTradeDetails')}
           </DialogDescription>
