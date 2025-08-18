@@ -33,6 +33,8 @@ export default function Dashboard() {
     displayName,
     hasSeenWelcomeMessage,
     transactions,
+    allAccounts,
+    loading,
     setTrades, 
     markWelcomeMessageAsSeen
   } = useFirestoreTrades(user?.uid);
@@ -46,9 +48,8 @@ export default function Dashboard() {
   const router = useRouter();
 
   const accounts = useMemo(() => {
-    const allAccounts = Array.from(new Set([...trades.map(t => t.account), ...Object.keys(startingBalances)]));
     return ['all', ...allAccounts];
-  }, [trades, startingBalances]);
+  }, [allAccounts]);
 
   useEffect(() => {
     if (!accounts.includes(selectedAccount)) {
@@ -243,6 +244,10 @@ export default function Dashboard() {
     router.push('/settings');
   }
 
+  if (loading) {
+      return null;
+  }
+
   if (!hasSeenWelcomeMessage) {
     return <Welcome displayName={displayName} onGetStarted={handleGetStarted} />;
   }
@@ -324,13 +329,13 @@ export default function Dashboard() {
         onOpenChange={handleDialogClose}
         onSaveTrade={handleAddOrUpdateTrade}
         trade={editingTrade}
-        accounts={accounts.filter(acc => acc !== 'all')}
+        accounts={allAccounts}
       />
       <ImportTradesDialog
         isOpen={isImportTradeOpen}
         onOpenChange={setImportTradeOpen}
         onImport={handleImportTrades}
-        accounts={accounts.filter(acc => acc !== 'all')}
+        accounts={allAccounts}
       />
     </div>
   );
