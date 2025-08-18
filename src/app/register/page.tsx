@@ -43,11 +43,11 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      // NOTE: In a real app, for a passkey-first approach, you might not create a password at all.
-      // Here, we create a user with a password, then immediately prompt for passkey registration.
+      // Create user with the actual password provided in the form
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
+      // Create the user's document in Firestore
       await setDoc(doc(db, "users", user.uid), {
         email: user.email,
         displayName: displayName,
@@ -58,7 +58,7 @@ export default function RegisterPage() {
         currentChallenge: null,
       });
 
-      // After creating the user, immediately redirect to prompt for passkey registration.
+      // After creating the user, redirect to prompt for passkey registration.
       router.push('/?action=registerPasskey');
     } catch (error: any) {
       toast({
@@ -122,6 +122,7 @@ export default function RegisterPage() {
                 required
                 disabled={loading}
                 minLength={6}
+                autoComplete="new-password"
               />
             </div>
             <div className="space-y-2">
@@ -133,6 +134,7 @@ export default function RegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={loading}
+                autoComplete="new-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

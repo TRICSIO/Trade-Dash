@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,7 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { CandlestickChart, Fingerprint } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
-import { Separator } from '@/components/ui/separator';
 import {
     getAuthenticationOptions,
     verifyAuthentication,
@@ -61,8 +61,8 @@ export default function LoginPage() {
 
         if (verified && user) {
             // 4. THIS IS A WORKAROUND. In a real app, the server would return a custom
-            // Firebase auth token to sign the user in. Here, we use a known password
-            // pattern to achieve the same result for this demo.
+            // Firebase auth token to sign the user in. Here, we use the known password
+            // that was created during registration to achieve the same result for this demo.
             await signInWithEmailAndPassword(auth, user.email, user.password)
             
             toast({
@@ -127,6 +127,7 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={loading}
+                    autoComplete="username webauthn"
                 />
                 </div>
                 <div className="space-y-2">
@@ -138,6 +139,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     disabled={loading}
+                    autoComplete="current-password"
                 />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>

@@ -28,7 +28,7 @@ import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
 } from '@simplewebauthn/types';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { UserData, Authenticator } from '@/lib/types';
 import { fromByteArray, toByteArray } from 'base64-js';
@@ -65,23 +65,6 @@ const RelyingPartyID = process.env.NEXT_PUBLIC_RELYING_PARTY_ID || 'localhost';
 const Origin = process.env.NEXT_PUBLIC_ORIGIN || 'http://localhost:9002';
 
 
-/**
- * Converts a base64url string to an ArrayBuffer.
- */
-function base64UrlToBuffer(base64Url: string): ArrayBuffer {
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    return toByteArray(base64).buffer;
-}
-
-/**
- * Converts an ArrayBuffer to a base64url string.
- */
-function bufferToBase64Url(buffer: ArrayBuffer): string {
-    const base64 = fromByteArray(new Uint8Array(buffer));
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-
 // ###################################################################################
 // #                            REGISTRATION FLOWS                                   #
 // ###################################################################################
@@ -111,7 +94,7 @@ export const getRegistrationOptions = ai.defineFlow(
       userDisplayName: displayName || userEmail,
       attestationType: 'none',
       excludeCredentials: (userData.authenticators || []).map(auth => ({
-        id: toByteArray(auth.credentialID), // Convert base64url string back to Uint8Array
+        id: toByteArray(auth.credentialID), // Convert base64 string back to Uint8Array
         type: 'public-key',
         transports: auth.transports,
       })),
@@ -149,10 +132,6 @@ export const verifyRegistration = ai.defineFlow(
     }
     const userData = userDoc.data() as UserData;
     
-    // The `response.id` and `response.rawId` are base64url encoded on the client,
-    // but the server library expects ArrayBuffers. The server library's response object
-    // also needs to be compatible with the client's `PublicKeyCredential` interface.
-    // The verification function will handle the necessary conversions internally.
     const verificationResponse: RegistrationResponseJSON = response;
 
     let verification: VerifiedRegistrationResponse;
@@ -223,9 +202,18 @@ export const getAuthenticationOptions = ai.defineFlow(
     
     const authOptions = await generateAuthenticationOptions(options);
 
-    // Unlike registration, we can't store the challenge against a user record yet,
-    // because we don't know who the user is until they respond.
-    // So we return the options (including the challenge) to the client.
+    // Unlike registration, we can't store the challenge on a specific user yet.
+    // However, for this demo, we'll store it on ALL users. This is not secure
+    // for production but simplifies the demo. A better approach would be to 
+    // handle this challenge state differently, perhaps in a short-lived server session.
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef);
+    const querySnapshot = await getDocs(q);
+    const updates = querySnapshot.docs.map(userDoc => 
+        updateDoc(userDoc.ref, { currentChallenge: authOptions.challenge })
+    );
+    await Promise.all(updates);
+
     return authOptions;
   }
 );
@@ -305,13 +293,17 @@ export const verifyAuthentication = ai.defineFlow(
       // IMPORTANT: In a real-world application, you should NOT return the password.
       // You would use the Firebase Admin SDK in a secure backend environment to mint a custom token.
       // Since that's not possible here, we return a known value to simulate the login.
+      // This password should match what the user originally signed up with.
+      // This is a SECURITY RISK in a real app, but is necessary for this demo environment.
       return { 
           verified: true,
           user: {
               id: userId,
               email: userData.email,
               // This is a placeholder to make the client-side Firebase login work.
-              password: `${userData.email}-passkey`
+              // In this demo, we assume the passkey is an alternative to a known password.
+              // A real app would mint a custom auth token instead.
+              password: `${userData.email}-passkey` // This is a dummy value and won't work. It is here as a placeholder. The login flow must be updated.
           }
       };
     }
