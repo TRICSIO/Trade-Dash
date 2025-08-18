@@ -52,7 +52,7 @@ function useFirestoreTrades(userId?: string) {
     [userId, toast]
   );
   
-  const debouncedSave = useCallback(debounce(saveDataToFirestore, 1500), [saveDataToFirestore]);
+  const debouncedSave = debounce(saveDataToFirestore, 1500);
 
   useEffect(() => {
     if (!userId) {
@@ -68,8 +68,8 @@ function useFirestoreTrades(userId?: string) {
             const data = docSnap.data() as UserData;
             const tradesFromDb = (data.trades || []).map((t: any) => ({
               ...t,
-              entryDate: t.entryDate ? new Date(t.entryDate) : new Date(),
-              exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
+              entryDate: t.entryDate?.seconds ? new Date(t.entryDate.seconds * 1000) : new Date(),
+              exitDate: t.exitDate?.seconds ? new Date(t.exitDate.seconds * 1000) : undefined,
             }));
             setTrades(sortTrades(tradesFromDb));
             setStartingBalances(data.startingBalances || {});
@@ -77,12 +77,11 @@ function useFirestoreTrades(userId?: string) {
             setDisplayName(data.displayName);
             setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage || false);
             
-            // For transactions
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
                 transactionsFromDb[acc] = (transactionsFromDb[acc] || []).map((t: any) => ({
                     ...t,
-                    date: t.date ? new Date(t.date) : new Date(),
+                    date: t.date?.seconds ? new Date(t.date.seconds * 1000) : new Date(),
                 }));
             });
             setTransactions(transactionsFromDb);
@@ -112,8 +111,8 @@ function useFirestoreTrades(userId?: string) {
     setTrades(sorted);
     const tradesToStore = sorted.map(t => ({
       ...t,
-      entryDate: new Date(t.entryDate).toISOString(),
-      exitDate: t.exitDate ? new Date(t.exitDate).toISOString() : undefined,
+      entryDate: t.entryDate,
+      exitDate: t.exitDate,
     }));
     debouncedSave({ trades: tradesToStore });
   }
@@ -148,7 +147,7 @@ function useFirestoreTrades(userId?: string) {
     Object.keys(transactionsToStore).forEach(acc => {
       transactionsToStore[acc] = transactionsToStore[acc].map(t => ({
         ...t,
-        date: new Date(t.date).toISOString() as any,
+        date: t.date,
       }));
     });
     debouncedSave({ transactions: transactionsToStore });
