@@ -327,7 +327,7 @@ function SettingsPage() {
                             min={0}
                             max={2}
                             step={1}
-                            onValue-change={(value) => setFontSize(fontSizeMapping[value[0]])}
+                            onValueChange={(value) => setFontSize(fontSizeMapping[value[0]])}
                         />
                         <span className="text-lg text-muted-foreground">{t('large')}</span>
                     </div>
@@ -371,3 +371,5 @@ export default function Settings() {
         </ProtectedRoute>
     )
 }
+
+    
