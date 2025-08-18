@@ -18,60 +18,89 @@ import { useFontSize } from '@/context/font-size-context';
 import { Slider } from '@/components/ui/slider';
 import { useLanguage } from '@/context/language-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AccountSettings } from '@/lib/types';
+import { isEqual } from 'lodash';
+
 
 function SettingsPage() {
   const { user } = useAuth();
   const { 
     trades, 
-    startingBalances, 
-    accountSettings,
-    displayName, 
+    startingBalances: initialStartingBalances, 
+    accountSettings: initialAccountSettings,
+    displayName: initialDisplayName, 
     setStartingBalances, 
     setAccountSettings,
     setDisplayName,
     addAccount
   } = useFirestoreTrades(user?.uid);
+
   const { t } = useTranslation();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
   const { language, setLanguage } = useLanguage();
+  
   const [newAccountName, setNewAccountName] = useState('');
-  const [currentDisplayName, setCurrentDisplayName] = useState(displayName || '');
+  
+  // Local state for edits
+  const [currentDisplayName, setCurrentDisplayName] = useState(initialDisplayName || '');
+  const [localStartingBalances, setLocalStartingBalances] = useState(initialStartingBalances);
+  const [localAccountSettings, setLocalAccountSettings] = useState(initialAccountSettings);
+
+  const [hasProfileChanges, setHasProfileChanges] = useState(false);
+  const [hasAccountChanges, setHasAccountChanges] = useState(false);
 
   useEffect(() => {
-    if (displayName) {
-      setCurrentDisplayName(displayName);
+    if (initialDisplayName) {
+      setCurrentDisplayName(initialDisplayName);
     }
-  }, [displayName]);
+  }, [initialDisplayName]);
+  
+  useEffect(() => {
+    setLocalStartingBalances(initialStartingBalances);
+  }, [initialStartingBalances]);
+
+  useEffect(() => {
+    setLocalAccountSettings(initialAccountSettings);
+  }, [initialAccountSettings]);
+
+  useEffect(() => {
+    setHasProfileChanges(currentDisplayName !== initialDisplayName);
+  }, [currentDisplayName, initialDisplayName]);
+
+  useEffect(() => {
+    setHasAccountChanges(!isEqual(localStartingBalances, initialStartingBalances) || !isEqual(localAccountSettings, initialAccountSettings));
+  }, [localStartingBalances, localAccountSettings, initialStartingBalances, initialAccountSettings]);
+
 
   const fontSizeMapping: ('small' | 'medium' | 'large')[] = ['small', 'medium', 'large'];
 
   const handleBalanceChange = (accountName: string, value: string) => {
-    const newBalances = { ...startingBalances, [accountName]: Number(value) };
-    setStartingBalances(newBalances);
+    setLocalStartingBalances(prev => ({...prev, [accountName]: Number(value)}));
   };
 
-  const handleSettingChange = (accountName: string, field: keyof (typeof accountSettings)[string], value: string) => {
-    const newSettings = {
-      ...accountSettings,
-      [accountName]: { ...accountSettings[accountName], [field]: value },
-    };
-    setAccountSettings(newSettings);
+  const handleSettingChange = (accountName: string, field: keyof AccountSettings[string], value: string) => {
+    setLocalAccountSettings(prev => ({
+      ...prev,
+      [accountName]: { ...prev[accountName], [field]: value },
+    }));
   };
   
   const handleAddNewAccount = (e: React.FormEvent) => {
     e.preventDefault();
-    addAccount(newAccountName);
-    setNewAccountName('');
+    if (newAccountName.trim()) {
+      addAccount(newAccountName.trim());
+      setNewAccountName('');
+    }
   }
 
   const handleBackup = () => {
     try {
         const backupData = {
             trades,
-            startingBalances,
-            accountSettings
+            startingBalances: initialStartingBalances,
+            accountSettings: initialAccountSettings,
         };
         const jsonString = JSON.stringify(backupData, null, 2);
         const blob = new Blob([jsonString], {type: 'application/json'});
@@ -104,8 +133,14 @@ function SettingsPage() {
       toast({ title: 'Error', description: 'Display name cannot be empty.', variant: 'destructive' });
     }
   };
+  
+  const handleAccountSettingsSave = () => {
+    setStartingBalances(localStartingBalances);
+    setAccountSettings(localAccountSettings);
+    toast({ title: 'Success', description: 'Account settings have been saved.' });
+  }
 
-  const allAccounts = Array.from(new Set([...Object.keys(startingBalances), ...trades.map(t => t.account)]));
+  const allAccounts = Array.from(new Set([...Object.keys(initialStartingBalances), ...trades.map(t => t.account)]));
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -120,17 +155,19 @@ function SettingsPage() {
                 <CardContent>
                     <div className="space-y-2">
                         <Label htmlFor="displayName">{t('displayName')}</Label>
-                        <div className="flex gap-2">
-                            <Input
-                                id="displayName"
-                                value={currentDisplayName}
-                                onChange={(e) => setCurrentDisplayName(e.target.value)}
-                                placeholder="Your display name"
-                            />
-                             <Button onClick={handleDisplayNameSave}><Save className="mr-2 h-4 w-4"/> {t('save')}</Button>
-                        </div>
+                        <Input
+                            id="displayName"
+                            value={currentDisplayName}
+                            onChange={(e) => setCurrentDisplayName(e.target.value)}
+                            placeholder="Your display name"
+                        />
                     </div>
                 </CardContent>
+                 {hasProfileChanges && (
+                    <CardFooter>
+                        <Button onClick={handleDisplayNameSave}><Save className="mr-2 h-4 w-4"/> {t('saveChanges')}</Button>
+                    </CardFooter>
+                )}
             </Card>
 
             <Card>
@@ -149,7 +186,7 @@ function SettingsPage() {
                             <Input
                                 id={`balance-${account}`}
                                 type="number"
-                                value={startingBalances[account] || 0}
+                                value={localStartingBalances[account] || 0}
                                 onChange={(e) => handleBalanceChange(account, e.target.value)}
                                 placeholder="e.g., 10000"
                             />
@@ -159,7 +196,7 @@ function SettingsPage() {
                             <Input
                                 id={`nickname-${account}`}
                                 type="text"
-                                value={accountSettings[account]?.accountNickname || ''}
+                                value={localAccountSettings[account]?.accountNickname || ''}
                                 onChange={(e) => handleSettingChange(account, 'accountNickname', e.target.value)}
                                 placeholder="e.g., My Roth IRA"
                             />
@@ -169,7 +206,7 @@ function SettingsPage() {
                             <Input
                                 id={`provider-${account}`}
                                 type="text"
-                                value={accountSettings[account]?.accountProvider || ''}
+                                value={localAccountSettings[account]?.accountProvider || ''}
                                 onChange={(e) => handleSettingChange(account, 'accountProvider', e.target.value)}
                                 placeholder="e.g., Fidelity"
                             />
@@ -179,7 +216,7 @@ function SettingsPage() {
                             <Input
                                 id={`number-${account}`}
                                 type="text"
-                                value={accountSettings[account]?.accountNumber || ''}
+                                value={localAccountSettings[account]?.accountNumber || ''}
                                 onChange={(e) => handleSettingChange(account, 'accountNumber', e.target.value)}
                                 placeholder="e.g., X12345678"
                             />
@@ -189,7 +226,7 @@ function SettingsPage() {
                             <Input
                                 id={`color-${account}`}
                                 type="color"
-                                value={accountSettings[account]?.color || '#ffffff'}
+                                value={localAccountSettings[account]?.color || '#ffffff'}
                                 onChange={(e) => handleSettingChange(account, 'color', e.target.value)}
                                 className="p-1 h-10 w-full"
                             />
@@ -217,6 +254,11 @@ function SettingsPage() {
                         </form>
                     </div>
                 </CardContent>
+                {hasAccountChanges && (
+                    <CardFooter>
+                        <Button onClick={handleAccountSettingsSave}><Save className="mr-2 h-4 w-4"/> {t('saveChanges')}</Button>
+                    </CardFooter>
+                )}
             </Card>
 
             <div className="grid gap-8 md:grid-cols-2">
@@ -271,7 +313,7 @@ function SettingsPage() {
                             min={0}
                             max={2}
                             step={1}
-                            onValueChange={(value) => setFontSize(fontSizeMapping[value[0]])}
+                            onValue-change={(value) => setFontSize(fontSizeMapping[value[0]])}
                         />
                         <span className="text-lg text-muted-foreground">{t('large')}</span>
                     </div>
@@ -315,3 +357,5 @@ export default function Settings() {
         </ProtectedRoute>
     )
 }
+
+    
