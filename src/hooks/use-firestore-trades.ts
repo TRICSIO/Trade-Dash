@@ -27,6 +27,7 @@ function useFirestoreTrades(userId?: string) {
     if (!userId) return;
     try {
       const userDocRef = doc(db, 'users', userId);
+      // Firestore does not like `undefined` values, so we filter them out.
       const finalData = Object.fromEntries(Object.entries(dataToSave).filter(([_, v]) => v !== undefined));
       await setDoc(userDocRef, finalData, { merge: true });
     } catch (error) {
@@ -110,11 +111,18 @@ function useFirestoreTrades(userId?: string) {
   }
 
   const handleMarkWelcomeMessageAsSeen = async () => {
+    if (!userId) return;
     setHasSeenWelcomeMessage(true);
-    await saveDataToFirestore({ hasSeenWelcomeMessage: true });
+    const userDocRef = doc(db, 'users', userId);
+    const userDoc = await getDoc(userDocRef);
+    if (!userDoc.exists()) {
+        await saveDataToFirestore({ hasSeenWelcomeMessage: true });
+    } else {
+        await setDoc(userDocRef, { hasSeenWelcomeMessage: true }, { merge: true });
+    }
   }
   
-  const handleAddNewAccount = async (accountName: string) => {
+  const handleAddNewAccount = async (accountName: string, balance: number) => {
     if (!accountName.trim()) {
       toast({ title: t('accountNameRequired'), variant: 'destructive' });
       return;
@@ -125,7 +133,7 @@ function useFirestoreTrades(userId?: string) {
       return;
     }
 
-    const newBalances = { ...startingBalances, [trimmedName]: 0 };
+    const newBalances = { ...startingBalances, [trimmedName]: balance };
     const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
     setStartingBalances(newBalances);

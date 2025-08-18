@@ -42,6 +42,7 @@ function SettingsPage() {
   const { language, setLanguage } = useLanguage();
   
   const [newAccountName, setNewAccountName] = useState('');
+  const [newAccountBalance, setNewAccountBalance] = useState<number>(0);
   
   // Local state for edits
   const [currentDisplayName, setCurrentDisplayName] = useState(initialDisplayName || '');
@@ -90,8 +91,9 @@ function SettingsPage() {
   const handleAddNewAccount = (e: React.FormEvent) => {
     e.preventDefault();
     if (newAccountName.trim()) {
-      addAccount(newAccountName.trim());
+      addAccount(newAccountName.trim(), newAccountBalance);
       setNewAccountName('');
+      setNewAccountBalance(0);
     }
   }
 
@@ -236,7 +238,7 @@ function SettingsPage() {
                     ))}
                     <form onSubmit={handleAddNewAccount} className="space-y-4 rounded-md border p-4 mt-6">
                             <h4 className="font-semibold">{t('addNewAccount')}</h4>
-                            <div className="flex items-end gap-2">
+                            <div className="flex flex-col sm:flex-row items-end gap-2">
                                 <div className="flex-grow space-y-2">
                                     <Label htmlFor="new-account-name">{t('accountName')}</Label>
                                     <Input
@@ -244,6 +246,18 @@ function SettingsPage() {
                                         value={newAccountName}
                                         onChange={(e) => setNewAccountName(e.target.value)}
                                         placeholder="e.g., Savings"
+                                        required
+                                    />
+                                </div>
+                                <div className="flex-grow space-y-2">
+                                    <Label htmlFor="new-account-balance">{t('startingBalance')}</Label>
+                                    <Input
+                                        id="new-account-balance"
+                                        type="number"
+                                        value={newAccountBalance}
+                                        onChange={(e) => setNewAccountBalance(Number(e.target.value))}
+                                        placeholder="e.g., 10000"
+                                        required
                                     />
                                 </div>
                                 <Button type="submit" size="icon">
@@ -357,5 +371,3 @@ export default function Settings() {
         </ProtectedRoute>
     )
 }
-
-    
