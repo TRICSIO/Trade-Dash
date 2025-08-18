@@ -264,7 +264,7 @@ export default function Dashboard() {
                         </SelectTrigger>
                         <SelectContent>
                           {accounts.map(acc => (
-                            <SelectItem key={acc} value={acc}>{acc === 'all' ? t('allAccounts') : acc}</SelectItem>
+                            <SelectItem key={acc} value={acc}>{acc === 'all' ? t('allAccounts') : (accountSettings[acc]?.accountNickname || acc)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -275,7 +275,7 @@ export default function Dashboard() {
                   <div className="mb-6">
                     <Card className="bg-primary/10 border-primary/40 inline-block">
                         <CardHeader className="pb-2">
-                            <CardDescription>{t('currentAccountBalance')} ({selectedAccount === 'all' ? t('all') : selectedAccount})</CardDescription>
+                            <CardDescription>{t('currentAccountBalance')} ({selectedAccount === 'all' ? t('all') : (accountSettings[selectedAccount]?.accountNickname || selectedAccount)})</CardDescription>
                             <CardTitle className="text-3xl">${accountBalance.toFixed(2)}</CardTitle>
                         </CardHeader>
                     </Card>

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
 import { useToast } from './use-toast';
@@ -23,18 +23,20 @@ function useFirestoreTrades(userId?: string) {
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const saveDataToFirestore = useCallback(async (dataToSave: Partial<UserData>) => {
-    if (!userId) return;
+  const updateUserDoc = useCallback(async (dataToUpdate: Partial<UserData>) => {
+    if (!userId) {
+        toast({ title: "Error", description: "You must be logged in to save data.", variant: 'destructive'});
+        return;
+    };
     try {
       const userDocRef = doc(db, 'users', userId);
-      // Firestore does not like `undefined` values, so we filter them out.
-      const finalData = Object.fromEntries(Object.entries(dataToSave).filter(([_, v]) => v !== undefined));
-      await setDoc(userDocRef, finalData, { merge: true });
+      await setDoc(userDocRef, dataToUpdate, { merge: true });
     } catch (error) {
       console.error("Error saving data to Firestore:", error);
       toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
     }
   }, [userId, toast]);
+
 
   useEffect(() => {
     if (!userId) {
@@ -57,7 +59,7 @@ function useFirestoreTrades(userId?: string) {
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
-            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? true : data.hasSeenWelcomeMessage);
+            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? false : data.hasSeenWelcomeMessage);
             
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
@@ -70,12 +72,15 @@ function useFirestoreTrades(userId?: string) {
 
         } else {
             console.log("No such document! A new one will be created on first save.");
-            setTrades([]);
-            setStartingBalances({});
-            setAccountSettings({});
-            setDisplayName(undefined);
-            setHasSeenWelcomeMessage(false);
-            setTransactions({});
+            // If the document doesn't exist, we should create it with some defaults.
+            updateUserDoc({ 
+                email: userId, // Assuming userId is email from auth, might need to get real email
+                trades: [], 
+                startingBalances: {}, 
+                accountSettings: {},
+                hasSeenWelcomeMessage: false,
+                transactions: {}
+            });
         }
         setLoading(false);
     }, (error) => {
@@ -85,41 +90,29 @@ function useFirestoreTrades(userId?: string) {
     });
 
     return () => unsubscribe();
-  }, [userId, toast]);
+  }, [userId, toast, updateUserDoc]);
 
   const handleSetTrades = (newTrades: Trade[] | ((val: Trade[]) => Trade[])) => {
     const updatedTrades = newTrades instanceof Function ? newTrades(trades) : newTrades;
     const sorted = sortTrades(updatedTrades);
-    setTrades(sorted);
-    saveDataToFirestore({ trades: sorted });
+    updateUserDoc({ trades: sorted });
   }
   
   const handleSetStartingBalances = (newBalances: Record<string, number>) => {
-    setStartingBalances(newBalances);
-    saveDataToFirestore({ startingBalances: newBalances });
+    updateUserDoc({ startingBalances: newBalances });
   }
 
   const handleSetAccountSettings = (newSettings: AccountSettings) => {
-    setAccountSettings(newSettings);
-    saveDataToFirestore({ accountSettings: newSettings });
+    updateUserDoc({ accountSettings: newSettings });
   }
 
   const handleSetDisplayName = (newName: string) => {
-      setDisplayName(newName);
-      saveDataToFirestore({ displayName: newName });
+      updateUserDoc({ displayName: newName });
       toast({ title: 'Success', description: 'Your display name has been updated.' });
   }
 
   const handleMarkWelcomeMessageAsSeen = async () => {
-    if (!userId) return;
-    setHasSeenWelcomeMessage(true);
-    const userDocRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-        await saveDataToFirestore({ hasSeenWelcomeMessage: true });
-    } else {
-        await setDoc(userDocRef, { hasSeenWelcomeMessage: true }, { merge: true });
-    }
+    updateUserDoc({ hasSeenWelcomeMessage: true });
   }
   
   const handleAddNewAccount = async (accountName: string, balance: number) => {
@@ -136,10 +129,7 @@ function useFirestoreTrades(userId?: string) {
     const newBalances = { ...startingBalances, [trimmedName]: balance };
     const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
-    setStartingBalances(newBalances);
-    setAccountSettings(newSettings);
-    
-    await saveDataToFirestore({ 
+    await updateUserDoc({ 
       startingBalances: newBalances,
       accountSettings: newSettings,
     });
@@ -148,8 +138,7 @@ function useFirestoreTrades(userId?: string) {
   
   const handleSetTransactionsForAccount = (account: string, newTransactions: AccountTransaction[]) => {
     const updatedTransactions = { ...transactions, [account]: newTransactions };
-    setTransactions(updatedTransactions);
-    saveDataToFirestore({ transactions: updatedTransactions });
+    updateUserDoc({ transactions: updatedTransactions });
   }
 
 
