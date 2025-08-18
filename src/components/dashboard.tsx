@@ -245,7 +245,7 @@ export default function Dashboard() {
   }
 
   if (loading) {
-      return null;
+    return null;
   }
 
   if (!hasSeenWelcomeMessage) {
