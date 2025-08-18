@@ -289,16 +289,16 @@ export default function Dashboard() {
         </Card>
 
         <div className="grid gap-8 lg:grid-cols-6">
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-6">
                 <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
             </div>
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-2">
                 <StyleDistributionChart trades={filteredTrades} />
             </div>
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-2">
                 <MonthlyPLChart trades={filteredTrades} />
             </div>
         </div>

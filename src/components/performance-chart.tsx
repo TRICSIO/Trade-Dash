@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -75,8 +76,8 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="fillEquity" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-equity)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-equity)" stopOpacity={0.1} />
+                  <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0.1} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -90,7 +91,7 @@ export default function PerformanceChart({ trades, startingBalance }: Performanc
                 dataKey="equity"
                 type="natural"
                 fill="url(#fillEquity)"
-                stroke="var(--color-equity)"
+                stroke="hsl(var(--chart-2))"
                 stackId="a"
               />
             </AreaChart>
