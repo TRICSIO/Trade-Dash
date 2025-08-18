@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -30,7 +31,7 @@ const prompt = ai.definePrompt({
     name: 'stockNewsPrompt',
     input: { schema: z.void() },
     output: { schema: StockNewsOutputSchema },
-    prompt: `Generate a list of 5 recent and significant stock market news announcements or articles. Include major market-moving news, IPO announcements, mergers, and press releases (PR). Provide a title, a short summary, a source, and a publication date for each.`,
+    prompt: `Generate a list of 5 recent and significant stock market news announcements or articles from the last few days. Focus on major market-moving events, significant IPO announcements, large mergers, and impactful corporate press releases (PR). Ensure the generated articles are plausible and feel current. Provide a title, a short summary, a source, and a publication date for each.`,
 });
 
 
