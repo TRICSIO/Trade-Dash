@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AccountSettings } from '@/lib/types';
 import { isEqual } from 'lodash';
 import AccountTransactionsDialog from '@/components/account-transactions-dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 function SettingsPage() {
@@ -191,68 +192,77 @@ function SettingsPage() {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-6 max-h-[60vh] overflow-y-auto px-1">
-                    {allAccounts.map((account) => (
-                        <div key={account} className="space-y-4 rounded-md border p-4">
-                            <div className="flex justify-between items-center">
-                                <h4 className="font-semibold">{account}</h4>
-                                <Button variant="outline" size="sm" onClick={() => handleOpenTransactionDialog(account)}>
-                                    <Settings2 className="mr-2 h-4 w-4"/> {t('manageAccount')}
-                                </Button>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
-                                <div className="space-y-2">
-                                <Label htmlFor={`balance-${account}`}>{t('startingBalance')}</Label>
-                                <Input
-                                    id={`balance-${account}`}
-                                    type="number"
-                                    value={localStartingBalances[account] || 0}
-                                    onChange={(e) => handleBalanceChange(account, e.target.value)}
-                                    placeholder="e.g., 10000"
-                                />
+                    <Accordion type="single" collapsible className="w-full">
+                      {allAccounts.map((account) => (
+                          <AccordionItem value={account} key={account}>
+                              <AccordionTrigger>
+                                <div className="flex justify-between items-center w-full pr-4">
+                                  <h4 className="font-semibold">{localAccountSettings[account]?.accountNickname || account}</h4>
+                                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleOpenTransactionDialog(account); }}>
+                                      <Settings2 className="mr-2 h-4 w-4"/> {t('manageAccount')}
+                                  </Button>
                                 </div>
-                                <div className="space-y-2">
-                                <Label htmlFor={`nickname-${account}`}>{t('accountNickname')}</Label>
-                                <Input
-                                    id={`nickname-${account}`}
-                                    type="text"
-                                    value={localAccountSettings[account]?.accountNickname || ''}
-                                    onChange={(e) => handleSettingChange(account, 'accountNickname', e.target.value)}
-                                    placeholder="e.g., My Roth IRA"
-                                />
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-4 rounded-md border p-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+                                        <div className="space-y-2">
+                                        <Label htmlFor={`balance-${account}`}>{t('startingBalance')}</Label>
+                                        <Input
+                                            id={`balance-${account}`}
+                                            type="number"
+                                            value={localStartingBalances[account] || 0}
+                                            onChange={(e) => handleBalanceChange(account, e.target.value)}
+                                            placeholder="e.g., 10000"
+                                        />
+                                        </div>
+                                        <div className="space-y-2">
+                                        <Label htmlFor={`nickname-${account}`}>{t('accountNickname')}</Label>
+                                        <Input
+                                            id={`nickname-${account}`}
+                                            type="text"
+                                            value={localAccountSettings[account]?.accountNickname || ''}
+                                            onChange={(e) => handleSettingChange(account, 'accountNickname', e.target.value)}
+                                            placeholder="e.g., My Roth IRA"
+                                        />
+                                        </div>
+                                        <div className="space-y-2">
+                                        <Label htmlFor={`provider-${account}`}>{t('accountProvider')}</Label>
+                                        <Input
+                                            id={`provider-${account}`}
+                                            type="text"
+                                            value={localAccountSettings[account]?.accountProvider || ''}
+                                            onChange={(e) => handleSettingChange(account, 'accountProvider', e.target.value)}
+                                            placeholder="e.g., Fidelity"
+                                        />
+                                        </div>
+                                        <div className="space-y-2">
+                                        <Label htmlFor={`number-${account}`}>{t('accountNumber')}</Label>
+                                        <Input
+                                            id={`number-${account}`}
+                                            type="text"
+                                            value={localAccountSettings[account]?.accountNumber || ''}
+                                            onChange={(e) => handleSettingChange(account, 'accountNumber', e.target.value)}
+                                            placeholder="e.g., X12345678"
+                                        />
+                                        </div>
+                                        <div className="space-y-2">
+                                        <Label htmlFor={`color-${account}`}>{t('accountColor')}</Label>
+                                        <Input
+                                            id={`color-${account}`}
+                                            type="color"
+                                            value={localAccountSettings[account]?.color || '#ffffff'}
+                                            onChange={(e) => handleSettingChange(account, 'color', e.target.value)}
+                                            className="p-1 h-10 w-full"
+                                        />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                <Label htmlFor={`provider-${account}`}>{t('accountProvider')}</Label>
-                                <Input
-                                    id={`provider-${account}`}
-                                    type="text"
-                                    value={localAccountSettings[account]?.accountProvider || ''}
-                                    onChange={(e) => handleSettingChange(account, 'accountProvider', e.target.value)}
-                                    placeholder="e.g., Fidelity"
-                                />
-                                </div>
-                                <div className="space-y-2">
-                                <Label htmlFor={`number-${account}`}>{t('accountNumber')}</Label>
-                                <Input
-                                    id={`number-${account}`}
-                                    type="text"
-                                    value={localAccountSettings[account]?.accountNumber || ''}
-                                    onChange={(e) => handleSettingChange(account, 'accountNumber', e.target.value)}
-                                    placeholder="e.g., X12345678"
-                                />
-                                </div>
-                                <div className="space-y-2">
-                                <Label htmlFor={`color-${account}`}>{t('accountColor')}</Label>
-                                <Input
-                                    id={`color-${account}`}
-                                    type="color"
-                                    value={localAccountSettings[account]?.color || '#ffffff'}
-                                    onChange={(e) => handleSettingChange(account, 'color', e.target.value)}
-                                    className="p-1 h-10 w-full"
-                                />
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                              </AccordionContent>
+                          </AccordionItem>
+                      ))}
+                    </Accordion>
+
                     <form onSubmit={handleAddNewAccount} className="space-y-4 rounded-md border p-4 mt-6">
                             <h4 className="font-semibold">{t('addNewAccount')}</h4>
                             <div className="flex flex-col sm:flex-row items-end gap-2">
