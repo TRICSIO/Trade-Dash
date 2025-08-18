@@ -183,14 +183,5 @@
     "registerPasskeyDescription": "Asegure su cuenta e inicie sesión con su rostro, huella digital o PIN. Es más rápido y seguro que una contraseña.",
     "skipForNow": "Omitir por ahora",
     "passkeyReady": "Su clave de acceso está lista. Ahora puede usarla para iniciar sesión en este dispositivo.",
-
-    "topMovers": "Principales Movimientos",
-    "topGainers": "Mayores Ganadores",
-    "topLosers": "Mayores Perdedores",
-    "topMoversDescription": "Los mayores ganadores y perdedores del mercado de hoy.",
-    "ticker": "Símbolo",
-    "name": "Nombre",
-    "price": "Precio",
-    "change": "Cambio",
-    "changePercent": "% Cambio"
+    "stockNews": "Noticias de la Bolsa"
 }

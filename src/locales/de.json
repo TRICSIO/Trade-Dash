@@ -170,19 +170,9 @@
     "orContinueWith": "Oder fortfahren mit",
     "loginSuccessful": "Anmeldung erfolgreich",
     "authCancelled": "Authentifizierung vom Benutzer abgebrochen.",
-
     "registerPasskeyTitle": "Passwortlose Anmeldung aktivieren",
     "registerPasskeyDescription": "Sichern Sie Ihr Konto und melden Sie sich mit Ihrem Gesicht, Fingerabdruck oder Ihrer PIN an. Es ist schneller und sicherer als ein Passwort.",
     "skipForNow": "Vorerst überspringen",
     "passkeyReady": "Ihr Passkey ist eingerichtet. Sie können ihn jetzt verwenden, um sich auf diesem Gerät anzumelden.",
-
-    "topMovers": "Top-Mover",
-    "topGainers": "Top-Gewinner",
-    "topLosers": "Top-Verlierer",
-    "topMoversDescription": "Die größten Gewinner und Verlierer des heutigen Marktes.",
-    "ticker": "Ticker",
-    "name": "Name",
-    "price": "Preis",
-    "change": "Veränderung",
-    "changePercent": "% Veränderung"
+    "stockNews": "Börsennachrichten"
 }

@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, CandlestickChart, FileUp, LogOut, Cog, Menu, Home, TrendingUp } from 'lucide-react';
+import { Plus, CandlestickChart, FileUp, LogOut, Cog, Menu, Home, Newspaper } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -59,9 +59,9 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                 </Link>
               </Button>
                <Button variant="ghost" asChild>
-                <Link href="/top-movers">
-                    <TrendingUp className="mr-2 h-4 w-4" />
-                    {t('topMovers')}
+                <Link href="/stock-news">
+                    <Newspaper className="mr-2 h-4 w-4" />
+                    {t('stockNews')}
                 </Link>
               </Button>
               <Button variant="outline" onClick={onImportClick}>
@@ -110,9 +110,9 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                              </SheetClose>
                              <SheetClose asChild>
                                 <Button variant="ghost" asChild className="w-full justify-start">
-                                    <Link href="/top-movers">
-                                        <TrendingUp className="mr-2 h-4 w-4" />
-                                        {t('topMovers')}
+                                    <Link href="/stock-news">
+                                        <Newspaper className="mr-2 h-4 w-4" />
+                                        {t('stockNews')}
                                     </Link>
                                 </Button>
                              </SheetClose>
