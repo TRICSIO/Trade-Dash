@@ -21,6 +21,7 @@ import StyleDistributionChart from './style-distribution-chart';
 import MonthlyPLChart from './monthly-pl-chart';
 import { parse } from 'papaparse';
 import { processCsvData } from '@/ai/flows/process-csv-data';
+import Welcome from './welcome';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -28,6 +29,7 @@ export default function Dashboard() {
     trades, 
     startingBalances, 
     accountSettings,
+    displayName,
     setTrades, 
     setStartingBalances, 
     setAccountSettings 
@@ -225,6 +227,8 @@ export default function Dashboard() {
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [filteredTrades, currentStartingBalance]);
 
+  const isNewUser = trades.length === 0 && Object.keys(startingBalances).length === 0;
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <AppHeader 
@@ -232,71 +236,76 @@ export default function Dashboard() {
         onImportClick={() => setImportTradeOpen(true)}
       />
       <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-8">
-        <Card>
-          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex-1">
-              <CardTitle>{t('performanceOverview')}</CardTitle>
-              <CardDescription>{t('kpiDescription')}</CardDescription>
-            </div>
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-start sm:items-end gap-4">
-              <div className="w-full sm:max-w-xs space-y-2">
-                  <Label htmlFor="account-select">{t('account')}</Label>
-                  <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                    <SelectTrigger id="account-select">
-                      <SelectValue placeholder={t('selectAccount')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {accounts.map(acc => (
-                        <SelectItem key={acc} value={acc}>{acc === 'all' ? t('allAccounts') : acc}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-              <div className="mb-6">
-                <Card className="bg-primary/10 border-primary/40 inline-block">
-                    <CardHeader className="pb-2">
-                        <CardDescription>{t('currentAccountBalance')} ({selectedAccount === 'all' ? t('all') : selectedAccount})</CardDescription>
-                        <CardTitle className="text-3xl">${accountBalance.toFixed(2)}</CardTitle>
-                    </CardHeader>
-                </Card>
-              </div>
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
-                <KpiCard title={t('totalTrades')} value={totalTrades.toString()} />
-                <KpiCard title={t('winningTrades')} value={winningTradesCount.toString()} />
-                <KpiCard title={t('losingTrades')} value={losingTradesCount.toString()} />
-                <KpiCard title={t('winRate')} value={`${winRate.toFixed(1)}%`} />
-                <KpiCard title={t('totalGain')} value={totalGain.toFixed(2)} isCurrency />
-                <KpiCard title={t('totalLoss')} value={totalLoss.toFixed(2)} isCurrency />
-                <KpiCard title={t('totalNetPL')} value={totalNetPL.toFixed(2)} isCurrency />
-                <KpiCard title={t('totalInvestedCapital')} value={totalInvested.toFixed(2)} isCurrency />
-                <KpiCard title={t('totalReturn')} value={`${totalReturn.toFixed(1)}%`} />
-                <KpiCard title={t('averageGain')} value={avgGain.toFixed(2)} isCurrency />
-                <KpiCard title={t('averageLoss')} value={avgLoss.toFixed(2)} isCurrency />
-                <KpiCard title={t('profitFactor')} value={isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞'} />
-            </div>
-          </CardContent>
-        </Card>
+        {isNewUser ? (
+          <Welcome displayName={displayName} />
+        ) : (
+          <>
+            <Card>
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <CardTitle>{t('performanceOverview')}</CardTitle>
+                  <CardDescription>{t('kpiDescription')}</CardDescription>
+                </div>
+                <div className="w-full sm:w-auto flex flex-col sm:flex-row items-start sm:items-end gap-4">
+                  <div className="w-full sm:max-w-xs space-y-2">
+                      <Label htmlFor="account-select">{t('account')}</Label>
+                      <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+                        <SelectTrigger id="account-select">
+                          <SelectValue placeholder={t('selectAccount')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts.map(acc => (
+                            <SelectItem key={acc} value={acc}>{acc === 'all' ? t('allAccounts') : acc}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                  <div className="mb-6">
+                    <Card className="bg-primary/10 border-primary/40 inline-block">
+                        <CardHeader className="pb-2">
+                            <CardDescription>{t('currentAccountBalance')} ({selectedAccount === 'all' ? t('all') : selectedAccount})</CardDescription>
+                            <CardTitle className="text-3xl">${accountBalance.toFixed(2)}</CardTitle>
+                        </CardHeader>
+                    </Card>
+                  </div>
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+                    <KpiCard title={t('totalTrades')} value={totalTrades.toString()} />
+                    <KpiCard title={t('winningTrades')} value={winningTradesCount.toString()} />
+                    <KpiCard title={t('losingTrades')} value={losingTradesCount.toString()} />
+                    <KpiCard title={t('winRate')} value={`${winRate.toFixed(1)}%`} />
+                    <KpiCard title={t('totalGain')} value={totalGain.toFixed(2)} isCurrency />
+                    <KpiCard title={t('totalLoss')} value={totalLoss.toFixed(2)} isCurrency />
+                    <KpiCard title={t('totalNetPL')} value={totalNetPL.toFixed(2)} isCurrency />
+                    <KpiCard title={t('totalInvestedCapital')} value={totalInvested.toFixed(2)} isCurrency />
+                    <KpiCard title={t('totalReturn')} value={`${totalReturn.toFixed(1)}%`} />
+                    <KpiCard title={t('averageGain')} value={avgGain.toFixed(2)} isCurrency />
+                    <KpiCard title={t('averageLoss')} value={avgLoss.toFixed(2)} isCurrency />
+                    <KpiCard title={t('profitFactor')} value={isFinite(profitFactor) ? profitFactor.toFixed(2) : '∞'} />
+                </div>
+              </CardContent>
+            </Card>
 
-        <div className="grid gap-8 lg:grid-cols-6">
-            <div className="lg:col-span-4">
-                <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
+            <div className="grid gap-8 lg:grid-cols-6">
+                <div className="lg:col-span-4">
+                    <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
+                </div>
+                <div className="lg:col-span-2">
+                    <AiSuggestions trades={filteredTrades} />
+                </div>
+                 <div className="lg:col-span-3">
+                    <StyleDistributionChart trades={filteredTrades} />
+                </div>
+                <div className="lg:col-span-3">
+                    <MonthlyPLChart trades={filteredTrades} />
+                </div>
             </div>
-            <div className="lg:col-span-2">
-                <AiSuggestions trades={filteredTrades} />
-            </div>
-             <div className="lg:col-span-3">
-                <StyleDistributionChart trades={filteredTrades} />
-            </div>
-            <div className="lg:col-span-3">
-                <MonthlyPLChart trades={filteredTrades} />
-            </div>
-        </div>
-        
-        <TradeTable trades={filteredTrades} accountSettings={accountSettings} onEditTrade={handleOpenEditDialog} onDeleteTrade={handleDeleteTrade} />
-
+            
+            <TradeTable trades={filteredTrades} accountSettings={accountSettings} onEditTrade={handleOpenEditDialog} onDeleteTrade={handleDeleteTrade} />
+          </>
+        )}
       </main>
       <AddTradeDialog
         isOpen={isAddTradeOpen}

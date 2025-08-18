@@ -36,6 +36,16 @@
     "language": "Language",
     "theme": "Theme",
     "welcome": "Welcome, {{name}}",
+    "welcomeDescription": "Let's get you set up to track and analyze your trades.",
+    "gettingStarted": "Getting Started in 3 Easy Steps",
+    "stepOneTitle": "1. Add an Account",
+    "stepOneDescription": "Go to settings to add your first broker or crypto exchange account. You need at least one to log trades.",
+    "goToSettings": "Go to Settings",
+    "stepTwoTitle": "2. Log Your Trades",
+    "stepTwoDescription": "Manually add your trades using the 'Add Trade' button or use the 'Import' feature to upload a CSV from your broker.",
+    "stepThreeTitle": "3. Analyze & Improve",
+    "stepThreeDescription": "Use the dashboard and AI insights to review your performance, find patterns, and refine your strategy.",
+
 
     "performanceOverview": "Performance Overview",
     "kpiDescription": "Your key trading metrics. Use the dropdown to filter by account.",
