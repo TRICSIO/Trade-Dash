@@ -32,7 +32,6 @@ export default function Dashboard() {
     accountSettings,
     displayName,
     hasSeenWelcomeMessage,
-    loading,
     transactions,
     setTrades, 
     markWelcomeMessageAsSeen
@@ -242,10 +241,6 @@ export default function Dashboard() {
   const handleGetStarted = () => {
     markWelcomeMessageAsSeen();
     router.push('/settings');
-  }
-
-  if (loading) {
-    return null;
   }
 
   if (!hasSeenWelcomeMessage) {
