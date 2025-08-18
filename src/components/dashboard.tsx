@@ -239,7 +239,7 @@ export default function Dashboard() {
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
-  const showWelcome = !hasSeenWelcomeMessage && !loading;
+  const showWelcome = !loading && !hasSeenWelcomeMessage;
 
   const handleGetStarted = () => {
     markWelcomeMessageAsSeen();

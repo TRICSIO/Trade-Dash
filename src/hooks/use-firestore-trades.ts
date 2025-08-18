@@ -18,7 +18,7 @@ function useFirestoreTrades(userId?: string) {
   const [accountSettings, setAccountSettings] = useState<AccountSettings>({});
   const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [hasSeenWelcomeMessage, setHasSeenWelcomeMessage] = useState(false);
+  const [hasSeenWelcomeMessage, setHasSeenWelcomeMessage] = useState(true);
   const [transactions, setTransactions] = useState<Record<string, AccountTransaction[]>>({});
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -29,25 +29,15 @@ function useFirestoreTrades(userId?: string) {
     const userDocRef = doc(db, 'users', userId);
     
     try {
-        await updateDoc(userDocRef, dataToUpdate);
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+            await updateDoc(userDocRef, dataToUpdate);
+        } else {
+            await setDoc(userDocRef, dataToUpdate, { merge: true });
+        }
     } catch (error) {
-       if ((error as FirestoreError).code === 'not-found') {
-          try {
-            const docSnap = await getDoc(userDocRef);
-            if (!docSnap.exists()) {
-                const initialData = await getInitialUserData(userId);
-                await setDoc(userDocRef, { ...initialData, ...dataToUpdate });
-            } else {
-                await updateDoc(userDocRef, dataToUpdate);
-            }
-          } catch (e) {
-            console.error("Error creating document after not-found error:", e);
-            toast({ title: "Error", description: "Could not create user data.", variant: 'destructive'});
-          }
-       } else {
-            console.error("Error saving data to Firestore:", error);
-            toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
-       }
+        console.error("Error saving data to Firestore:", error);
+        toast({ title: "Error", description: "Could not save changes to the cloud.", variant: 'destructive'});
     }
   }, [userId, toast]);
 
@@ -98,21 +88,6 @@ function useFirestoreTrades(userId?: string) {
     return () => unsubscribe();
   }, [userId, toast]);
 
-  const getInitialUserData = async (userId: string) => {
-      const userDocRef = doc(db, 'users', userId);
-      const docSnap = await getDoc(userDocRef);
-      if (docSnap.exists()) {
-          return docSnap.data() as UserData;
-      }
-      return {
-          trades: [],
-          startingBalances: {},
-          accountSettings: {},
-          transactions: {},
-          hasSeenWelcomeMessage: false,
-      };
-  };
-
   const handleSetTrades = (newTrades: Trade[]) => {
     const sorted = sortTrades(newTrades);
     updateUserDoc({ trades: sorted });
@@ -131,7 +106,7 @@ function useFirestoreTrades(userId?: string) {
       toast({ title: 'Success', description: 'Your display name has been updated.' });
   }
 
-  const handleMarkWelcomeMessageAsSeen = async () => {
+  const handleMarkWelcomeMessageAsSeen = () => {
     updateUserDoc({ hasSeenWelcomeMessage: true });
   }
   
