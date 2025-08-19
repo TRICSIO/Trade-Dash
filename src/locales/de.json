@@ -34,6 +34,8 @@
     "language": "Sprache",
     "theme": "Thema",
     "welcome": "Willkommen, {{name}}",
+    "howTo": "Anleitung",
+    "howToTitle": "Wie man mit Trade-Dash beginnt",
     "welcomeDescription": "Lassen Sie uns Sie einrichten, um Ihre Trades zu verfolgen und zu analysieren.",
     "gettingStarted": "Loslegen",
     "stepOneTitle": "1. Konto hinzufügen",
@@ -245,5 +247,3 @@
     "noTransactions": "Noch keine Transaktionen protokolliert.",
     "transactionNotesPlaceholder": "z.B. Monatliche Ersparnisse, Gewinnmitnahmen"
 }
-
-    

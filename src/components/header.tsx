@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, CandlestickChart, FileUp, LogOut, Cog, Menu, Home, BarChart2 } from 'lucide-react';
+import { Plus, CandlestickChart, FileUp, LogOut, Cog, Menu, Home, BarChart2, BookOpen } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -64,6 +64,12 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                     {t('analytics')}
                 </Link>
               </Button>
+               <Button variant="ghost" asChild>
+                <Link href="/how-to">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    {t('howTo')}
+                </Link>
+              </Button>
               <Button variant="outline" onClick={onImportClick}>
                   <FileUp className="mr-2 h-4 w-4" />
                   {t('import')}
@@ -113,6 +119,14 @@ export default function AppHeader({ onAddTradeClick, onImportClick }: AppHeaderP
                                     <Link href="/analytics">
                                         <BarChart2 className="mr-2 h-4 w-4" />
                                         {t('analytics')}
+                                    </Link>
+                                </Button>
+                             </SheetClose>
+                             <SheetClose asChild>
+                                <Button variant="ghost" asChild className="w-full justify-start">
+                                    <Link href="/how-to">
+                                        <BookOpen className="mr-2 h-4 w-4" />
+                                        {t('howTo')}
                                     </Link>
                                 </Button>
                              </SheetClose>

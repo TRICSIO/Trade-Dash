@@ -38,6 +38,5 @@ export interface UserData {
     accountSettings: AccountSettings;
     email: string;
     displayName?: string;
-    hasSeenWelcomeMessage?: boolean;
     transactions?: Record<string, AccountTransaction[]>;
 }

@@ -21,7 +21,6 @@ import StyleDistributionChart from './style-distribution-chart';
 import MonthlyPLChart from './monthly-pl-chart';
 import { parse } from 'papaparse';
 import { processCsvData } from '@/ai/flows/process-csv-data';
-import Welcome from './welcome';
 import { useRouter } from 'next/navigation';
 import LoadingScreen from './loading-screen';
 
@@ -31,13 +30,10 @@ export default function Dashboard() {
     trades, 
     startingBalances, 
     accountSettings,
-    displayName,
-    hasSeenWelcomeMessage,
     transactions,
     allAccounts,
     loading,
     setTrades, 
-    markWelcomeMessageAsSeen
   } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
@@ -240,17 +236,8 @@ export default function Dashboard() {
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
-  const handleGetStarted = () => {
-    markWelcomeMessageAsSeen();
-    router.push('/settings');
-  }
-
   if (loading) {
     return <LoadingScreen />;
-  }
-
-  if (!hasSeenWelcomeMessage) {
-    return <Welcome displayName={displayName} onGetStarted={handleGetStarted} />;
   }
 
   return (

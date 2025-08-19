@@ -36,6 +36,8 @@
     "language": "Idioma",
     "theme": "Tema",
     "welcome": "Bienvenido, {{name}}",
+    "howTo": "Guía de Uso",
+    "howToTitle": "Cómo Empezar con Trade-Dash",
     "welcomeDescription": "Vamos a configurarte para que puedas rastrear y analizar tus operaciones.",
     "gettingStarted": "Empezar",
     "stepOneTitle": "1. Añadir una cuenta",
@@ -259,5 +261,3 @@
     "noTransactions": "Aún no se han registrado transacciones.",
     "transactionNotesPlaceholder": "p. ej., ahorros mensuales, toma de ganancias"
 }
-
-    

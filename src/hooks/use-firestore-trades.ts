@@ -18,7 +18,6 @@ function useFirestoreTrades(userId?: string) {
   const [accountSettings, setAccountSettings] = useState<AccountSettings>({});
   const [displayName, setDisplayName] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [hasSeenWelcomeMessage, setHasSeenWelcomeMessage] = useState(true);
   const [transactions, setTransactions] = useState<Record<string, AccountTransaction[]>>({});
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -71,7 +70,6 @@ function useFirestoreTrades(userId?: string) {
             setStartingBalances(data.startingBalances || {});
             setAccountSettings(data.accountSettings || {});
             setDisplayName(data.displayName);
-            setHasSeenWelcomeMessage(data.hasSeenWelcomeMessage === undefined ? false : data.hasSeenWelcomeMessage);
             
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
@@ -84,7 +82,6 @@ function useFirestoreTrades(userId?: string) {
 
         } else {
             console.log("No user document, it will be created on the first data modification.");
-            setHasSeenWelcomeMessage(false);
         }
         setLoading(false);
     }, (error) => {
@@ -113,10 +110,6 @@ function useFirestoreTrades(userId?: string) {
       updateUserDoc({ displayName: newName });
       toast({ title: 'Success', description: 'Your display name has been updated.' });
   }, [updateUserDoc, toast]);
-
-  const handleMarkWelcomeMessageAsSeen = useCallback(() => {
-    updateUserDoc({ hasSeenWelcomeMessage: true });
-  }, [updateUserDoc]);
   
   const handleAddNewAccount = useCallback(async (accountName: string, balance: number) => {
     if (!userId) return;
@@ -166,7 +159,6 @@ function useFirestoreTrades(userId?: string) {
       accountSettings, 
       displayName,
       loading,
-      hasSeenWelcomeMessage,
       transactions,
       allAccounts,
       setTrades: handleSetTrades, 
@@ -174,7 +166,6 @@ function useFirestoreTrades(userId?: string) {
       setAccountSettings: handleSetAccountSettings,
       setDisplayName: handleSetDisplayName,
       addAccount: handleAddNewAccount,
-      markWelcomeMessageAsSeen: handleMarkWelcomeMessageAsSeen,
       setTransactionsForAccount: handleSetTransactionsForAccount,
     };
 }

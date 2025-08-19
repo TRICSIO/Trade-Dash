@@ -36,6 +36,8 @@
     "language": "Language",
     "theme": "Theme",
     "welcome": "Welcome, {{name}}",
+    "howTo": "How-to Guide",
+    "howToTitle": "How to Get Started with Trade-Dash",
     "welcomeDescription": "Let's get you set up to track and analyze your trades.",
     "gettingStarted": "Get Started",
     "stepOneTitle": "1. Add an Account",
@@ -260,5 +262,3 @@
     "noTransactions": "No transactions logged yet.",
     "transactionNotesPlaceholder": "e.g., Monthly savings, profit taking"
 }
-
-    
