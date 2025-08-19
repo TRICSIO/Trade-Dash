@@ -6,7 +6,7 @@ import AppHeader from "@/components/header";
 import { useTranslation } from "@/hooks/use-translation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ListChecks, LogIn, Rocket, Settings, UploadCloud, BarChart2, Plus, BrainCircuit } from "lucide-react";
+import { ListChecks, LogIn, Rocket, Settings, UploadCloud, BarChart2, Plus, BrainCircuit, Banknote } from "lucide-react";
 import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -40,8 +40,9 @@ function HowToPageContent() {
                                         <h4 className="font-semibold text-lg">{t('stepOneTitle')}</h4>
                                     </div>
                                 </AccordionTrigger>
-                                <AccordionContent className="pl-14 text-muted-foreground space-y-2">
+                                <AccordionContent className="pl-14 text-muted-foreground space-y-4">
                                     <p>{t('stepOneDescription')}</p>
+                                    <p>You can add details like a nickname, provider, and account number. Assigning a unique color helps you visually distinguish between accounts on the dashboard.</p>
                                     <Button variant="outline" size="sm" asChild>
                                         <Link href="/settings">{t('goToSettings')}</Link>
                                     </Button>
@@ -49,6 +50,28 @@ function HowToPageContent() {
                             </AccordionItem>
 
                             <AccordionItem value="item-2">
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                                            <Banknote className="w-5 h-5" />
+                                        </div>
+                                        <h4 className="font-semibold text-lg">Manage Deposits & Withdrawals</h4>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-14 text-muted-foreground space-y-4">
+                                   <p>
+                                      To keep your account balances perfectly accurate, it's important to log any deposits or withdrawals. On the <Link href="/settings" className="underline font-semibold">Settings</Link> page, find your account and click the 'Manage Account' button.
+                                   </p>
+                                   <p>This will open a dialog where you can add transactions for:</p>
+                                   <ul className="list-disc pl-5 space-y-1">
+                                        <li><strong>Deposits:</strong> Any new funds you add to the account.</li>
+                                        <li><strong>Withdrawals:</strong> Any funds you take out of the account.</li>
+                                   </ul>
+                                   <p>These transactions are factored into your "Current Account Balance" on the dashboard.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-3">
                                 <AccordionTrigger>
                                     <div className="flex items-center gap-3">
                                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
@@ -78,7 +101,7 @@ function HowToPageContent() {
                                 </AccordionContent>
                             </AccordionItem>
 
-                            <AccordionItem value="item-3">
+                            <AccordionItem value="item-4">
                                 <AccordionTrigger>
                                     <div className="flex items-center gap-3">
                                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
@@ -92,17 +115,17 @@ function HowToPageContent() {
                                        Once your data is in, you can explore your performance in multiple ways:
                                    </p>
                                    <div className="flex items-start gap-4 p-4 border rounded-md">
-                                        <Link href="/" className="flex-shrink-0">
-                                            <BarChart2 className="h-5 w-5 mt-1 text-primary"/>
+                                        <Link href="/" className="flex-shrink-0 mt-1">
+                                            <BarChart2 className="h-5 w-5 text-primary"/>
                                         </Link>
                                         <div>
                                             <h5 className="font-semibold text-foreground">Dashboard</h5>
-                                            <p>This is your main overview. See your most important Key Performance Indicators (KPIs), your overall equity curve, and a full history of your trades.</p>
+                                            <p>This is your main overview. See your most important Key Performance Indicators (KPIs), your overall equity curve, and a full history of your trades. You can filter the entire dashboard by account.</p>
                                         </div>
                                    </div>
                                     <div className="flex items-start gap-4 p-4 border rounded-md">
-                                        <Link href="/analytics" className="flex-shrink-0">
-                                            <BarChart2 className="h-5 w-5 mt-1 text-primary"/>
+                                        <Link href="/analytics" className="flex-shrink-0 mt-1">
+                                            <BarChart2 className="h-5 w-5 text-primary"/>
                                         </Link>
                                         <div>
                                             <h5 className="font-semibold text-foreground">Analytics Page</h5>
@@ -110,7 +133,9 @@ function HowToPageContent() {
                                         </div>
                                    </div>
                                      <div className="flex items-start gap-4 p-4 border rounded-md">
-                                        <BrainCircuit className="h-5 w-5 mt-1 text-primary"/>
+                                       <div className="flex-shrink-0 mt-1">
+                                            <BrainCircuit className="h-5 w-5 text-primary"/>
+                                        </div>
                                         <div>
                                             <h5 className="font-semibold text-foreground">AI Insights</h5>
                                             <p>On the dashboard, use the 'Generate Suggestions' button. The AI will analyze all your trades and provide personalized, actionable feedback to help you identify strengths and weaknesses in your strategy.</p>
