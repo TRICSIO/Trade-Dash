@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import type { Trade } from '@/lib/types';
 import useFirestoreTrades from '@/hooks/use-firestore-trades';
 import AppHeader from '@/components/header';
@@ -22,7 +22,8 @@ import MonthlyPLChart from './monthly-pl-chart';
 import { parse } from 'papaparse';
 import { processCsvData } from '@/ai/flows/process-csv-data';
 import { useRouter } from 'next/navigation';
-import LoadingScreen from './loading-screen';
+import { Suspense } from 'react';
+import LoadingScreen from '@/components/loading-screen';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -44,22 +45,16 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  const accounts = useMemo(() => {
-    return ['all', ...allAccounts];
-  }, [allAccounts]);
+  if (loading) {
+    return <LoadingScreen />
+  }
 
-  useEffect(() => {
-    if (!accounts.includes(selectedAccount)) {
-      setSelectedAccount('all');
-    }
-  }, [accounts, selectedAccount]);
-
-  const filteredTrades = useMemo(() => {
-    if (selectedAccount === 'all') {
-      return trades;
-    }
-    return trades.filter(t => t.account === selectedAccount);
-  }, [trades, selectedAccount]);
+  const accounts = ['all', ...allAccounts];
+  if (!accounts.includes(selectedAccount)) {
+    setSelectedAccount('all');
+  }
+  
+  const filteredTrades = trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
 
   const currentStartingBalance = useMemo(() => {
     if (selectedAccount === 'all') {
@@ -235,10 +230,6 @@ export default function Dashboard() {
 
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
-
-  if (loading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
