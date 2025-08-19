@@ -45,15 +45,12 @@ export default function Dashboard() {
   const router = useRouter();
 
   const accounts = ['all', ...allAccounts];
+
+  // If the currently selected account is no longer in the list of available accounts
+  // (e.g., it was deleted), reset the selection to 'all'.
+  // This prevents the UI from being stuck on a non-existent account.
   if (!accounts.includes(selectedAccount)) {
-      // This check can cause an infinite loop if not careful.
-      // A safer approach might be to use useEffect, but for now this is simpler.
-      // Let's check if the selectedAccount is valid before setting it.
-      if (allAccounts.length > 0 && selectedAccount !== 'all') {
-        setSelectedAccount('all');
-      } else if (allAccounts.length === 0 && selectedAccount !== 'all') {
-        setSelectedAccount('all');
-      }
+    setSelectedAccount('all');
   }
   
   const filteredTrades = useMemo(() => {
@@ -310,7 +307,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-6">
             <div className="lg:col-span-4">
-                <PerformanceChart trades={filteredTrades.filter(t => t.exitDate && t.exitPrice)} startingBalance={currentStartingBalance} />
+                <PerformanceChart trades={filteredTrades} startingBalance={currentStartingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
