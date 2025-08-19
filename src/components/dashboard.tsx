@@ -22,7 +22,6 @@ import MonthlyPLChart from './monthly-pl-chart';
 import { parse } from 'papaparse';
 import { processCsvData } from '@/ai/flows/process-csv-data';
 import { useRouter } from 'next/navigation';
-import { Suspense } from 'react';
 import LoadingScreen from '@/components/loading-screen';
 
 export default function Dashboard() {
@@ -45,16 +44,21 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const router = useRouter();
 
-  if (loading) {
-    return <LoadingScreen />
-  }
-
   const accounts = ['all', ...allAccounts];
   if (!accounts.includes(selectedAccount)) {
-    setSelectedAccount('all');
+      // This check can cause an infinite loop if not careful.
+      // A safer approach might be to use useEffect, but for now this is simpler.
+      // Let's check if the selectedAccount is valid before setting it.
+      if (allAccounts.length > 0 && selectedAccount !== 'all') {
+        setSelectedAccount('all');
+      } else if (allAccounts.length === 0 && selectedAccount !== 'all') {
+        setSelectedAccount('all');
+      }
   }
   
-  const filteredTrades = trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
+  const filteredTrades = useMemo(() => {
+    return trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
+  }, [trades, selectedAccount]);
 
   const currentStartingBalance = useMemo(() => {
     if (selectedAccount === 'all') {
@@ -62,6 +66,91 @@ export default function Dashboard() {
     }
     return startingBalances[selectedAccount] || 0;
   }, [selectedAccount, startingBalances]);
+
+  const {
+    totalTrades,
+    winningTradesCount,
+    losingTradesCount,
+    winRate,
+    totalGain,
+    totalLoss,
+    totalNetPL,
+    totalInvested,
+    totalReturn,
+    avgGain,
+    avgLoss,
+    profitFactor,
+    accountBalance,
+  } = useMemo(() => {
+    let totalInvested = 0;
+    
+    const closedTrades = filteredTrades.filter(t => t.exitDate && t.exitPrice);
+    
+    const tradeResults = closedTrades.map(t => {
+        const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
+        const cost = t.entryPrice * t.quantity * multiplier;
+        totalInvested += cost;
+        const proceeds = (t.exitPrice ?? 0) * t.quantity * multiplier;
+        const netPl = proceeds - cost - (t.commissions || 0) - (t.fees || 0);
+        return {pl: netPl, exitDate: t.exitDate!};
+    });
+    
+    const totalNetPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
+
+    const winningTrades = tradeResults.filter(result => result.pl > 0);
+    const losingTrades = tradeResults.filter(result => result.pl < 0);
+    
+    const winningTradesCount = winningTrades.length;
+    const losingTradesCount = losingTrades.length;
+    
+    const totalTradesCount = filteredTrades.length;
+
+    const winRateValue = closedTrades.length > 0 ? (winningTradesCount / closedTrades.length) * 100 : 0;
+    
+    const totalGainValue = winningTrades.reduce((acc, trade) => acc + trade.pl, 0);
+    const totalLossValue = losingTrades.reduce((acc, trade) => acc + trade.pl, 0);
+    
+    const avgGainValue = winningTradesCount > 0 ? totalGainValue / winningTradesCount : 0;
+    const avgLossValue = losingTradesCount > 0 ? totalLossValue / losingTradesCount : 0;
+
+    const profitFactorValue = totalLossValue !== 0 ? Math.abs(totalGainValue / totalLossValue) : Infinity;
+
+    const totalReturnValue = totalInvested > 0 ? (totalNetPL / totalInvested) * 100 : 0;
+
+    const openTradesCost = filteredTrades.filter(t => !t.exitDate || !t.exitPrice).reduce((acc, t) => {
+        const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
+        return acc + (t.entryPrice * t.quantity * multiplier);
+    }, 0);
+    
+    const accountTransactions = selectedAccount === 'all'
+        ? Object.values(transactions).flat()
+        : transactions[selectedAccount] || [];
+
+    const totalDeposits = accountTransactions.filter(t => t.type === 'deposit').reduce((acc, t) => acc + t.amount, 0);
+    const totalWithdrawals = accountTransactions.filter(t => t.type === 'withdrawal').reduce((acc, t) => acc + t.amount, 0);
+
+    const currentAccountBalance = currentStartingBalance + totalNetPL + totalDeposits - totalWithdrawals - openTradesCost;
+
+    return { 
+        totalTrades: totalTradesCount, 
+        winningTradesCount, 
+        losingTradesCount, 
+        winRate: winRateValue, 
+        totalGain: totalGainValue, 
+        totalLoss: totalLossValue, 
+        totalNetPL, 
+        totalInvested, 
+        totalReturn: totalReturnValue, 
+        avgGain: avgGainValue, 
+        avgLoss: avgLossValue, 
+        profitFactor: profitFactorValue, 
+        accountBalance: currentAccountBalance 
+    };
+  }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
+
+  if (loading) {
+    return <LoadingScreen />
+  }
 
   const handleOpenAddDialog = () => {
     setEditingTrade(undefined);
@@ -163,73 +252,6 @@ export default function Dashboard() {
         }
     });
 };
-
-  const {
-    totalTrades,
-    winningTradesCount,
-    losingTradesCount,
-    winRate,
-    totalGain,
-    totalLoss,
-    totalNetPL,
-    totalInvested,
-    totalReturn,
-    avgGain,
-    avgLoss,
-    profitFactor,
-    accountBalance,
-  } = useMemo(() => {
-    let totalInvested = 0;
-    
-    const closedTrades = filteredTrades.filter(t => t.exitDate && t.exitPrice);
-    
-    const tradeResults = closedTrades.map(t => {
-        const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
-        const cost = t.entryPrice * t.quantity * multiplier;
-        totalInvested += cost;
-        const proceeds = (t.exitPrice ?? 0) * t.quantity * multiplier;
-        const netPl = proceeds - cost - (t.commissions || 0) - (t.fees || 0);
-        return {pl: netPl, exitDate: t.exitDate!};
-    });
-    
-    const totalNetPL = tradeResults.reduce((acc, result) => acc + result.pl, 0);
-
-    const winningTrades = tradeResults.filter(result => result.pl > 0);
-    const losingTrades = tradeResults.filter(result => result.pl < 0);
-    
-    const winningTradesCount = winningTrades.length;
-    const losingTradesCount = losingTrades.length;
-    
-    const totalTrades = filteredTrades.length;
-
-    const winRate = closedTrades.length > 0 ? (winningTradesCount / closedTrades.length) * 100 : 0;
-    
-    const totalGain = winningTrades.reduce((acc, trade) => acc + trade.pl, 0);
-    const totalLoss = losingTrades.reduce((acc, trade) => acc + trade.pl, 0);
-    
-    const avgGain = winningTradesCount > 0 ? totalGain / winningTradesCount : 0;
-    const avgLoss = losingTradesCount > 0 ? totalLoss / losingTradesCount : 0;
-
-    const profitFactor = totalLoss !== 0 ? Math.abs(totalGain / totalLoss) : Infinity;
-
-    const totalReturn = totalInvested > 0 ? (totalNetPL / totalInvested) * 100 : 0;
-
-    const openTradesCost = filteredTrades.filter(t => !t.exitDate || !t.exitPrice).reduce((acc, t) => {
-        const multiplier = t.tradeStyle === 'Option' ? 100 : 1;
-        return acc + (t.entryPrice * t.quantity * multiplier);
-    }, 0);
-    
-    const accountTransactions = selectedAccount === 'all'
-        ? Object.values(transactions).flat()
-        : transactions[selectedAccount] || [];
-
-    const totalDeposits = accountTransactions.filter(t => t.type === 'deposit').reduce((acc, t) => acc + t.amount, 0);
-    const totalWithdrawals = accountTransactions.filter(t => t.type === 'withdrawal').reduce((acc, t) => acc + t.amount, 0);
-
-    const accountBalance = currentStartingBalance + totalNetPL + totalDeposits - totalWithdrawals - openTradesCost;
-
-    return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
-  }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
