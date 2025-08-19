@@ -48,21 +48,15 @@ export default function Dashboard() {
 
   // If the currently selected account is no longer in the list of available accounts
   // (e.g., it was deleted), reset the selection to 'all'.
-  // This prevents the UI from being stuck on a non-existent account.
   if (!accounts.includes(selectedAccount)) {
     setSelectedAccount('all');
   }
   
-  const filteredTrades = useMemo(() => {
-    return trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
-  }, [trades, selectedAccount]);
+  const filteredTrades = trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
 
-  const currentStartingBalance = useMemo(() => {
-    if (selectedAccount === 'all') {
-      return Object.values(startingBalances).reduce((acc, balance) => acc + balance, 0);
-    }
-    return startingBalances[selectedAccount] || 0;
-  }, [selectedAccount, startingBalances]);
+  const currentStartingBalance = selectedAccount === 'all'
+      ? Object.values(startingBalances).reduce((acc, balance) => acc + balance, 0)
+      : startingBalances[selectedAccount] || 0;
 
   const {
     totalTrades,
@@ -337,5 +331,3 @@ export default function Dashboard() {
       />
     </div>
   );
-
-    
