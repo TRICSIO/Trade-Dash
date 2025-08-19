@@ -6,56 +6,119 @@ import AppHeader from "@/components/header";
 import { useTranslation } from "@/hooks/use-translation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ListChecks, LogIn, Rocket, Settings, UploadCloud } from "lucide-react";
+import { ListChecks, LogIn, Rocket, Settings, UploadCloud, BarChart2, Plus, BrainCircuit } from "lucide-react";
 import Link from "next/link";
-import useFirestoreTrades from "@/hooks/use-firestore-trades";
-import { useAuth } from "@/hooks/use-auth";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 function HowToPageContent() {
-    const { user } = useAuth();
-    const { displayName } = useFirestoreTrades(user?.uid);
     const { t } = useTranslation();
 
     return (
         <div className="flex flex-col min-h-screen bg-background">
             <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}} />
-            <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
-                 <Card className="w-full max-w-3xl">
+            <main className="flex-1 p-4 sm:p-6 lg:p-8 flex justify-center">
+                 <Card className="w-full max-w-4xl">
                     <CardHeader className="text-center">
+                        <div className="flex justify-center items-center gap-2 mb-2">
+                            <Rocket className="h-10 w-10 text-primary" />
+                        </div>
                         <CardTitle className="text-3xl font-bold tracking-tight">
                             {t('howToTitle')}
                         </CardTitle>
                         <CardDescription className="text-lg">
-                            {t('welcomeDescription')}
+                           {t('welcomeDescription')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                            <div className="flex flex-col items-center space-y-2">
-                                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-2">
-                                <Settings className="w-8 h-8" />
-                                </div>
-                                <h4 className="font-semibold">{t('stepOneTitle')}</h4>
-                                <p className="text-sm text-muted-foreground">{t('stepOneDescription')}</p>
-                                <Button variant="outline" size="sm" asChild>
-                                    <Link href="/settings">{t('goToSettings')}</Link>
-                                </Button>
-                            </div>
-                            <div className="flex flex-col items-center space-y-2">
-                                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-2">
-                                <LogIn className="w-8 h-8" />
-                                </div>
-                                <h4 className="font-semibold">{t('stepTwoTitle')}</h4>
-                                <p className="text-sm text-muted-foreground">{t('stepTwoDescription')}</p>
-                            </div>
-                            <div className="flex flex-col items-center space-y-2">
-                                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-2">
-                                <ListChecks className="w-8 h-8" />
-                                </div>
-                                <h4 className="font-semibold">{t('stepThreeTitle')}</h4>
-                                <p className="text-sm text-muted-foreground">{t('stepThreeDescription')}</p>
-                            </div>
-                        </div>
+                        <Accordion type="single" collapsible className="w-full" defaultValue="item-1">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                                            <Settings className="w-5 h-5" />
+                                        </div>
+                                        <h4 className="font-semibold text-lg">{t('stepOneTitle')}</h4>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-14 text-muted-foreground space-y-2">
+                                    <p>{t('stepOneDescription')}</p>
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link href="/settings">{t('goToSettings')}</Link>
+                                    </Button>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-2">
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                                            <LogIn className="w-5 h-5" />
+                                        </div>
+                                        <h4 className="font-semibold text-lg">{t('stepTwoTitle')}</h4>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-14 text-muted-foreground space-y-4">
+                                   <p>
+                                       You have two primary ways to get your trade data into the app.
+                                   </p>
+                                   <div className="flex items-start gap-4 p-4 border rounded-md">
+                                        <Plus className="h-5 w-5 mt-1 text-primary"/>
+                                        <div>
+                                            <h5 className="font-semibold text-foreground">Add Manually</h5>
+                                            <p>Use the 'Add Trade' button in the header to open a form where you can input all the details of a single trade, including instrument, prices, dates, and notes.</p>
+                                        </div>
+                                   </div>
+                                    <div className="flex items-start gap-4 p-4 border rounded-md">
+                                        <UploadCloud className="h-5 w-5 mt-1 text-primary"/>
+                                        <div>
+                                            <h5 className="font-semibold text-foreground">Import from CSV</h5>
+                                            <p>Use the 'Import' button to upload a CSV file from your broker. The AI will analyze the file and automatically create all the trades for you, assigning them to your chosen account.</p>
+                                        </div>
+                                   </div>
+                                </AccordionContent>
+                            </AccordionItem>
+
+                            <AccordionItem value="item-3">
+                                <AccordionTrigger>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                                            <ListChecks className="w-5 h-5" />
+                                        </div>
+                                        <h4 className="font-semibold text-lg">{t('stepThreeTitle')}</h4>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pl-14 text-muted-foreground space-y-4">
+                                     <p>
+                                       Once your data is in, you can explore your performance in multiple ways:
+                                   </p>
+                                   <div className="flex items-start gap-4 p-4 border rounded-md">
+                                        <Link href="/" className="flex-shrink-0">
+                                            <BarChart2 className="h-5 w-5 mt-1 text-primary"/>
+                                        </Link>
+                                        <div>
+                                            <h5 className="font-semibold text-foreground">Dashboard</h5>
+                                            <p>This is your main overview. See your most important Key Performance Indicators (KPIs), your overall equity curve, and a full history of your trades.</p>
+                                        </div>
+                                   </div>
+                                    <div className="flex items-start gap-4 p-4 border rounded-md">
+                                        <Link href="/analytics" className="flex-shrink-0">
+                                            <BarChart2 className="h-5 w-5 mt-1 text-primary"/>
+                                        </Link>
+                                        <div>
+                                            <h5 className="font-semibold text-foreground">Analytics Page</h5>
+                                            <p>For a deeper dive, the Analytics page shows you charts on your performance broken down by weekday and by instrument, helping you spot more specific patterns.</p>
+                                        </div>
+                                   </div>
+                                     <div className="flex items-start gap-4 p-4 border rounded-md">
+                                        <BrainCircuit className="h-5 w-5 mt-1 text-primary"/>
+                                        <div>
+                                            <h5 className="font-semibold text-foreground">AI Insights</h5>
+                                            <p>On the dashboard, use the 'Generate Suggestions' button. The AI will analyze all your trades and provide personalized, actionable feedback to help you identify strengths and weaknesses in your strategy.</p>
+                                        </div>
+                                   </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
                     </CardContent>
                 </Card>
             </main>
