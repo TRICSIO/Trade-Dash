@@ -32,7 +32,8 @@ export default function Dashboard() {
     accountSettings,
     transactions,
     allAccounts,
-    setTrades, 
+    setTrades,
+    loading,
   } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
@@ -235,6 +236,10 @@ export default function Dashboard() {
     return { totalTrades, winningTradesCount, losingTradesCount, winRate, totalGain, totalLoss, totalNetPL, totalInvested, totalReturn, avgGain, avgLoss, profitFactor, accountBalance };
   }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <AppHeader 
@@ -322,4 +327,5 @@ export default function Dashboard() {
       />
     </div>
   );
-}
+
+    
