@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart';
 import type { Trade } from '@/lib/types';
@@ -105,9 +106,3 @@ export default function MonthlyPLChart({ trades }: MonthlyPLChartProps) {
     </Card>
   );
 }
-
-// Recharts doesn't export Cell component from the main entry point
-// This is a workaround to make it available
-const Cell = (props: any) => {
-  return <div {...props} />;
-};
