@@ -7,7 +7,6 @@ import { db } from '@/lib/firebase';
 import type { Trade, AccountSettings, UserData, AccountTransaction } from '@/lib/types';
 import { useToast } from './use-toast';
 import { useTranslation } from './use-translation';
-import { isEqual } from 'lodash';
 
 const sortTrades = (trades: Trade[]) => {
     return trades.sort((a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime());
@@ -28,36 +27,17 @@ function useFirestoreTrades(userId?: string) {
     
     const userDocRef = doc(db, 'users', userId);
     try {
-      // Optimistically update local state first for better responsiveness
-      if (dataToUpdate.trades && !isEqual(dataToUpdate.trades, trades)) {
-        setTrades(sortTrades(dataToUpdate.trades));
-      }
-      if (dataToUpdate.startingBalances && !isEqual(dataToUpdate.startingBalances, startingBalances)) {
-        setStartingBalances(dataToUpdate.startingBalances);
-      }
-      if (dataToUpdate.accountSettings && !isEqual(dataToUpdate.accountSettings, accountSettings)) {
-        setAccountSettings(dataToUpdate.accountSettings);
-      }
-       if (dataToUpdate.displayName && dataToUpdate.displayName !== displayName) {
-        setDisplayName(dataToUpdate.displayName);
-      }
-      if (dataToUpdate.transactions && !isEqual(dataToUpdate.transactions, transactions)) {
-        setTransactions(dataToUpdate.transactions);
-      }
-      
       const docSnap = await getDoc(userDocRef);
       if (docSnap.exists()) {
         await updateDoc(userDocRef, dataToUpdate);
       } else {
-        // Create the document if it doesn't exist.
         await setDoc(userDocRef, dataToUpdate, { merge: true });
       }
     } catch (error) {
       console.error("Error saving data to Firestore:", error);
       toast({ title: t('error'), description: "Could not save changes to the cloud.", variant: 'destructive'});
-       // TODO: Revert optimistic updates on failure
     }
-  }, [userId, toast, t, trades, startingBalances, accountSettings, displayName, transactions]);
+  }, [userId, toast, t]);
 
 
   useEffect(() => {
@@ -78,18 +58,10 @@ function useFirestoreTrades(userId?: string) {
               exitDate: t.exitDate?.seconds ? new Date(t.exitDate.seconds * 1000) : (t.exitDate ? new Date(t.exitDate) : undefined),
             }));
             
-            if (!isEqual(tradesFromDb, trades)) {
-              setTrades(sortTrades(tradesFromDb));
-            }
-            if (!isEqual(data.startingBalances, startingBalances)) {
-              setStartingBalances(data.startingBalances || {});
-            }
-            if (!isEqual(data.accountSettings, accountSettings)) {
-              setAccountSettings(data.accountSettings || {});
-            }
-            if (data.displayName !== displayName) {
-              setDisplayName(data.displayName);
-            }
+            setTrades(sortTrades(tradesFromDb));
+            setStartingBalances(data.startingBalances || {});
+            setAccountSettings(data.accountSettings || {});
+            setDisplayName(data.displayName);
             
             const transactionsFromDb = data.transactions || {};
             Object.keys(transactionsFromDb).forEach(acc => {
@@ -98,9 +70,7 @@ function useFirestoreTrades(userId?: string) {
                     date: t.date?.seconds ? new Date(t.date.seconds * 1000) : new Date(t.date),
                 }));
             });
-            if (!isEqual(transactionsFromDb, transactions)) {
-                setTransactions(transactionsFromDb);
-            }
+            setTransactions(transactionsFromDb);
 
         } else {
             console.log("No user document, it will be created on the first data modification.");
@@ -113,21 +83,25 @@ function useFirestoreTrades(userId?: string) {
     });
 
     return () => unsubscribe();
-  }, [userId, toast, t]); // Removed dependencies that are updated inside to avoid loops
+  }, [userId]);
 
   const handleSetTrades = useCallback((newTrades: Trade[]) => {
+    setTrades(sortTrades(newTrades)); // Optimistic update
     updateUserDoc({ trades: newTrades });
   }, [updateUserDoc]);
   
   const handleSetStartingBalances = useCallback((newBalances: Record<string, number>) => {
+    setStartingBalances(newBalances); // Optimistic update
     updateUserDoc({ startingBalances: newBalances });
   }, [updateUserDoc]);
 
   const handleSetAccountSettings = useCallback((newSettings: AccountSettings) => {
+    setAccountSettings(newSettings); // Optimistic update
     updateUserDoc({ accountSettings: newSettings });
   }, [updateUserDoc]);
 
   const handleSetDisplayName = useCallback((newName: string) => {
+      setDisplayName(newName); // Optimistic update
       updateUserDoc({ displayName: newName });
       toast({ title: t('save'), description: t('profileSettingsDescription') });
   }, [updateUserDoc, toast, t]);
@@ -149,6 +123,10 @@ function useFirestoreTrades(userId?: string) {
     const newBalances = { ...startingBalances, [trimmedName]: balance };
     const newSettings = { ...accountSettings, [trimmedName]: { color: '#ffffff', accountNickname: trimmedName, accountProvider: '', accountNumber: '' } };
     
+    // Optimistic updates
+    setStartingBalances(newBalances);
+    setAccountSettings(newSettings);
+
     await updateUserDoc({ 
       startingBalances: newBalances,
       accountSettings: newSettings,
@@ -159,6 +137,7 @@ function useFirestoreTrades(userId?: string) {
   
   const handleSetTransactionsForAccount = useCallback((account: string, newTransactions: AccountTransaction[]) => {
     const updatedTransactions = { ...transactions, [account]: newTransactions };
+    setTransactions(updatedTransactions); // Optimistic update
     updateUserDoc({ transactions: updatedTransactions });
   }, [transactions, updateUserDoc]);
 
