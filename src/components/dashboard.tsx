@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Trade } from '@/lib/types';
 import useFirestoreTrades from '@/hooks/use-firestore-trades';
 import AppHeader from '@/components/header';
@@ -47,9 +47,11 @@ export default function Dashboard() {
 
   const accounts = ['all', ...allAccounts];
 
-  if (!accounts.includes(selectedAccount)) {
-      setSelectedAccount('all');
-  }
+  useEffect(() => {
+    if (!accounts.includes(selectedAccount)) {
+        setSelectedAccount('all');
+    }
+  }, [selectedAccount, accounts]);
   
   const filteredTrades = trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
 
@@ -138,10 +140,6 @@ export default function Dashboard() {
     };
   }, [filteredTrades, currentStartingBalance, transactions, selectedAccount]);
 
-  if (loading) {
-    return <LoadingScreen />
-  }
-
   const handleOpenAddDialog = () => {
     setEditingTrade(undefined);
     setAddTradeOpen(true);
@@ -160,6 +158,10 @@ export default function Dashboard() {
   }
 
   const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, id?: string) => {
+    if (!accounts.includes(tradeData.account)) {
+        addAccount(tradeData.account, 0);
+    }
+
     let updatedTrades;
     if (id) {
         updatedTrades = trades.map(t => t.id === id ? { ...t, ...tradeData, id } : t);
@@ -167,15 +169,12 @@ export default function Dashboard() {
         const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
         updatedTrades = [tradeWithId, ...trades];
     }
+
     setTrades(updatedTrades.map(trade => ({
         ...trade,
         entryDate: new Date(trade.entryDate),
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
-
-    if (!accounts.includes(tradeData.account)) {
-      addAccount(tradeData.account, 0);
-    }
   };
 
   const handleDeleteTrade = (tradeId: string) => {
@@ -245,7 +244,11 @@ export default function Dashboard() {
             });
         }
     });
-};
+  };
+  
+  if (loading) {
+    return <LoadingScreen />
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
