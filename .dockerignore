@@ -1,15 +1,24 @@
+# Git
+.git
+.gitignore
 
-# See https://docs.docker.com/engine/reference/builder/#dockerignore-file
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
 
-# node
+# Node
 node_modules
 npm-debug.log
 
-# Mac
-.DS_Store
-
-# next.js
+# Next.js
 .next/
 dist/
 out/
-coverage/
+
+# Env
+.env
+.env.local
+
+# Misc
+README.md
