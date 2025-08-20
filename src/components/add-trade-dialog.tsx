@@ -102,15 +102,15 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
     } : {
       instrument: '',
       account: '',
-      entryPrice: undefined,
-      exitPrice: undefined,
-      quantity: undefined,
+      entryPrice: '',
+      exitPrice: '',
+      quantity: '',
       tradeStyle: '',
       entryDate: undefined,
       exitDate: undefined,
       notes: '',
-      commissions: undefined,
-      fees: undefined,
+      commissions: '',
+      fees: '',
       tags: [],
     },
   });
@@ -139,15 +139,15 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
         } : {
           instrument: '',
           account: '',
-          entryPrice: undefined,
-          exitPrice: undefined,
-          quantity: undefined,
+          entryPrice: '',
+          exitPrice: '',
+          quantity: '',
           tradeStyle: '',
           entryDate: undefined,
           exitDate: undefined,
           notes: '',
-          commissions: undefined,
-          fees: undefined,
+          commissions: '',
+          fees: '',
           tags: [],
         });
     }
@@ -156,10 +156,10 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
   function onSubmit(values: z.infer<typeof formSchema>) {
     const tradeToSave = {
         ...values,
-        exitPrice: values.exitPrice || undefined,
+        exitPrice: Number(values.exitPrice) || undefined,
         exitDate: values.exitDate || undefined,
-        commissions: values.commissions || undefined,
-        fees: values.fees || undefined,
+        commissions: Number(values.commissions) || undefined,
+        fees: Number(values.fees) || undefined,
         tags: values.tags || [],
     };
     onSaveTrade(tradeToSave, trade?.id);
@@ -295,7 +295,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   <FormItem>
                     <FormLabel>{t('entryPrice')}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
+                      <Input type="number" step="any" placeholder="0.00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -308,7 +308,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                   <FormItem>
                     <FormLabel>{t('exitPrice')}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
+                      <Input type="number" step="any" placeholder="0.00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -323,7 +323,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                     <FormItem>
                     <FormLabel>{t('quantity')}</FormLabel>
                     <FormControl>
-                        <Input type="number" step="any" placeholder="e.g., 100" {...field} value={field.value ?? ''} />
+                        <Input type="number" step="any" placeholder="e.g., 100" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -336,7 +336,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                         <FormItem>
                         <FormLabel>{t('commissions')}</FormLabel>
                         <FormControl>
-                            <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
+                            <Input type="number" step="any" placeholder="0.00" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
@@ -349,7 +349,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
                         <FormItem>
                         <FormLabel>{t('fees')}</FormLabel>
                         <FormControl>
-                            <Input type="number" step="any" placeholder="0.00" {...field} value={field.value ?? ''} />
+                            <Input type="number" step="any" placeholder="0.00" {...field} />
                         </FormControl>
                         <FormMessage />
                         </FormItem>
