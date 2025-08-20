@@ -48,10 +48,10 @@ export default function Dashboard() {
   const accounts = ['all', ...allAccounts];
 
   useEffect(() => {
-    if (!accounts.includes(selectedAccount)) {
+    if (!loading && allAccounts.length > 0 && !allAccounts.includes(selectedAccount) && selectedAccount !== 'all') {
         setSelectedAccount('all');
     }
-  }, [selectedAccount, accounts]);
+  }, [selectedAccount, allAccounts, loading]);
   
   const filteredTrades = trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
 
@@ -158,7 +158,7 @@ export default function Dashboard() {
   }
 
   const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, id?: string) => {
-    if (!accounts.includes(tradeData.account)) {
+    if (!allAccounts.includes(tradeData.account)) {
         addAccount(tradeData.account, 0);
     }
 
@@ -307,7 +307,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-6">
             <div className="lg:col-span-4">
-                <PerformanceChart trades={filteredTrades} startingBalance={currentStartingBalance} transactions={transactions} selectedAccount={selectedAccount} />
+                <PerformanceChart trades={filteredTrades} startingBalance={currentStartingBalance} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
@@ -337,5 +337,8 @@ export default function Dashboard() {
       />
     </div>
   );
+
+    
+
 
     
