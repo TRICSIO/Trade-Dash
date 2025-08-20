@@ -34,6 +34,7 @@ export default function Dashboard() {
     allAccounts,
     setTrades,
     loading,
+    addAccount,
   } = useFirestoreTrades(user?.uid);
   
   const [isAddTradeOpen, setAddTradeOpen] = useState(false);
@@ -46,10 +47,8 @@ export default function Dashboard() {
 
   const accounts = ['all', ...allAccounts];
 
-  // If the currently selected account is no longer in the list of available accounts
-  // (e.g., it was deleted), reset the selection to 'all'.
   if (!accounts.includes(selectedAccount)) {
-    setSelectedAccount('all');
+      setSelectedAccount('all');
   }
   
   const filteredTrades = trades.filter(t => selectedAccount === 'all' || t.account === selectedAccount);
@@ -173,6 +172,10 @@ export default function Dashboard() {
         entryDate: new Date(trade.entryDate),
         exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
     })));
+
+    if (!accounts.includes(tradeData.account)) {
+      addAccount(tradeData.account, 0);
+    }
   };
 
   const handleDeleteTrade = (tradeId: string) => {
@@ -278,7 +281,7 @@ export default function Dashboard() {
                 <Card className="bg-primary/10 border-primary/40 inline-block">
                     <CardHeader className="pb-2">
                         <CardDescription>{t('currentAccountBalance')} ({selectedAccount === 'all' ? t('all') : (accountSettings[selectedAccount]?.accountNickname || selectedAccount)})</CardDescription>
-                        <CardTitle className="text-3xl">${accountBalance.toFixed(2)}</CardTitle>
+                        <CardTitle className="text-4xl">${accountBalance.toFixed(2)}</CardTitle>
                     </CardHeader>
                 </Card>
               </div>
@@ -301,7 +304,7 @@ export default function Dashboard() {
 
         <div className="grid gap-8 lg:grid-cols-6">
             <div className="lg:col-span-4">
-                <PerformanceChart trades={filteredTrades} startingBalance={currentStartingBalance} />
+                <PerformanceChart trades={filteredTrades} startingBalance={currentStartingBalance} transactions={transactions} selectedAccount={selectedAccount} />
             </div>
             <div className="lg:col-span-2">
                 <AiSuggestions trades={filteredTrades} />
@@ -331,3 +334,5 @@ export default function Dashboard() {
       />
     </div>
   );
+
+    
