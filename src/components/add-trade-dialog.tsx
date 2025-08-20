@@ -94,12 +94,7 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
     
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: isEditing ? {
-        ...trade,
-        entryDate: new Date(trade.entryDate),
-        exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
-        tags: trade.tags || [],
-    } : {
+    defaultValues: {
       instrument: '',
       account: '',
       entryPrice: '',
@@ -130,26 +125,33 @@ export default function AddTradeDialog({ isOpen, onOpenChange, onSaveTrade, trad
 
 
   useEffect(() => {
-    if(isOpen) {
-        form.reset(isEditing ? {
-            ...trade,
-            entryDate: new Date(trade.entryDate),
-            exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
-            tags: trade.tags || [],
-        } : {
+    if (isOpen) {
+      if (isEditing && trade) {
+        form.reset({
+          ...trade,
+          entryDate: new Date(trade.entryDate),
+          exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+          exitPrice: trade.exitPrice ?? '',
+          commissions: trade.commissions ?? '',
+          fees: trade.fees ?? '',
+          tags: trade.tags || [],
+        });
+      } else {
+        form.reset({
           instrument: '',
           account: '',
           entryPrice: '',
           exitPrice: '',
           quantity: '',
           tradeStyle: '',
-          entryDate: undefined,
+          entryDate: new Date(),
           exitDate: undefined,
           notes: '',
           commissions: '',
           fees: '',
           tags: [],
         });
+      }
     }
   }, [isOpen, isEditing, trade, form]);
 
