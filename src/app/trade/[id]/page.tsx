@@ -20,6 +20,7 @@ import Link from 'next/link';
 import AddTradeDialog from '@/components/add-trade-dialog';
 import ImportTradesDialog from '@/components/import-trades-dialog';
 import { Trade } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 
 const dateLocaleMap = {
     en: enUS,
@@ -32,28 +33,33 @@ function TradeDetailPageContent() {
     const params = useParams();
     const { id } = params;
     const { user } = useAuth();
-    const { trades, loading, accountSettings, setTrades } = useFirestoreTrades(user?.uid);
+    const { trades, loading, accountSettings, setTrades, allAccounts, addAccount } = useFirestoreTrades(user?.uid);
     const { t } = useTranslation();
     const { language } = useLanguage();
     const dateLocale = dateLocaleMap[language] || enUS;
+    const router = useRouter();
     
     const [isAddTradeOpen, setAddTradeOpen] = useState(false);
     const [isImportTradeOpen, setImportTradeOpen] = useState(false);
     
     const trade = useMemo(() => trades.find(t => t.id === id), [trades, id]);
 
-    const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, id?: string) => {
+    const handleAddOrUpdateTrade = (tradeData: Omit<Trade, 'id'>, tradeId?: string) => {
+        if (!allAccounts.includes(tradeData.account)) {
+            addAccount(tradeData.account, 0);
+        }
+
         let updatedTrades;
-        if (id) {
-            updatedTrades = trades.map(t => t.id === id ? { ...t, ...tradeData, id } : t);
+        if (tradeId) {
+            updatedTrades = trades.map(t => t.id === tradeId ? { ...t, ...tradeData, id: tradeId } : t);
         } else {
             const tradeWithId = { ...tradeData, id: crypto.randomUUID() };
             updatedTrades = [tradeWithId, ...trades];
         }
-        setTrades(updatedTrades.map(trade => ({
-            ...trade,
-            entryDate: new Date(trade.entryDate),
-            exitDate: trade.exitDate ? new Date(trade.exitDate) : undefined,
+        setTrades(updatedTrades.map(t => ({
+            ...t,
+            entryDate: new Date(t.entryDate),
+            exitDate: t.exitDate ? new Date(t.exitDate) : undefined,
         })));
     };
 
@@ -63,22 +69,29 @@ function TradeDetailPageContent() {
                 <AppHeader onAddTradeClick={() => {}} onImportClick={() => {}}/>
                 <main className="flex-1 p-4 sm:p-6 lg:p-8">
                     <div className="max-w-4xl mx-auto space-y-8">
-                        <Skeleton className="h-4 w-1/4" />
-                        <Skeleton className="h-10 w-3/4" />
+                        <Skeleton className="h-10 w-36" />
                         <Card>
                             <CardHeader>
-                                <Skeleton className="h-8 w-1/2" />
-                                <Skeleton className="h-4 w-1/3" />
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-8 w-48" />
+                                        <Skeleton className="h-4 w-64" />
+                                    </div>
+                                    <Skeleton className="h-6 w-24 rounded-full" />
+                                </div>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+                                </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <Skeleton className="h-16 w-full" />
-                                    <Skeleton className="h-16 w-full" />
-                                    <Skeleton className="h-16 w-full" />
-                                    <Skeleton className="h-16 w-full" />
+                                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
                                 </div>
                                 <Skeleton className="h-24 w-full" />
                             </CardContent>
+                             <CardFooter>
+                                <Skeleton className="h-10 w-28" />
+                            </CardFooter>
                         </Card>
                     </div>
                 </main>
@@ -90,8 +103,8 @@ function TradeDetailPageContent() {
         return (
              <div className="flex flex-col min-h-screen bg-background">
                 <AppHeader onAddTradeClick={() => setAddTradeOpen(true)} onImportClick={() => setImportTradeOpen(true)}/>
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">
-                    <div className="max-w-4xl mx-auto text-center">
+                <main className="flex-1 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
+                    <div className="text-center space-y-4">
                         <h1 className="text-2xl font-bold">{t('tradeNotFound')}</h1>
                         <p className="text-muted-foreground">{t('tradeNotFoundDescription')}</p>
                         <Button asChild className="mt-4">
@@ -118,8 +131,8 @@ function TradeDetailPageContent() {
             <main className="flex-1 p-4 sm:p-6 lg:p-8">
                 <div className="max-w-4xl mx-auto space-y-8">
                     <div>
-                        <Button variant="outline" asChild>
-                            <Link href="/">{t('backToDashboard')}</Link>
+                        <Button variant="outline" onClick={() => router.back()}>
+                            {t('backToDashboard')}
                         </Button>
                     </div>
                     <Card>
@@ -186,7 +199,7 @@ function TradeDetailPageContent() {
                                     </CardHeader>
                                     <CardContent className={pl === null ? '' : isProfit ? 'text-green-400' : 'text-red-400'}>
                                          <p className="text-2xl font-bold flex items-center gap-2">
-                                            {pl === null ? <Clock className="h-6 w-6" /> : isProfit ? <ArrowUpRight className="h-6 w-6" /> : <ArrowDownLeft className="h-6 w-6" />}
+                                            {pl === null ? <Clock className="h-6 w-6 text-muted-foreground" /> : isProfit ? <ArrowUpRight className="h-6 w-6" /> : <ArrowDownLeft className="h-6 w-6" />}
                                             {pl !== null ? `$${pl.toFixed(2)}` : t('open')}
                                          </p>
                                     </CardContent>
@@ -197,7 +210,7 @@ function TradeDetailPageContent() {
                                     </CardHeader>
                                     <CardContent className={plPercent === null ? '' : isProfit ? 'text-green-400' : 'text-red-400'}>
                                         <p className="text-2xl font-bold flex items-center gap-2">
-                                            {plPercent === null ? <Clock className="h-5 w-5" /> : <Percent className="h-5 w-5" />}
+                                            {plPercent === null ? <Clock className="h-5 w-5 text-muted-foreground" /> : <Percent className="h-5 w-5" />}
                                             {plPercent !== null ? `${plPercent.toFixed(2)}%` : t('open')}
                                         </p>
                                     </CardContent>
@@ -256,8 +269,9 @@ function TradeDetailPageContent() {
                 onOpenChange={setAddTradeOpen}
                 onSaveTrade={handleAddOrUpdateTrade}
                 trade={trade}
+                accounts={allAccounts}
             />
-            <ImportTradesDialog
+             <ImportTradesDialog
                 isOpen={isImportTradeOpen}
                 onOpenChange={setImportTradeOpen}
                 onImport={() => {}}

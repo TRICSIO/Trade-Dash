@@ -1,7 +1,15 @@
-Dockerfile
-.dockerignore
+
+# See https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
+# node
 node_modules
 npm-debug.log
-README.md
-.next
-.git
+
+# Mac
+.DS_Store
+
+# next.js
+.next/
+dist/
+out/
+coverage/

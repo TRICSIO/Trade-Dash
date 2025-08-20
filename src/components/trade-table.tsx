@@ -195,7 +195,7 @@ export default function TradeTable({ trades, accountSettings, onEditTrade, onDel
                                 variant="outline"
                                 style={accountColor ? { borderColor: accountColor, color: accountColor } : {}}
                             >
-                                {trade.account}
+                                {accountSettings[trade.account]?.accountNickname || trade.account}
                             </Badge>
                         </TableCell>
                         <TableCell>
